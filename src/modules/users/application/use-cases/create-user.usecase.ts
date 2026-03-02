@@ -6,12 +6,13 @@ import { CreateUserRepository } from "@/modules/users/domain/repositories/create
 import { FindUserByEmailRepository } from "@/modules/users/domain/repositories/find-user-by-email.repository";
 import { AppError } from "@/core/errors-app-error";
 import { DomainLogger, NoopDomainLogger } from "@/core/logger/domain-logger";
+import { UserRole } from "../../domain/value-objects/user-role";
 
 interface CreateUserDTO {
   nome: string;
   email: string;
   senha: string;
-  role: "Gerente" | "Funcionario" | "Cliente";
+  role: UserRole;
   // campos extras para perfil
   clienteTelefone?: string;
   clienteEndereco?: string;

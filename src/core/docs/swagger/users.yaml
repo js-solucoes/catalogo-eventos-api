@@ -131,7 +131,7 @@ components:
           type: string
         role:
           type: string
-          enum: [Gerente, Funcionario, Cliente]
+          enum: [Admin]
       required: [nome, email, senha, role]
 
     UpdateUserRequest:
@@ -146,7 +146,7 @@ components:
           type: string
         role:
           type: string
-          enum: [Gerente, Funcionario, Cliente]
+          enum: [Admin]
 
     UserResponse:
       type: object

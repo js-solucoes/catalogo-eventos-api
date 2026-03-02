@@ -41,6 +41,7 @@ const EnvSchema = z.object({
     .default(false),
 
   SALT: z.coerce.number().int().positive().default(10),
+  ADMIN_PASSWORD: z.string().default("admin123"),
 
   DB_DIALECT: z
     .enum(["mysql", "mariadb", "postgres", "sqlite"])

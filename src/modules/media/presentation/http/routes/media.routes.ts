@@ -13,7 +13,7 @@ export function registerMediaRoutes(router: Router) {
   router.post(
     "/media",
     authMiddleware,
-    authorizeRoles(["Gerente", "Funcionario"]), // ajuste se necessário
+    authorizeRoles(["Admin"]), // ajuste se necessário
     validateBody(uploadMediaSchema),
     adaptRoute(UploadMediaControllerFactory())
   );

@@ -11,14 +11,14 @@ describe("ListUsersUseCase", () => {
           nome: "User 1",
           email: "user1@example.com",
           senha: "hash1",
-          role: "Gerente",
+          role: "Admin",
         }),
         new UserEntity({
           id: 2,
           nome: "User 2",
           email: "user2@example.com",
           senha: "hash2",
-          role: "Funcionario",
+          role: "Admin",
         }),
       ]),
     };

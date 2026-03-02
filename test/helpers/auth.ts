@@ -1,12 +1,12 @@
 // tests/helpers/auth.ts
 import { api } from "./api";
 import { makeUser } from "../factories/user-factory";
-import { makeGerente } from "../factories/gerente-factory";
+import { makeAdmin } from "../factories/admin-factory";
 
 export async function seedUserAndLogin({
   email,
   senha = "senha123",
-  role = "Gerente",
+  role = "Admin",
   criarPerfil = true,
 }: {
   email?: string;
@@ -15,8 +15,8 @@ export async function seedUserAndLogin({
   criarPerfil?: boolean;
 } = {}) {
   const user = await makeUser({ email, senha, role } as any);
-  if (criarPerfil && role === "Gerente") {
-    await makeGerente(user);
+  if (criarPerfil && role === "Admin") {
+    await makeAdmin(user);
   }
 
   const resp = await api()

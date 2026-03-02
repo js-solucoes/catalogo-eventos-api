@@ -17,7 +17,7 @@ describe("RefreshTokenUseCase", () => {
         nome: "Fulano",
         email: "fulano@example.com",
         senha: "hash",
-        role: "Gerente",
+        role: "Admin",
       } as any)),
     };
 
@@ -45,7 +45,7 @@ describe("RefreshTokenUseCase", () => {
     expect(tokenServiceMock.generateAccessToken).toHaveBeenCalledWith({
       sub: "1",
       email: "fulano@example.com",
-      role: "Gerente",
+      role: "Admin",
     });
 
     expect(out).toEqual({ accessToken: "new-access-token" });

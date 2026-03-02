@@ -1,12 +1,13 @@
 import sequelize from "@/core/database";
 import { DataTypes, Model } from "sequelize";
+import { UserRole } from "../../domain/value-objects/user-role";
 
 export class User extends Model {
   id!: number;
   email!: string;
   senha!: string;
   nome!: string;
-  role!: "Gerente" | "Funcionario" | "Cliente";
+  role!: UserRole;
 }
 
 User.init(
@@ -30,9 +31,9 @@ User.init(
       allowNull: false,
     },
     role: {
-      type: DataTypes.ENUM("Gerente", "Funcionario", "Cliente"),
+      type: DataTypes.ENUM("Admin"),
       allowNull: false,
-      defaultValue: "Funcionario",
+      defaultValue: "Admin",
     },
   },
   {

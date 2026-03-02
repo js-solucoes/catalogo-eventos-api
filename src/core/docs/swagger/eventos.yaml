@@ -37,7 +37,7 @@ paths:
 
     post:
       tags: [Eventos]
-      summary: Publicar evento (Gerente)
+      summary: Publicar evento (Admin)
       security:
         - bearerAuth: []
       requestBody:
@@ -59,7 +59,7 @@ paths:
   /api/eventos/{id}:
     put:
       tags: [Eventos]
-      summary: Atualizar evento (Gerente)
+      summary: Atualizar evento (Admin)
       security:
         - bearerAuth: []
       parameters:
@@ -85,7 +85,7 @@ paths:
 
     delete:
       tags: [Eventos]
-      summary: Deletar evento (Gerente)
+      summary: Deletar evento (Admin)
       security:
         - bearerAuth: []
       parameters:

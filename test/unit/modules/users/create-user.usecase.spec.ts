@@ -93,7 +93,7 @@ describe("CreateUserUseCase", () => {
       nome: "Fulano",
       email: "fulano@example.com",
       senha: "123456",
-      role: "Funcionario",
+      role: "Admin",
     } as any;
 
     const result = await sut.execute(input);
@@ -105,7 +105,7 @@ describe("CreateUserUseCase", () => {
     expect(userPassed.senha).toBe("hashed-123456");
 
     // ✅ strategy chamada corretamente
-    expect(profileStrategyFactoryMock.getStrategy).toHaveBeenCalledWith("Funcionario");
+    expect(profileStrategyFactoryMock.getStrategy).toHaveBeenCalledWith("Admin");
     expect(strategyMock.createProfile).toHaveBeenCalledWith(
       expect.objectContaining({
         user: expect.any(UserEntity),
@@ -123,12 +123,12 @@ describe("CreateUserUseCase", () => {
     // ✅ logs corretos (mensagens reais do usecase)
     expect(loggerMock.info).toHaveBeenCalledWith(
       "Iniciando CreateUserUseCase",
-      expect.objectContaining({ email: "fulano@example.com", role: "Funcionario" })
+      expect.objectContaining({ email: "fulano@example.com", role: "Admin" })
     );
 
     expect(loggerMock.info).toHaveBeenCalledWith(
       "Usuário + perfil criados com sucesso",
-      expect.objectContaining({ userId: 1, email: "fulano@example.com", role: "Funcionario" })
+      expect.objectContaining({ userId: 1, email: "fulano@example.com", role: "Admin" })
     );
   });
 
@@ -141,7 +141,7 @@ describe("CreateUserUseCase", () => {
         nome: "Outro",
         email: "exists@example.com",
         senha: "hash",
-        role: "Cliente",
+        role: "Admin",
       })
     );
 
@@ -149,7 +149,7 @@ describe("CreateUserUseCase", () => {
       nome: "Fulano",
       email: "exists@example.com",
       senha: "123456",
-      role: "Funcionario",
+      role: "Admin",
     } as any;
 
     await expect(sut.execute(input)).rejects.toMatchObject<AppError>({
@@ -166,7 +166,7 @@ describe("CreateUserUseCase", () => {
     // ✅ log esperado: só o "Iniciando..." (não existe "Email já está em uso" no use case)
     expect(loggerMock.info).toHaveBeenCalledWith(
       "Iniciando CreateUserUseCase",
-      expect.objectContaining({ email: "exists@example.com", role: "Funcionario" })
+      expect.objectContaining({ email: "exists@example.com", role: "Admin" })
     );
   });
 });

@@ -19,8 +19,8 @@ describe("authorizeRoles middleware", () => {
   beforeEach(() => jest.clearAllMocks());
 
   it("deve chamar next quando role estiver na lista permitida", () => {
-    const { req, res, next, status } = makeReqResNext("Gerente");
-    const middleware = authorizeRoles(["Gerente", "Funcionario"]);
+    const { req, res, next, status } = makeReqResNext("Admin");
+    const middleware = authorizeRoles(["Admin"]);
 
     middleware(req, res, next);
 
@@ -30,7 +30,7 @@ describe("authorizeRoles middleware", () => {
 
   it("deve retornar 403 quando usuário não tiver role", () => {
     const { req, res, next, status, json } = makeReqResNext();
-    const middleware = authorizeRoles(["Gerente"]);
+    const middleware = authorizeRoles(["Admin"]);
 
     middleware(req, res, next);
 
@@ -45,7 +45,7 @@ describe("authorizeRoles middleware", () => {
 
   it("deve retornar 403 quando role não estiver permitida", () => {
     const { req, res, next, status, json } = makeReqResNext("Cliente");
-    const middleware = authorizeRoles(["Gerente"]);
+    const middleware = authorizeRoles(["Admin"]);
 
     middleware(req, res, next);
 
@@ -59,8 +59,8 @@ describe("authorizeRoles middleware", () => {
   });
 
   it("deve tratar role sem case-sensitive (lowercase/uppercase)", () => {
-    const { req, res, next, status } = makeReqResNext("gErEnTe");
-    const middleware = authorizeRoles(["Gerente"]);
+    const { req, res, next, status } = makeReqResNext("Admin");
+    const middleware = authorizeRoles(["admin"]);
 
     middleware(req, res, next);
 

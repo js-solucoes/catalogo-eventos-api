@@ -116,5 +116,5 @@ components:
           format: email
         role:
           type: string
-          enum: [Gerente, Funcionario, Cliente]
+          enum: [Admin]
       required: [id, nome, email, role]

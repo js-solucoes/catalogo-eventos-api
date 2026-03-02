@@ -14,7 +14,7 @@ describe("UpdateUserUseCase", () => {
       nome: "User 1",
       email: "user1@example.com",
       senha: "old-hash",
-      role: "Funcionario",
+      role: "Admin",
     });
 
   const makeSut = () => {
@@ -72,7 +72,7 @@ describe("UpdateUserUseCase", () => {
     const input = {
       nome: "User 1 Atualizado",
       email: "novo-email@example.com",
-      role: "Gerente",
+      role: "Admin",
     } as any;
 
     const result = await sut.execute(1, input);
@@ -84,12 +84,12 @@ describe("UpdateUserUseCase", () => {
 
     expect(data.nome).toBe("User 1 Atualizado");
     expect(data.email).toBe("novo-email@example.com");
-    expect(data.role).toBe("Gerente");
+    expect(data.role).toBe("Admin");
     expect(data.senha).toBeUndefined();
 
     expect(result?.nome).toBe("User 1 Atualizado");
     expect(result?.email).toBe("novo-email@example.com");
-    expect(result?.role).toBe("Gerente");
+    expect(result?.role).toBe("Admin");
   });
 
   it("deve criptografar nova senha quando enviada", async () => {

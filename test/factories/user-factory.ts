@@ -11,6 +11,6 @@ export async function makeUser(attrs?: Partial<User>): Promise<User> {
     nome: attrs?.nome ?? "John Doe",
     email: attrs?.email ?? `john${Date.now()}@dominio.com`,
     senha: senhaCriptografada,
-    role: attrs?.role ?? "Gerente",
+    role: attrs?.role ?? "Admin",
   } as any);
 }

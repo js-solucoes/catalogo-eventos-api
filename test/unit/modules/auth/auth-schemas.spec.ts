@@ -72,14 +72,14 @@ describe("auth-schemas", () => {
     const ok = authResponseSchema.safeParse({
       token: "abc",
       userId: 1,
-      role: "Gerente",
+      role: "Admin",
     });
     expect(ok.success).toBe(true);
 
     const bad = authResponseSchema.safeParse({
       token: "abc",
       userId: 1,
-      role: "Admin",
+      role: "Gerente",
     });
     expect(bad.success).toBe(false);
   });

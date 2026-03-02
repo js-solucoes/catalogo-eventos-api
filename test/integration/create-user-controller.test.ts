@@ -25,7 +25,7 @@ describe("CreateUserController (integration)", () => {
       nome: "John Doe",
       email: "jhondoe123@dominio.com",
       senha: "senha123",
-      role: "Gerente",
+      role: "Admin",
     });
 
     expect(resp.status).toBe(201); // se sua API retorna 201
@@ -34,7 +34,7 @@ describe("CreateUserController (integration)", () => {
     expect(resp.body.data).toMatchObject({
       nome: "John Doe",
       email: "jhondoe123@dominio.com",
-      role: "Gerente",
+      role: "Admin",
     });
   });
 
@@ -43,7 +43,7 @@ describe("CreateUserController (integration)", () => {
       nome: "John Doe",
       email: "jhondoe123@dominio.com",
       senha: "senha123",
-      role: "Gerente",
+      role: "Admin",
     });
     expect(resp.status).toBe(401);
     expect(resp.type).toMatch(/json/);
@@ -121,7 +121,7 @@ describe("CreateUserController (integration)", () => {
         nome: "Jane Doe",
         email: "jhondoe123@dominio.com",
         senha: "senha123",
-        role: "Gerente",
+        role: "Admin",
       });
     expect(first.status).toBe(201);
 
@@ -130,7 +130,7 @@ describe("CreateUserController (integration)", () => {
       nome: "Outra Pessoa",
       email: "jhondoe123@dominio.com",
       senha: "senha123",
-      role: "Gerente",
+      role: "Admin",
     });
 
     expect(dup.status).toBe(409);

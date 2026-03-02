@@ -3,7 +3,7 @@ import {
   createUserSchema,
   updateUserSchema,
 } from "@/modules/users/presentation/http/validators/user-schemas";
-import { UserRole } from "../../domain/profile/profile-strategy-factory";
+import { UserRole } from "../../domain/value-objects/user-role";
 
 export type CreateUserDTO = z.infer<typeof createUserSchema>;
 export type UpdateUserDTO = z.infer<typeof updateUserSchema>;

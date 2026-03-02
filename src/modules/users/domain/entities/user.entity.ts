@@ -1,9 +1,11 @@
+import { UserRole, UserRoleEnumLiteral } from "../value-objects/user-role";
+
 export interface UserProps {
   id?: number;
   nome: string;
   email: string;
   senha: string;
-  role: "Gerente" | "Funcionario" | "Cliente";
+  role: UserRole;
 }
 
 export class UserEntity {

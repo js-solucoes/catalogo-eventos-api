@@ -443,7 +443,7 @@ components:
         nome: "João da Silva"
         senha: "123abc"
         email: "joao.silva@dominio.com"
-        role: "Gerente"
+        role: "Admin"
     CreateUser:
       type: object
       required:
@@ -468,7 +468,7 @@ components:
         nome: "João da Silva"
         senha: "123abc"
         email: "joao.silva@dominio.com"
-        role: "Gerente"
+        role: "Admin"
     CreateUserResponseDTO:
       type: object
       properties:
@@ -488,7 +488,7 @@ components:
         id: 1
         nome: "João da Silva"
         email: "joao.silva@dominio.com"
-        role: "Gerente"
+        role: "Admin"
     Prato:
       type: object
       required:

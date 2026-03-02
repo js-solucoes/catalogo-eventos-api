@@ -57,6 +57,7 @@ describe("core/config/env", () => {
       JWT_REFRESH_EXPIRES_IN: "7d",
       SALT: "10",
       UPDATE_MODEL: "true",
+      ADMIN_PASSWORD: "admin123",
 
       // DB
       DB_DIALECT: "mysql",

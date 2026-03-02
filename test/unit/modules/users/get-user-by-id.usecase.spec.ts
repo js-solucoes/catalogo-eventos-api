@@ -12,7 +12,7 @@ describe("GetUserByIdUseCase", () => {
               nome: "User 1",
               email: "user1@example.com",
               senha: "hash1",
-              role: "Gerente",
+              role: "Admin",
             })
           : null
       ),

@@ -28,10 +28,10 @@ export const createUserSchema = z.object({
     })
     .min(6, "Senha deve ter pelo menos 6 caracteres"),
 
-  role: z.enum(["Gerente", "Funcionario", "Cliente"], {
+  role: z.enum(["Admin"], {
     error: (issue) => {
       if (
-        !["Gerente", "Funcionario", "Cliente"].some(
+        !["Admin"].some(
           (element) => element === issue.input
         )
       ) {
@@ -74,10 +74,10 @@ export const updateUserSchema = z.object({
     .optional(),
 
   role: z
-    .enum(["Gerente", "Funcionario", "Cliente"], {
+    .enum(["Admin"], {
       error: (issue) => {
         if (
-          !["Gerente", "Funcionario", "Cliente"].some(
+          !["Admin"].some(
             (element) => element === issue.input
           )
         ) {

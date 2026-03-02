@@ -58,7 +58,7 @@ describe("auth-middleware", () => {
     (jwt.verify as jest.Mock).mockReturnValue({
       sub: "10",
       email: "user@mail.com",
-      role: "Gerente",
+      role: "Admin",
     });
 
     authMiddleware(req, res, next);
@@ -72,7 +72,7 @@ describe("auth-middleware", () => {
     expect(req.user).toEqual({
       id: "10",
       email: "user@mail.com",
-      role: "Gerente",
+      role: "Admin",
     });
 
     expect(next).toHaveBeenCalled();

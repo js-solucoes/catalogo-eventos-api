@@ -13,7 +13,7 @@ describe("LoginUseCase", () => {
       nome: "User Teste",
       email: "user@example.com",
       senha: "hashed-password",
-      role: "Gerente",
+      role: "Admin",
     });
 
   const makeSut = () => {
@@ -30,7 +30,7 @@ describe("LoginUseCase", () => {
       decodeRefreshToken: jest.fn(() => ({
         sub: "1",
         email: "user@example.com",
-        role: "Gerente",
+        role: "Admin",
       })),
       generateAccessToken: jest.fn(() => "new-access-token"),
       generateRefreshToken: jest.fn(() => "new-refresh-token"),
@@ -86,7 +86,7 @@ describe("LoginUseCase", () => {
     expect(result.user).toMatchObject({
       id: 1,
       email: "user@example.com",
-      role: "Gerente",
+      role: "Admin",
     });
   });
 

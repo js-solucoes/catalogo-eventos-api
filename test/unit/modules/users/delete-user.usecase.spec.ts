@@ -10,7 +10,7 @@ describe("DeleteUserUseCase", () => {
       nome: "User 1",
       email: "user1@example.com",
       senha: "hash",
-      role: "Funcionario",
+      role: "Admin",
     });
 
   const makeSut = () => {
@@ -54,7 +54,7 @@ describe("DeleteUserUseCase", () => {
 
     const result = await sut.execute(1);
 
-    expect(profileStrategyFactoryMock.getStrategy).toHaveBeenCalledWith("Funcionario");
+    expect(profileStrategyFactoryMock.getStrategy).toHaveBeenCalledWith("Admin");
     expect(profileStrategyFactoryMock.getStrategy().removeProfile).toHaveBeenCalledWith(1, expect.anything());
     expect(deleteRepoMock.delete).toHaveBeenCalledWith(1, expect.anything());
     expect(result).toBe(true);

@@ -21,5 +21,5 @@ export const refreshTokenSchema = z.object({
 export const authResponseSchema = z.object({
   token: z.string(),
   userId: z.number(),
-  role: z.enum(["Gerente", "Funcionario", "Cliente"]),
+  role: z.enum(["Admin"]),
 });

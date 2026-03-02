@@ -17,7 +17,7 @@ export function registerEventRoutes(router: Router) {
   router.post(
     "/api/eventos",
     authMiddleware,
-    authorizeRoles(["Gerente"]),
+    authorizeRoles(["Admin"]),
     validateBody(createEventSchema),
     adaptRoute(makeCreateEventController())
   );
@@ -25,7 +25,7 @@ export function registerEventRoutes(router: Router) {
   router.put(
     "/api/eventos/:id",
     authMiddleware,
-    authorizeRoles(["Gerente"]),
+    authorizeRoles(["Admin"]),
     validateBody(updateEventSchema),
     adaptRoute(makeUpdateEventController())
   );
@@ -33,7 +33,7 @@ export function registerEventRoutes(router: Router) {
   router.delete(
     "/api/eventos/:id",
     authMiddleware,
-    authorizeRoles(["Gerente"]),
+    authorizeRoles(["Admin"]),
     adaptRoute(makeDeleteEventController())
   );
 }
