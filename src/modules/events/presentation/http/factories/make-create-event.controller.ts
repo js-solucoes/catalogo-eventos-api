@@ -9,11 +9,11 @@ import { SequelizeEventRepository } from "@/modules/events/infra/repositories/se
 
 export function makeCreateEventController() {
   const eventRepo = new SequelizeEventRepository();
-  const cidadeRepo = new SequelizeCityRepository(); // ou repo do módulo de cidades
-  const cidadeUseCase = new FindCityByIdUseCase(cidadeRepo);
+  const cityRepo = new SequelizeCityRepository(); 
+  const cityUseCase = new FindCityByIdUseCase(cityRepo);
   const usecase = new CreateEventUseCase(
     eventRepo,
-    cidadeUseCase,
+    cityUseCase,
     new NoopDomainLogger(),
   );
   return new CreateEventController(usecase);

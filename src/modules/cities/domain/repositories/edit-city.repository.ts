@@ -4,7 +4,7 @@ import { CityEntity } from "../entities/city.entity";
 export interface EditCityRepository {
   edit(
     id: number,
-    cidade: Partial<CityEntity>,
+    City: Partial<CityEntity>,
     t?: Transaction,
   ): Promise<CityEntity | null>;
 }

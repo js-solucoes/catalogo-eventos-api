@@ -7,10 +7,10 @@ export function eventLinks(id: string | number): Links {
   const eventId = String(id);
 
   return {
-    self: { href: `/api/eventos/${eventId}`, method: "GET" },
-    update: { href: `/api/eventos/${eventId}`, method: "PUT" },
-    delete: { href: `/api/eventos/${eventId}`, method: "DELETE" },
-    list: { href: `/api/eventos`, method: "GET" },
+    self: { href: `/api/events/${eventId}`, method: "GET" },
+    update: { href: `/api/events/${eventId}`, method: "PUT" },
+    delete: { href: `/api/events/${eventId}`, method: "DELETE" },
+    list: { href: `/api/events`, method: "GET" },
   };
 }
 
@@ -40,7 +40,7 @@ export function eventListLinks({
   filters,
   sort,
 }: ListLinksParams): Links {
-  const base = "/api/eventos";
+  const base = "/api/events";
 
   const baseQuery = {
     page,

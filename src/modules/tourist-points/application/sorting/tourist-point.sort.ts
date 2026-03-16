@@ -1,7 +1,6 @@
-// src/modules/pontos-turisticos/application/sorting/ponto-turistico.sort.ts
 export const TOURIST_POINT_SORT_FIELDS = [
   "nome",
-  "cidade",
+  "city",
   "estado",
   "createdAt",
 ] as const;

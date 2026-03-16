@@ -32,7 +32,7 @@ export class CreateCityUseCase {
     const transaction = await sequelize.transaction();
 
     try {
-      const cidade = new CityEntity({
+      const city = new CityEntity({
         id: 0,
         nome: dto.nome,
         uf: dto.uf,
@@ -40,7 +40,7 @@ export class CreateCityUseCase {
       });
 
       const created = await this.createCityRepository.create(
-        cidade,
+        city,
         transaction,
       );
 

@@ -26,8 +26,8 @@ export class UpdateEventUseCase {
     }
 
     if (dto.cityId !== undefined) {
-      const cidade = await this.findCityById.execute(Number(dto.cityId));
-      if (!cidade) {
+      const city = await this.findCityById.execute(Number(dto.cityId));
+      if (!city) {
         throw new AppError({
           code: "CIDADE_NOT_FOUND",
           message: `Cidade ${dto.cityId} não encontrada`,

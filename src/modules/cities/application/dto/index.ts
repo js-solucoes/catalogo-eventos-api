@@ -13,7 +13,6 @@ export type GetCityParamsDTO = z.infer<typeof getCityParamsSchema>;
 export type DeleteCityParamsDTO = z.infer<typeof deleteCityParamsSchema>;
 export type ListCitiesQueryDTO = z.infer<typeof listCitiesQuerySchema>;
 
-// Tipo básico de cidade “plain”
 export interface CityViewModel {
   id: number;
   nome: string;

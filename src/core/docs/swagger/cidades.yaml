@@ -3,7 +3,7 @@ tags:
     description: Endpoints relacionados a cidades
 
 paths:
-  /cidades/{id}:
+  /cities/{id}:
     get:
       tags: [Cidades]
       summary: Buscar cidade por id
@@ -31,7 +31,7 @@ paths:
       responses:
         "204":
           description: No Content
-  /cidades:
+  /cities:
     post:
       tags: [Cidades]
       summary: Criar cidade

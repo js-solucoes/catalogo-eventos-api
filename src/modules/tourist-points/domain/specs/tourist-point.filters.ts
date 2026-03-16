@@ -1,10 +1,9 @@
-// src/modules/pontos-turisticos/domain/specs/ponto-turistico.filters.ts
 import { Specification } from "@/core/domain/specification/specification";
 import { eq, like } from "@/core/domain/specification/builders";
 
 export type ListPontosParams = {
   search?: string;
-  cidade?: string;
+  city?: string;
   estado?: string;
   categoria?: string;
 };
@@ -17,8 +16,8 @@ export const bySearch = (p: ListPontosParams): Specification | null => {
 };
 
 export const byCidade = (p: ListPontosParams): Specification | null => {
-  const v = normalize(p.cidade);
-  return v ? eq("cidade", v) : null;
+  const v = normalize(p.city);
+  return v ? eq("city", v) : null;
 };
 
 export const byEstado = (p: ListPontosParams): Specification | null => {

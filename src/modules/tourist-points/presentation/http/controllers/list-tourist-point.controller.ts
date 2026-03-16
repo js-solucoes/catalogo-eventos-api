@@ -23,7 +23,7 @@ export class ListTouristPointsController implements Controller {
         page: q.page,
         limit: q.limit,
         nome: q.nome,
-        cidade: q.cidade,
+        city: q.city,
         estado: q.estado,
         ativo:
           q.ativo === "true" ? true : q.ativo === "false" ? false : undefined,
@@ -34,7 +34,7 @@ export class ListTouristPointsController implements Controller {
       const data = result.items.map((item: any) => ({
         id: item.id,
         nome: item.nome,
-        cidade: item.cidade,
+        city: item.city,
         estado: item.estado,
         ativo: item.ativo,
         createdAt: item.createdAt,
@@ -42,13 +42,13 @@ export class ListTouristPointsController implements Controller {
       }));
 
       const links = buildPaginationLinks({
-        basePath: "/api/pontos-turisticos",
+        basePath: "/api/tourist-points",
         page: result.page,
         limit: result.limit,
         totalPages: result.totalPages,
         query: {
           nome: q.nome,
-          cidade: q.cidade,
+          city: q.city,
           estado: q.estado,
           ativo: q.ativo,
           sortBy: q.sortBy,

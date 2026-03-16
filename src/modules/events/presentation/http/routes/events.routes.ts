@@ -12,10 +12,10 @@ import { makeDeleteEventController } from "../factories/make-delete-event.contro
 import { createEventSchema, updateEventSchema } from "../validators/event-schemas";
 
 export function registerEventRoutes(router: Router) {
-  router.get("/api/eventos", adaptRoute(makeListEventsController()));
+  router.get("/api/events", adaptRoute(makeListEventsController()));
 
   router.post(
-    "/api/eventos",
+    "/api/events",
     authMiddleware,
     authorizeRoles(["Admin"]),
     validateBody(createEventSchema),
@@ -23,7 +23,7 @@ export function registerEventRoutes(router: Router) {
   );
 
   router.put(
-    "/api/eventos/:id",
+    "/api/events/:id",
     authMiddleware,
     authorizeRoles(["Admin"]),
     validateBody(updateEventSchema),
@@ -31,7 +31,7 @@ export function registerEventRoutes(router: Router) {
   );
 
   router.delete(
-    "/api/eventos/:id",
+    "/api/events/:id",
     authMiddleware,
     authorizeRoles(["Admin"]),
     adaptRoute(makeDeleteEventController())

@@ -18,7 +18,7 @@ export class DeleteCityController implements Controller {
     } catch (error) {
       logger.error("Erro ao deletar cidade", {
         correlationId,
-        route: "DeleteCidadeController",
+        route: "DeleteCityController",
         error,
       });
 

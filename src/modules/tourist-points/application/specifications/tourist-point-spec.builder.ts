@@ -3,7 +3,7 @@ import { eq, like, between } from "../../domain/specifications/factories";
 
 type Params = {
   nome?: string;
-  cidade?: string;
+  city?: string;
   estado?: string;
   ativo?: boolean;
   precoMin?: number;
@@ -18,8 +18,8 @@ export class TouristPointSpecificationBuilder {
     return this;
   }
 
-  withCidade(cidade?: string) {
-    if (cidade) this.specs.push(eq("cidade", cidade));
+  withCidade(city?: string) {
+    if (city) this.specs.push(eq("city", city));
     return this;
   }
 

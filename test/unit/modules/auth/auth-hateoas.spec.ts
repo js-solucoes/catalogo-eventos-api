@@ -10,7 +10,7 @@ describe("auth-hateoas", () => {
     expect(links).toEqual({
       self: { href: "/api/login", method: "POST" },
       refreshToken: { href: "/api/refresh-token", method: "POST" },
-      me: { href: "/api/usuarios/me", method: "GET" },
+      me: { href: "/api/users/me", method: "GET" },
     });
   });
 

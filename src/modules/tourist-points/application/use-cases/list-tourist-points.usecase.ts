@@ -1,4 +1,4 @@
-// src/modules/pontos-turisticos/application/use-cases/list-pontos-turisticos.usecase.ts
+
 import { normalizePagination } from "@/core/http/pagination";
 import { normalizeSort } from "@/core/http/sorting";
 import { ListTouristPointsSpecificationRepository } from "../../domain/repositories/list-tourist-points-specification.repository";
@@ -14,7 +14,7 @@ type Input = {
 
   // filtros
   nome?: string;
-  cidade?: string;
+  city?: string;
   estado?: string;
   ativo?: boolean;
 
@@ -39,7 +39,7 @@ export class ListTouristPointsUseCase {
 
     const spec = new TouristPointSpecificationBuilder()
       .withNome(params.nome)
-      .withCidade(params.cidade)
+      .withCidade(params.city)
       .withEstado(params.estado)
       .withAtivo(params.ativo)
       .build();

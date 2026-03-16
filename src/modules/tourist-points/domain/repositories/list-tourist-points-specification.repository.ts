@@ -1,4 +1,4 @@
-// src/modules/pontos-turisticos/domain/repositories/list-pontos-turisticos.repository.ts
+
 import { QuerySpecification } from "../specifications/query-specification";
 
 export interface ListTouristPointsSpecificationRepository {

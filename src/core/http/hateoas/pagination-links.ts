@@ -5,7 +5,7 @@ export type Link = { href: string; method: "GET" | "POST" | "PUT" | "PATCH" | "D
 export type LinksPagination = Record<string, Link | undefined>;
 
 type BuildLinksInput = {
-  basePath: string; // ex: "/api/pontos-turisticos"
+  basePath: string; 
   page: number;
   limit: number;
   totalPages: number;
