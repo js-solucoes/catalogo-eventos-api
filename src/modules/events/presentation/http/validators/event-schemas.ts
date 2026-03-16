@@ -12,7 +12,7 @@ export const createEventSchema = z.object({
   preco: z.string().min(1, "Preço é obrigatório"),
   img: z.url("img deve ser uma URL válida"),
   desc: z.string().min(3, "Descrição é obrigatória"),
-  cidadeId: z.coerce.number().int().positive("cidadeId é obrigatório"),
+  cityId: z.coerce.number().int().positive("cityId é obrigatório"),
 });
 
 export const updateEventSchema = createEventSchema.partial();

@@ -18,7 +18,7 @@ const ALLOWED_SORT_FIELDS = new Set([
   "cat",
   "data",
   "hora",
-  "cidadeId",
+  "cityId",
   "createdAt",
   "updatedAt",
 ]);
@@ -42,7 +42,7 @@ export class SequelizeEventRepository
       preco: m.preco,
       img: m.img,
       desc: m.desc,
-      cidadeId: m.cidadeId,
+      cityId: m.cityId,
       createdAt: (m as any).createdAt,
       updatedAt: (m as any).updatedAt,
     });
@@ -59,7 +59,7 @@ export class SequelizeEventRepository
         preco: event.preco,
         img: event.img,
         desc: event.desc,
-        cidadeId: event.cidadeId,
+        cityId: event.cityId,
       },
       { transaction: t }
     );
@@ -86,7 +86,7 @@ export class SequelizeEventRepository
         preco: data.preco ?? found.preco,
         img: data.img ?? found.img,
         desc: data.desc ?? found.desc,
-        cidadeId: data.cidadeId ?? found.cidadeId,
+        cityId: data.cityId ?? found.cityId,
       },
       { transaction: t }
     );
@@ -116,15 +116,15 @@ export class SequelizeEventRepository
       : "desc") as "asc" | "desc";
 
     const filters = query.filters ?? {};
-    const cidadeId =
-      filters.cidadeId !== undefined ? Number(filters.cidadeId) : undefined;
+    const cityId =
+      filters.cityId !== undefined ? Number(filters.cityId) : undefined;
 
     const builder = new SpecificationBuilder<typeof filters>()
       .add((p) => (p.titulo ? like("titulo", p.titulo) : null))
       .add((p) => (p.cat ? eq("cat", p.cat) : null))
-      .add((p) => (typeof cidadeId === "number" ? eq("cidadeId", cidadeId) : null));
+      .add((p) => (typeof cityId === "number" ? eq("cityId", cityId) : null));
 
-    const spec = builder.build({ ...filters, cidadeId });
+    const spec = builder.build({ ...filters, cityId });
 
     const where = spec ? spec.toSequelizeWhere() : {};
 

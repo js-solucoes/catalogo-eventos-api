@@ -1,17 +1,17 @@
 import { AppError } from "@/core/errors-app-error";
 import { DomainLogger, NoopDomainLogger } from "@/core/logger/domain-logger";
+import { FindCityByIdUseCase } from "@/modules/cities/application/use-cases/find-city-by-id.usecase";
 import { EventEntity } from "../../domain/entities/event.entity";
-import { UpdateEventDTO } from "../dto";
 import { FindEventByIdRepository } from "../../domain/repositories/find-event-by-id.repository";
 import { UpdateEventRepository } from "../../domain/repositories/update-event.repository";
-import { FindCidadeByIdUseCase } from "@/modules/cidades/application/use-cases/find-cidade-by-id.usecase";
+import { UpdateEventDTO } from "../dto";
 
 export class UpdateEventUseCase {
   constructor(
     private readonly findByIdRepo: FindEventByIdRepository,
     private readonly updateRepo: UpdateEventRepository,
-    private readonly findCidadeById: FindCidadeByIdUseCase,
-    private readonly logger: DomainLogger = new NoopDomainLogger()
+    private readonly findCityById: FindCityByIdUseCase,
+    private readonly logger: DomainLogger = new NoopDomainLogger(),
   ) {}
 
   async execute(id: number, dto: UpdateEventDTO): Promise<EventEntity> {
@@ -25,14 +25,14 @@ export class UpdateEventUseCase {
       });
     }
 
-    if (dto.cidadeId !== undefined) {
-      const cidade = await this.findCidadeById.execute(Number(dto.cidadeId));
+    if (dto.cityId !== undefined) {
+      const cidade = await this.findCityById.execute(Number(dto.cityId));
       if (!cidade) {
         throw new AppError({
           code: "CIDADE_NOT_FOUND",
-          message: `Cidade ${dto.cidadeId} não encontrada`,
+          message: `Cidade ${dto.cityId} não encontrada`,
           statusCode: 404,
-          details: { cidadeId: dto.cidadeId },
+          details: { cityId: dto.cityId },
         });
       }
     }

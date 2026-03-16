@@ -18,7 +18,7 @@ export class ListEventsController implements Controller {
 
       titulo: q.titulo,
       cat: q.cat,
-      cidadeId: q.cidadeId ? Number(q.cidadeId) : undefined,
+      cityId: q.cityId ? Number(q.cityId) : undefined,
 
       sortBy: q.sortBy,
       sortDir: q.sortDir,

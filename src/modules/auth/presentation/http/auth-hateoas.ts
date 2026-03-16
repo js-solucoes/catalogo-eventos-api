@@ -12,7 +12,7 @@ export const loginLinks = (): Links => ({
     method: "POST",
   },
   me: {
-    href: `${API_PREFIX}/usuarios/me`,
+    href: `${API_PREFIX}/users/me`,
     method: "GET",
   },
 });

@@ -9,7 +9,7 @@ export type CreateEventDTO = {
   preco: string;
   img: string;
   desc: string;
-  cidadeId: number;
+  cityId: number;
 };
 
 export type UpdateEventDTO = Partial<CreateEventDTO>;
@@ -20,7 +20,7 @@ export type ListEventsDTO = {
 
   titulo?: string;
   cat?: EventCategory;
-  cidadeId?: number | string;
+  cityId?: number | string;
 
   sortBy?: string;
   sortDir?: "asc" | "desc" | string;
@@ -37,7 +37,7 @@ export type ListEventsResult = {
     preco: string;
     img: string;
     desc: string;
-    cidadeId: number;
+    cityId: number;
     createdAt?: Date;
     updatedAt?: Date;
   }>;

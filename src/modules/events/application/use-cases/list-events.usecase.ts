@@ -27,7 +27,7 @@ export class ListEventsUseCase {
     const filters = {
       titulo: input.titulo,
       cat: input.cat,
-      cidadeId: input.cidadeId !== undefined ? Number(input.cidadeId) : undefined,
+      cityId: input.cityId !== undefined ? Number(input.cityId) : undefined,
     };
 
     const result = await this.repo.list({

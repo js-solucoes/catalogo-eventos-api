@@ -11,7 +11,7 @@ export interface EventProps {
   preco: string; // manter string por enquanto
   img: string; // url/path
   desc: string;
-  cidadeId: number;
+  cityId: number;
   createdAt?: Date;
   updatedAt?: Date;
 }
@@ -46,8 +46,8 @@ export class EventEntity {
   get desc() {
     return this.props.desc;
   }
-  get cidadeId() {
-    return this.props.cidadeId;
+  get cityId() {
+    return this.props.cityId;
   }
   get createdAt() {
     return this.props.createdAt;

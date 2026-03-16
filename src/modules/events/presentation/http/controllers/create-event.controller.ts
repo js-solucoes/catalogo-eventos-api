@@ -27,7 +27,7 @@ export class CreateEventController implements Controller {
           preco: createdEvent.preco,
           img: createdEvent.img,
           desc: createdEvent.desc,
-          cidadeId: createdEvent.cidadeId,
+          cityId: createdEvent.cityId,
           createdAt: createdEvent.createdAt,
           updatedAt: createdEvent.updatedAt,
         },

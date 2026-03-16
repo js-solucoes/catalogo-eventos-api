@@ -38,7 +38,7 @@ export class UpdateEventController implements Controller {
           preco: updated.preco,
           img: updated.img,
           desc: updated.desc,
-          cidadeId: updated.cidadeId,
+          cityId: updated.cityId,
           createdAt: updated.createdAt,
           updatedAt: updated.updatedAt,
         },

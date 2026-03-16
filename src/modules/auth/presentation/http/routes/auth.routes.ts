@@ -29,9 +29,9 @@ export function registerAuthRoutes(router: Router): void {
   const loginController = new LoginController(loginUseCase);
   const refreshController = new RefreshTokenController(refreshUseCase);
 
-  router.post("/login", validateBody(loginSchema), adaptRoute(loginController));
+  router.post("/auth/login", validateBody(loginSchema), adaptRoute(loginController));
   router.post(
-    "/refresh-token",
+    "/auth/refresh-token",
     validateBody(refreshTokenSchema),
     adaptRoute(refreshController)
   );

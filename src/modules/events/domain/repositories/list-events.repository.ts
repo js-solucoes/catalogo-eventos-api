@@ -6,7 +6,7 @@ export type SortDir = "asc" | "desc";
 export interface ListEventsFilters {
   titulo?: string;
   cat?: string;
-  cidadeId?: number;
+  cityId?: number;
 }
 
 export interface ListSort {

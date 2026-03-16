@@ -1,6 +1,6 @@
 // src/modules/events/infra/model/event-model.ts
 import sequelize from "@/core/database";
-import { CidadeModel } from "@/modules/cidades/infra/models/cidade-model";
+import { CityModel } from "@/modules/cities/infra/models/city-model";
 import { DataTypes, Model } from "sequelize";
 
 class EventModel extends Model {
@@ -13,7 +13,7 @@ class EventModel extends Model {
   preco!: string;
   img!: string;
   desc!: string;
-  cidadeId!: number;
+  cityId!: number;
 }
 
 EventModel.init(
@@ -27,21 +27,21 @@ EventModel.init(
     preco: { type: DataTypes.STRING, allowNull: false },
     img: { type: DataTypes.STRING, allowNull: false },
     desc: { type: DataTypes.TEXT, allowNull: false },
-    cidadeId: {
+    cityId: {
       type: DataTypes.INTEGER,
       allowNull: false,
       references: {
-        model: "cidades", // Name of the target model
+        model: "cities", // Name of the target model
         key: "id", // Key in the target model that we're referencing
       },
     },
   },
   {
     sequelize,
-    tableName: "eventos",
+    tableName: "events",
   },
 );
 
-EventModel.belongsTo(CidadeModel, { foreignKey: "cidadeId", as: "cidade" });
+EventModel.belongsTo(CityModel, { foreignKey: "cityId", as: "city" });
 
 export default EventModel;
