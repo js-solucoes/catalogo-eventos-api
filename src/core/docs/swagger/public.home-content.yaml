@@ -1,0 +1,102 @@
+tags:
+  - name: Home Content PUBLIC
+    description: Endpoints relacionados ao conteúdo da página home
+
+paths:
+  /api/public/home-content:
+    get:
+      summary: Lista de conteúdo da página home do Celeiro do MS
+      tags: 
+        - Home Content PUBLIC
+      responses:
+        200:
+          description: A listagem de destaques da página home foi obtida com sucesso!
+          content:
+            application/json:
+              schema:
+                $ref: "#components/schemas/PublicHomeContentPagedResponse"
+
+  /api/public/home-content/{id}:
+    get:
+      summary: Busca um conteúdo da página home pelo ID
+      tags: 
+        - Home Content PUBLIC
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+          description: ID do conteúdo da página home que deseja buscar
+      responses:
+        200:
+          description: O conteúdo da página home foi obtido com sucesso!
+          content:
+            application/json:
+              schema:
+                $ref: "#components/schemas/PublicHomeContent"
+  
+components:
+  schemas:
+    PublicHomeContent:
+      type: object
+      properties:
+        homeBanner:
+          $ref: "#/components/schemas/PublicHomeContentBanner"
+        homeHighlight:
+          $ref: "#/components/schemas/PublicHomeContentHighlight"
+    PublicHomeContentBanner:
+      type: object
+      properties:
+        id: { type:  number,example: 0 }
+        title: { type: string, example: "" }
+        subtitle: { type: string, example: "" }
+        imageUrl: { type: string, example: "" }
+        ctaLabel: { type: string, example: "" }
+        ctaUrl: { type: string, example: "" }
+        active: { type:  boolean,example: true }
+        order: { type:  number,example: 0 }
+        createdAt: { type: date, example: "2026-04-26" }
+        updatedAt: { type: date, example: "2026-04-26" }
+    PublicHomeContentHighlight:
+      type: object
+      properties:
+        id: { type: number, example: 0 }
+        type: { type: string, example: "" }
+        referenceId: { type: number, example: 0 }
+        title: { type: string, example: "" }
+        description: { type: string, example: "" }
+        imageUrl: { type: string, example: "" }
+        cityName: { type: string, example: "" }
+        ctaUrl: { type: string, example: "" }
+        active: { type: boolean, example: true }
+        order: { type: number, example: 0 }
+        createdAt: { type: date, example: "2026-04-26" }
+        updatedAt: { type: date, example: "2026-04-26" }
+    PublicHomeContentPagedResponse:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            items:
+              type: array
+              items:
+                $ref: "#components/schemas/PublicHomeContent"
+            page:
+              type: integer
+            limit:
+              type: integer
+            total:
+              type: integer
+            totalPages:
+              type: integer
+            sort:
+              type: object
+              properties:
+                sortBy: { type: string }
+                sortDir: { type: string }
+        links:
+          $ref: '#/components/schemas/Links'
+        meta:
+          $ref: '#/components/schemas/Meta'

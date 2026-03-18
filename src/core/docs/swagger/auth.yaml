@@ -1,9 +1,12 @@
+tags:
+  - name: Auth
+    description: Endpoints relacionados ao Login do Celeiro do MS
+
 paths:
-  /login:
+  /auth/login:
     post:
       summary: Autentica um usuário e retorna um token JWT
-      tags:
-        - Auth
+      tags: [Auth]
       requestBody:
         required: true
         content:
@@ -11,24 +14,23 @@ paths:
             schema:
               $ref: '#/components/schemas/LoginRequest'
       responses:
-        '200':
+        200:
           description: Login bem-sucedido
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/LoginResponse'
-        '401':
+        401:
           description: Credenciais inválidas
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
 
-  /refresh-token:
+  /auth/refresh-token:
     post:
       summary: Gera um novo access token a partir de um refresh token válido
-      tags:
-        - Auth
+      tags: [Auth]
       security:
         - bearerAuth: []
       requestBody:
@@ -38,13 +40,13 @@ paths:
             schema:
               $ref: '#/components/schemas/RefreshTokenRequest'
       responses:
-        '200':
+        200:
           description: Novo access token gerado
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/RefreshTokenResponse'
-        '401':
+        401:
           description: Refresh token inválido
           content:
             application/json:
@@ -103,7 +105,6 @@ components:
           $ref: '#/components/schemas/Meta'
       required: [data]
 
-    # User aqui ou em users.yaml (se quiser separar)
     User:
       type: object
       properties:

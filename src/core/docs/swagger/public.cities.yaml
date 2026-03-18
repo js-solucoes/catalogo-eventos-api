@@ -1,0 +1,85 @@
+tags:
+  - name: Cities PUBLIC
+    description: Endpoints relacionados as cidades da região do Celeiro do MS
+
+paths:
+  /api/public/cities:
+    get:
+      summary: Lista as cidades da região do Celeiro do MS
+      tags: 
+        - Cities PUBLIC
+      responses:
+        200:
+          description: A listagem de cidades foi obtida com sucesso!
+          content:
+            application/json:
+              schema:
+                $ref: "#components/schemas/PublicCityPagedResponse"
+                
+  /api/public/cities/{id}:
+    get:
+      summary: Busca uma cidade pelo ID
+      tags: 
+        - Cities PUBLIC
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+          description: ID da cidade que deseja buscar
+      responses:
+        200:
+          description: A cidades foi obtida com sucesso!
+          content:
+            application/json:
+              schema:
+                $ref: "#components/schemas/PublicCity"
+
+components:
+  schemas:
+    PublicCity:
+      type: object
+      properties:
+        id: { type: number, example: 0 }
+        name: { type: string, example: "Dourados" }
+        slug: { type: string, example: "dourados" }
+        state: { type: string, example: "MS" }
+        summary: { type: string, example: "Um resumo sobre Dourados" }
+        description:
+          {
+            type: string,
+            example: "Este é um texto contando algo sobre Dourados",
+          }
+        imageUrl:
+          { type: string, example: https://repositorio.com.br/imagem.jpg }
+        published: { type: boolean, example: true }
+        createdAt: { type: date, example: "2026-04-26" }
+        updatedAt: { type: date, example: "2026-04-26" }
+    PublicCityPagedResponse:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            items:
+              type: array
+              items:
+                $ref: "#components/schemas/AdminCity"
+            page:
+              type: integer
+            limit:
+              type: integer
+            total:
+              type: integer
+            totalPages:
+              type: integer
+            sort:
+              type: object
+              properties:
+                sortBy: { type: string }
+                sortDir: { type: string }
+        links:
+          $ref: '#/components/schemas/Links'
+        meta:
+          $ref: '#/components/schemas/Meta'

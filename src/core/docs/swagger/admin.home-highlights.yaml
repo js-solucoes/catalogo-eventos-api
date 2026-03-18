@@ -1,0 +1,149 @@
+tags:
+  - name: Home Highlight ADMIN
+    description: Endpoints relacionados aos destaques da página home
+
+paths:
+  /api/admin/home-highlights:
+    get:
+      summary: Lista de destaques da página home do Celeiro do MS
+      tags:
+        - Home Highlight ADMIN
+      security:
+        - bearerAuth: []
+      responses:
+        200:
+          description: A listagem de destaques da página home foi obtida com sucesso!
+          content:
+            application/json:
+              schema:
+                $ref: "#components/schemas/AdminHomeHighlightPagedResponse"
+
+    post:
+      summary: Cadastra um destaque da página home do Celeiro do MS
+      tags:
+        - Home Highlight ADMIN
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#components/schemas/AdminHomeHighlight"
+      responses:
+        201:
+          description: O destaque da página home foi criado com sucesso!
+          content:
+            application/json:
+              schema:
+                $ref: "#components/schemas/AdminHomeHighlight"
+  /api/admin/home-highlights/{id}:
+    get:
+      summary: Busca um destaque da página home pelo ID
+      tags:
+        - Home Highlight ADMIN
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+          description: ID do destaque da página home que deseja buscar
+      responses:
+        200:
+          description: O destaque da página home foi obtido com sucesso!
+          content:
+            application/json:
+              schema:
+                $ref: "#components/schemas/AdminHomeHighlight"
+    patch:
+      summary: Atualiza os dados de um destaque da página home do Celeiro do MS
+      tags:
+        - Home Highlight ADMIN
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+          description: ID do destaque da página home que deseja atualizar
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#components/schemas/AdminHomeHighlight"
+    delete:
+      summary: Exclui um destaque da página home pelo ID
+      tags:
+        - Home Highlight ADMIN
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+          description: ID do destaques da página home que deseja excluir
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      deleted: { type: boolean, example: true }
+
+components:
+  schemas:
+    AdminHomeHighlight:
+      type: object
+      properties:
+        id: { type: number, example: 1 }
+        type: { type: string, example: "" }
+        referenceId: { type: string, example: "" }
+        title: { type: string, example: "" }
+        description: { type: string, example: "" }
+        imageUrl: { type: string, example: "" }
+        cityName: { type: string, example: "" }
+        ctaUrl: { type: string, example: "" }
+        active: { type: boolean, example: true }
+        order: { type: number, example: 1 }
+        createdAt: { type: date, example: "2026-04-26" }
+        updatedAt: { type: date, example: "2026-04-26" }
+    AdminHomeHighlightPagedResponse:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            items:
+              type: array
+              items:
+                $ref: "#components/schemas/AdminHomeHighlight"
+            page:
+              type: integer
+            limit:
+              type: integer
+            total:
+              type: integer
+            totalPages:
+              type: integer
+            sort:
+              type: object
+              properties:
+                sortBy: { type: string }
+                sortDir: { type: string }
+        links:
+          $ref: "#/components/schemas/Links"
+        meta:
+          $ref: "#/components/schemas/Meta"

@@ -1,0 +1,145 @@
+tags:
+  - name: Social Link ADMIN
+    description: Endpoints relacionados aos links de redes sociais
+
+paths:
+  /api/admin/social-links:
+    get:
+      summary: Lista de links de redes sociais do Celeiro do MS
+      tags: 
+        - Social Link ADMIN
+      security:
+        - bearerAuth: []
+      responses:
+        200:
+          description: A listagem de links de redes sociais foi obtida com sucesso!
+          content:
+            application/json:
+              schema:
+                $ref: "#components/schemas/AdminSocialLinkPagedResponse"
+
+    post:
+      summary: Cadastra um link de rede social do Celeiro do MS
+      tags: 
+        - Social Link ADMIN
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#components/schemas/AdminInstitutionalContent"
+      responses:
+        201:
+          description: O link de rede social foi criado com sucesso!
+          content:
+            application/json:
+              schema:
+                $ref: "#components/schemas/AdminSocialLink"
+  /api/admin/social-links/{id}:
+    get:
+      summary: Busca um link de rede social pelo ID
+      tags: 
+        - Social Link ADMIN
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+          description: ID do link de rede social que deseja buscar
+      responses:
+        200:
+          description: O link de rede social foi obtido com sucesso!
+          content:
+            application/json:
+              schema:
+                $ref: "#components/schemas/AdminSocialLink"
+    patch:
+      summary: Atualiza os dados de um link de rede social do Celeiro do MS
+      tags:
+        - Social Link ADMIN
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+          description: ID do link de rede social que deseja atualizar
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#components/schemas/AdminSocialLink"
+    delete:
+      summary: Exclui um link de rede social pelo ID
+      tags: 
+        - Social Link ADMIN
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+          description: ID do link de rede social que deseja excluir
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      deleted: { type: boolean, example: true }
+  
+components:
+  schemas:
+    AdminSocialLink:
+      type: object
+      properties:
+        id: { type:  number, example: 0 }
+        platform: { type:  string, example: "" }
+        label: { type:  string, example: "" }
+        url: { type:  string, example: "" }
+        active: { type:  boolean, example: true }
+        order: { type:  number, example: 0 }
+        createdAt: { type: date, example: "2026-04-26" }
+        updatedAt: { type: date, example: "2026-04-26" }
+    AdminSocialLinkPagedResponse:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            items:
+              type: array
+              items:
+                $ref: "#components/schemas/AdminSocialLink"
+            page:
+              type: integer
+            limit:
+              type: integer
+            total:
+              type: integer
+            totalPages:
+              type: integer
+            sort:
+              type: object
+              properties:
+                sortBy: { type: string }
+                sortDir: { type: string }
+        links:
+          $ref: '#/components/schemas/Links'
+        meta:
+          $ref: '#/components/schemas/Meta'

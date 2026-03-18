@@ -1,0 +1,78 @@
+tags:
+  - name: Social Link PUBLIC
+    description: Endpoints relacionados aos links de redes sociais
+
+paths:
+  /api/public/social-links:
+    get:
+      summary: Lista de links de redes sociais do Celeiro do MS
+      tags:
+        - Social Link PUBLIC
+      responses:
+        200:
+          description: A listagem de links de redes sociais foi obtida com sucesso!
+          content:
+            application/json:
+              schema:
+                $ref: "#components/schemas/AdminSocialLinkPagedResponse"
+
+  /api/public/social-links/{id}:
+    get:
+      summary: Busca um link de rede social pelo ID
+      tags:
+        - Social Link PUBLIC
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+          description: ID do link de rede social que deseja buscar
+      responses:
+        200:
+          description: O link de rede social foi obtido com sucesso!
+          content:
+            application/json:
+              schema:
+                $ref: "#components/schemas/AdminSocialLink"
+
+components:
+  schemas:
+    AdminSocialLink:
+      type: object
+      properties:
+        id: { type: number, example: 0 }
+        platform: { type: string, example: "" }
+        label: { type: string, example: "" }
+        url: { type: string, example: "" }
+        active: { type: boolean, example: true }
+        order: { type: number, example: 0 }
+        createdAt: { type: date, example: "2026-04-26" }
+        updatedAt: { type: date, example: "2026-04-26" }
+    AdminSocialLinkPagedResponse:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            items:
+              type: array
+              items:
+                $ref: "#components/schemas/AdminSocialLink"
+            page:
+              type: integer
+            limit:
+              type: integer
+            total:
+              type: integer
+            totalPages:
+              type: integer
+            sort:
+              type: object
+              properties:
+                sortBy: { type: string }
+                sortDir: { type: string }
+        links:
+          $ref: "#/components/schemas/Links"
+        meta:
+          $ref: "#/components/schemas/Meta"

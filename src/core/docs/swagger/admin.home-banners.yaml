@@ -1,0 +1,147 @@
+tags:
+  - name: Home Banners ADMIN
+    description: Endpoints relacionados aos banners da página home
+
+paths:
+  /api/admin/home-banner:
+    get:
+      summary: Lista de banners da página home do Celeiro do MS
+      tags: 
+        - Home Banners ADMIN
+      security:
+        - bearerAuth: []
+      responses:
+        200:
+          description: A listagem de banners da página home foi obtida com sucesso!
+          content:
+            application/json:
+              schema:
+                $ref: "#components/schemas/AdminHomeBannerPagedResponse"
+
+    post:
+      summary: Cadastra um banner da página home do Celeiro do MS
+      tags: 
+        - Home Banners ADMIN
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#components/schemas/AdminHomeBanner"
+      responses:
+        201:
+          description: O banner da página home foi criado com sucesso!
+          content:
+            application/json:
+              schema:
+                $ref: "#components/schemas/AdminHomeBanner"
+  /api/admin/home-banner/{id}:
+    get:
+      summary: Busca um banner da página home pelo ID
+      tags: 
+        - Home Banners ADMIN
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+          description: ID do banner da página home que deseja buscar
+      responses:
+        200:
+          description: O banner da página home foi obtido com sucesso!
+          content:
+            application/json:
+              schema:
+                $ref: "#components/schemas/AdminHomeBanner"
+    patch:
+      summary: Atualiza os dados de um banner da página home do Celeiro do MS
+      tags:
+        - Home Banners ADMIN
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+          description: ID do banner da página home que deseja atualizar
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#components/schemas/AdminHomeBanner"
+    delete:
+      summary: Exclui um banner da página home pelo ID
+      tags: 
+        - Home Banners ADMIN
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+          description: ID do banner da página home que deseja excluir
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      deleted: { type: boolean, example: true }
+  
+components:
+  schemas:
+    AdminHomeBanner:
+      type: object
+      properties:
+        id: { type:  integer,example: 0 }
+        title: { type:  string, example: "" }
+        subtitle: { type:  string, example: "" }
+        imageUrl: { type:  string, example: "" }
+        ctaLabel: { type:  string, example: "" }
+        ctaUrl: { type:  string, example: "" }
+        active: { type:  boolean, example: true }
+        order: { type:  number,example: 0 }
+        createdAt: { type: date, example: "2026-04-26" }
+        updatedAt: { type: date, example: "2026-04-26" }
+    AdminHomeBannerPagedResponse:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            items:
+              type: array
+              items:
+                $ref: "#components/schemas/AdminHomeBanner"
+            page:
+              type: integer
+            limit:
+              type: integer
+            total:
+              type: integer
+            totalPages:
+              type: integer
+            sort:
+              type: object
+              properties:
+                sortBy: { type: string }
+                sortDir: { type: string }
+        links:
+          $ref: '#/components/schemas/Links'
+        meta:
+          $ref: '#/components/schemas/Meta'

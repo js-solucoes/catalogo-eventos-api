@@ -1,0 +1,109 @@
+tags:
+  - name: Events PUBLIC
+    description: Endpoints relacionados aos eventos da região
+
+paths:
+  /api/public/events:
+    get:
+      summary: Lista de eventos do Celeiro do MS
+      tags: 
+        - Events PUBLIC
+      parameters:
+        - in: query
+          name: page
+          schema: { type: integer, minimum: 1, default: 1 }
+        - in: query
+          name: limit
+          schema: { type: integer, minimum: 1, maximum: 100, default: 10 }
+        - in: query
+          name: name
+          schema: { type: string }
+        - in: query
+          name: category
+          schema:
+            type: string
+            enum: [show, esporte, feira, teatro, gastronomia]
+        - in: query
+          name: cityId
+          schema: { type: integer }
+        - in: query
+          name: sortBy
+          schema: { type: string, example: createdAt }
+        - in: query
+          name: sortDir
+          schema: { type: string, enum: [asc, desc], default: desc }
+      responses:
+        200:
+          description: A listagem de eventos foi obtida com sucesso!
+          content:
+            application/json:
+              schema:
+                $ref: "#components/schemas/PublicEventPagedResponse"
+
+  /api/public/events/{id}:
+    get:
+      summary: Busca um evento pelo ID
+      tags: 
+        - Events PUBLIC
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+          description: ID do evento que deseja buscar
+      responses:
+        200:
+          description: O evento foi obtido com sucesso!
+          content:
+            application/json:
+              schema:
+                $ref: "#components/schemas/PublicEvent"
+   
+components:
+  schemas:
+    PublicEvent:
+      type: object
+      properties:
+        id: { type: integer, example: 0 }
+        cityId: { type: integer, example: 0 }
+        citySlug: { type: string, example: "" }
+        name: { type: string, example: "" }
+        description: { type: string, example: "" }
+        category: { type: string, example: "" }
+        startDate: { type: string, example: "2026-04-26" }
+        endDate: { type: string, example: "2026-04-26" }
+        formattedDate: { type: string, example: "26/04/2026" }
+        location: { type: string, example: "" }
+        imageUrl: { type: string, example: "" }
+        featured: { type: boolean, example: true }
+        published: { type: boolean, example: true }
+        createdAt: { type: date, example: "2026-04-26" }
+        updatedAt: { type: date, example: "2026-04-26" }
+    PublicEventPagedResponse:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            items:
+              type: array
+              items:
+                $ref: "#components/schemas/AdminEvent"
+            page:
+              type: integer
+            limit:
+              type: integer
+            total:
+              type: integer
+            totalPages:
+              type: integer
+            sort:
+              type: object
+              properties:
+                sortBy: { type: string }
+                sortDir: { type: string }
+        links:
+          $ref: '#/components/schemas/Links'
+        meta:
+          $ref: '#/components/schemas/Meta'

@@ -1,0 +1,150 @@
+tags:
+  - name: Tourist Point ADMIN
+    description: Endpoints relacionados aos pontos turísiticos
+
+paths:
+  /api/admin/tourist-points:
+    get:
+      summary: Lista de pontos turísiticos do Celeiro do MS
+      tags:
+        - Tourist Point ADMIN
+      security:
+        - bearerAuth: []
+      responses:
+        200:
+          description: A listagem de pontos turísiticos foi obtida com sucesso!
+          content:
+            application/json:
+              schema:
+                $ref: "#components/schemas/AdminTouristPointPagedResponse"
+
+    post:
+      summary: Cadastra um ponto turístico do Celeiro do MS
+      tags:
+        - Tourist Point ADMIN
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#components/schemas/AdminInstitutionalContent"
+      responses:
+        201:
+          description: O link de ponto turístico foi criado com sucesso!
+          content:
+            application/json:
+              schema:
+                $ref: "#components/schemas/AdminTouristPoint"
+  /api/admin/tourist-points/{id}:
+    get:
+      summary: Busca um link de ponto turístico pelo ID
+      tags:
+        - Tourist Point ADMIN
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+          description: ID do link de ponto turístico que deseja buscar
+      responses:
+        200:
+          description: O link de ponto turístico foi obtido com sucesso!
+          content:
+            application/json:
+              schema:
+                $ref: "#components/schemas/AdminSocialLink"
+    patch:
+      summary: Atualiza os dados de um link de ponto turístico do Celeiro do MS
+      tags:
+        - Tourist Point ADMIN
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+          description: ID do link de ponto turístico que deseja atualizar
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#components/schemas/AdminTouristPoint"
+    delete:
+      summary: Exclui um link de ponto turístico pelo ID
+      tags:
+        - Tourist Point ADMIN
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+          description: ID do link de ponto turístico que deseja excluir
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      deleted: { type: boolean, example: true }
+
+components:
+  schemas:
+    AdminTouristPoint:
+      type: object
+      properties:
+        id: { type: number, example: 0 }
+        cityId: { type: number, example: 0 }
+        citySlug: { type: string, example: "" }
+        name: { type: string, example: "" }
+        description: { type: string, example: "" }
+        category: { type: string, example: "" }
+        address: { type: string, example: "" }
+        openingHours: { type: date, example: "2026-04-26" }
+        imageUrl: { type: string, example: "" }
+        featured: { type: boolean, example: true }
+        published: { type: boolean, example: true }
+        createdAt: { type: date, example: "2026-04-26" }
+        updatedAt: { type: date, example: "2026-04-26" }
+    AdminTouristPointPagedResponse:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            items:
+              type: array
+              items:
+                $ref: "#components/schemas/AdminTouristPoint"
+            page:
+              type: integer
+            limit:
+              type: integer
+            total:
+              type: integer
+            totalPages:
+              type: integer
+            sort:
+              type: object
+              properties:
+                sortBy: { type: string }
+                sortDir: { type: string }
+        links:
+          $ref: "#/components/schemas/Links"
+        meta:
+          $ref: "#/components/schemas/Meta"

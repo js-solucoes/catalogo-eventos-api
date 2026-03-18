@@ -1,0 +1,82 @@
+tags:
+  - name: Institutional Content ADMIN
+    description: Endpoints relacionados ao conteudo institucional
+
+paths:
+  /api/admin/institutional-content:
+    get:
+      summary: Lista de conteudo institucional do Celeiro do MS
+      tags: 
+        - Institutional Content ADMIN
+      responses:
+        200:
+          description: A listagem de destaques da página home foi obtida com sucesso!
+          content:
+            application/json:
+              schema:
+                $ref: "#components/schemas/AdminInstitutionalContentPagedResponse"
+
+  /api/admin/institutional-content/{id}:
+    get:
+      summary: Busca um conteudo institucional pelo ID
+      tags: 
+        - Institutional Content ADMIN
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+          description: ID do conteudo institucional que deseja buscar
+      responses:
+        200:
+          description: O conteudo institucional foi obtido com sucesso!
+          content:
+            application/json:
+              schema:
+                $ref: "#components/schemas/AdminInstitutionalContent"
+
+components:
+  schemas:
+    AdminInstitutionalContent:
+      type: object
+      properties:
+        id: { type: number ,example: 0 }
+        aboutTitle: { type: string, example: "" }
+        aboutText: { type: string, example: "" }
+        whoWeAreTitle: { type: string, example: "" }
+        whoWeAreText: { type: string, example: "" }
+        purposeTitle: { type: string, example: "" }
+        purposeText: { type: string, example: "" }
+        mission: { type: string, example: "" }
+        vision: { type: string, example: "" }
+        valuesJson: { type:  ,example: "" }
+        createdAt: { type: date, example: "2026-04-26" }
+        updatedAt: { type: date, example: "2026-04-26" }
+    AdminInstitutionalContentPagedResponse:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            items:
+              type: array
+              items:
+                $ref: "#components/schemas/AdminInstitutionalContent"
+            page:
+              type: integer
+            limit:
+              type: integer
+            total:
+              type: integer
+            totalPages:
+              type: integer
+            sort:
+              type: object
+              properties:
+                sortBy: { type: string }
+                sortDir: { type: string }
+        links:
+          $ref: '#/components/schemas/Links'
+        meta:
+          $ref: '#/components/schemas/Meta'

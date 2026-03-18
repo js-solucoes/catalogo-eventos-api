@@ -1,0 +1,152 @@
+tags:
+  - name: Events ADMIN
+    description: Endpoints relacionados aos eventos da região
+
+paths:
+  /api/admin/events:
+    get:
+      summary: Lista de eventos do Celeiro do MS
+      tags: 
+        - Events ADMIN
+      security:
+        - bearerAuth: []
+      responses:
+        200:
+          description: A listagem de eventos foi obtida com sucesso!
+          content:
+            application/json:
+              schema:
+                $ref: "#components/schemas/AdminEventPagedResponse"
+
+    post:
+      summary: Cadastra um evento da região do Celeiro do MS
+      tags: 
+        - Events ADMIN
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#components/schemas/AdminEvent"
+      responses:
+        201:
+          description: O Evento foi criada com sucesso!
+          content:
+            application/json:
+              schema:
+                $ref: "#components/schemas/AdminEvent"
+  /api/admin/events/{id}:
+    get:
+      summary: Busca um evento pelo ID
+      tags: 
+        - Events ADMIN
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+          description: ID do evento que deseja buscar
+      responses:
+        200:
+          description: O evento foi obtido com sucesso!
+          content:
+            application/json:
+              schema:
+                $ref: "#components/schemas/AdminEvent"
+    patch:
+      summary: Atualiza os dados de um evento do Celeiro do MS
+      tags:
+        - Events ADMIN
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+          description: ID do evento que deseja atualizar
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#components/schemas/AdminEvent"
+    delete:
+      summary: Exclui um evento pelo ID
+      tags: 
+        - Events ADMIN
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+          description: ID do evento que deseja excluir
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      deleted: { type: boolean, example: true }
+   
+components:
+  schemas:
+    AdminEvent:
+      type: object
+      properties:
+        id: { type: integer }
+        cityId: { type: integer }
+        citySlug: { type: string }
+        name: { type: string }
+        description: { type: string }
+        category: { type: string }
+        startDate: { type: string }
+        endDate: { type: string }
+        formattedDate: { type: string }
+        location: { type: string }
+        imageUrl: { type: string }
+        featured: { type: boolean }
+        published: { type: boolean }
+        createdAt: { type: date, example: "2026-04-26" }
+        updatedAt: { type: date, example: "2026-04-26" }
+    AdminEventPagedResponse:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            items:
+              type: array
+              items:
+                $ref: "#components/schemas/AdminEvent"
+            page:
+              type: integer
+            limit:
+              type: integer
+            total:
+              type: integer
+            totalPages:
+              type: integer
+            sort:
+              type: object
+              properties:
+                sortBy: { type: string }
+                sortDir: { type: string }
+        links:
+          $ref: '#/components/schemas/Links'
+        meta:
+          $ref: '#/components/schemas/Meta'

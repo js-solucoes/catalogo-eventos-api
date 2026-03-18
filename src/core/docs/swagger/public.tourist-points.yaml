@@ -1,0 +1,107 @@
+tags:
+  - name: Tourist Point PUBLIC
+    description: Endpoints relacionados aos pontos turísiticos
+
+paths:
+  /api/public/tourist-points:
+    get:
+      summary: Lista de pontos turísiticos do Celeiro do MS
+      tags:
+        - Tourist Point PUBLIC
+      parameters:
+        - in: query
+          name: page
+          schema: { type: integer, minimum: 1, default: 1 }
+        - in: query
+          name: limit
+          schema: { type: integer, minimum: 1, maximum: 100, default: 10 }
+        - in: query
+          name: titulo
+          schema: { type: string }
+        - in: query
+          name: category
+          schema:
+            type: string
+            enum: [show, esporte, feira, teatro, gastronomia]
+        - in: query
+          name: cityId
+          schema: { type: integer }
+        - in: query
+          name: sortBy
+          schema: { type: string, example: createdAt }
+        - in: query
+          name: sortDir
+          schema: { type: string, enum: [asc, desc], default: desc }
+      responses:
+        200:
+          description: A listagem de pontos turísiticos foi obtida com sucesso!
+          content:
+            application/json:
+              schema:
+                $ref: "#components/schemas/AdminTouristPointPagedResponse"
+
+  /api/public/tourist-points/{id}:
+    get:
+      summary: Busca um link de ponto turístico pelo ID
+      tags:
+        - Tourist Point PUBLIC
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+          description: ID do link de ponto turístico que deseja buscar
+      responses:
+        200:
+          description: O link de ponto turístico foi obtido com sucesso!
+          content:
+            application/json:
+              schema:
+                $ref: "#components/schemas/AdminSocialLink"
+
+components:
+  schemas:
+    AdminTouristPoint:
+      type: object
+      properties:
+        id: { type: number, example: 0 }
+        cityId: { type: number, example: 0 }
+        citySlug: { type: string, example: "" }
+        name: { type: string, example: "" }
+        description: { type: string, example: "" }
+        category: { type: string, example: "" }
+        address: { type: string, example: "" }
+        openingHours: { type: date, example: "2026-04-26" }
+        imageUrl: { type: string, example: "" }
+        featured: { type: boolean, example: true }
+        published: { type: boolean, example: true }
+        createdAt: { type: date, example: "2026-04-26" }
+        updatedAt: { type: date, example: "2026-04-26" }
+    AdminTouristPointPagedResponse:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            items:
+              type: array
+              items:
+                $ref: "#components/schemas/AdminTouristPoint"
+            page:
+              type: integer
+            limit:
+              type: integer
+            total:
+              type: integer
+            totalPages:
+              type: integer
+            sort:
+              type: object
+              properties:
+                sortBy: { type: string }
+                sortDir: { type: string }
+        links:
+          $ref: "#/components/schemas/Links"
+        meta:
+          $ref: "#/components/schemas/Meta"

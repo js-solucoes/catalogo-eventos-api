@@ -21,7 +21,7 @@ components:
           type: string
         method:
           type: string
-      required: [href]
+      required: [href, method]
 
     Links:
       type: object
