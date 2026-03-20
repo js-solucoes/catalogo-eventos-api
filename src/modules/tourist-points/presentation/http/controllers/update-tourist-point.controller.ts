@@ -1,6 +1,6 @@
 import { logger } from "@/core/config/logger";
 import { mapErrorToHttpResponse } from "@/core/http/http-error-response";
-import { ok, resource } from "@/core/http/http-resource";
+import { ok, resource, ResourceBuilder } from "@/core/http/http-resource";
 import { Controller, HttpRequest, HttpResponse } from "@/core/protocols";
 import { UpdateTouristPointUseCase } from "../../../application/use-cases/update-tourist-point.usecase";
 import { touristPointLinks } from "../tourist-point-hateoas";
@@ -30,15 +30,25 @@ export class UpdateTouristPointController implements Controller {
       }
 
       const data = {
-        nome: updated.nome,
-        tipo: updated.tipo,
-        horario: updated.horario,
-        img: updated.img,
-        desc: updated.desc,
+        id: updated.id,
         cityId: updated.cityId,
+        citySlug: updated.citySlug,
+        name: updated.name,
+        description: updated.description,
+        category: updated.category,
+        address: updated.address,
+        openingHours: updated.openingHours,
+        imageUrl: updated.imageUrl,
+        featured: updated.featured, // ✅ obrigatório pela model
+        published: updated.published,
       };
+      const builder = new ResourceBuilder(data);
+      const resource = builder
+        .addAllLinks(touristPointLinks(updated.id))
+        .addMeta({ correlationId, version: "1.0.0" })
+        .build();
 
-      return ok(resource(data, touristPointLinks(updated.id)));
+      return ok(resource);
     } catch (error) {
       logger.error("Erro ao atualizar ponto turístico", {
         correlationId,

@@ -1,7 +1,7 @@
 export const TOURIST_POINT_SORT_FIELDS = [
-  "nome",
+  "name",
   "city",
-  "estado",
+  "state",
   "createdAt",
 ] as const;
 

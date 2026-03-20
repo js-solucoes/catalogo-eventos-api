@@ -44,57 +44,71 @@ export class SequelizeTouristPointRepository
   ): Promise<TouristPointEntity> {
     const created = await TouristPointModel.create(
       {
-        nome: data.nome,
-        tipo: data.tipo ?? null,
-        horario: data.horario ?? null,
-        img: data.img,
-        desc: data.desc ?? null,
-        cityId: data.cityId, // ✅ obrigatório pela model
+        cityId: data.cityId,
+        citySlug: data.citySlug,
+        name: data.name,
+        description: data.description ?? null,
+        category: data.category ?? null,
+        address: data.address ?? null,
+        openingHours: data.openingHours ?? null,
+        imageUrl: data.imageUrl,
+        featured: data.featured, // ✅ obrigatório pela model
+        published: data.published,
       },
       { transaction: t },
     );
 
     return new TouristPointEntity({
       id: created.id,
-      nome: created.nome,
-      tipo: created.tipo,
-      horario: created.horario,
-      img: created.img,
-      desc: created.desc,
-      cityId: created.cityId, // ✅
+      cityId: created.cityId,
+      citySlug: created.citySlug,
+      name: created.name,
+      description: created.description,
+      category: created.category,
+      address: created.address,
+      openingHours: created.openingHours,
+      imageUrl: created.imageUrl,
+      featured: created.featured,
+      published: created.published,
     });
   }
 
   async findById(id: number): Promise<TouristPointEntity | null> {
-    const ponto = await TouristPointModel.findByPk(id);
-    if (!ponto) return null;
+    const point = await TouristPointModel.findByPk(id);
+    if (!point) return null;
 
     return new TouristPointEntity({
-      id: ponto.id,
-      nome: ponto.nome,
-      tipo: ponto.tipo,
-      horario: ponto.horario,
-      img: ponto.img,
-      desc: ponto.desc,
-      cityId: ponto.cityId, // ✅
+      id: point.id,
+      cityId: point.cityId,
+      citySlug: point.citySlug,
+      name: point.name,
+      description: point.description,
+      category: point.category,
+      address: point.address,
+      openingHours: point.openingHours,
+      imageUrl: point.imageUrl,
+      featured: point.featured, // ✅ obrigatório pela model
+      published: point.published,
     });
   }
 
-  async findByCityId(
-    cityId: number,
-  ): Promise<TouristPointEntity[] | null> {
-    const pontos = await TouristPointModel.findAll({ where: { cityId } });
+  async findByCityId(cityId: number): Promise<TouristPointEntity[] | null> {
+    const points = await TouristPointModel.findAll({ where: { cityId } });
 
-    return pontos.map(
+    return points.map(
       (p) =>
         new TouristPointEntity({
           id: p.id,
-          nome: p.nome,
-          tipo: p.tipo,
-          horario: p.horario,
-          img: p.img,
-          desc: p.desc,
-          cityId: p.cityId, // ✅
+          cityId: p.cityId,
+          citySlug: p.citySlug,
+          name: p.name,
+          description: p.description,
+          category: p.category,
+          address: p.address,
+          openingHours: p.openingHours,
+          imageUrl: p.imageUrl,
+          featured: p.featured, // ✅ obrigatório pela model
+          published: p.published,
         }),
     );
   }
@@ -106,12 +120,16 @@ export class SequelizeTouristPointRepository
   ): Promise<TouristPointEntity | null> {
     const [affected] = await TouristPointModel.update(
       {
-        nome: data.nome,
-        tipo: data.tipo,
-        horario: data.horario,
-        img: data.img,
-        desc: data.desc,
         cityId: data.cityId,
+        citySlug: data.citySlug,
+        name: data.name,
+        description: data.description,
+        category: data.category,
+        address: data.address,
+        openingHours: data.openingHours,
+        imageUrl: data.imageUrl,
+        featured: data.featured, // ✅ obrigatório pela model
+        published: data.published,
       },
       { where: { id }, transaction: t },
     );

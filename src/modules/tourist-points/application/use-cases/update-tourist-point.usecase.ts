@@ -19,12 +19,16 @@ export class UpdateTouristPointUseCase {
     }
     return {
       id: touristPoint.id,
-      nome: touristPoint.nome,
-      tipo: touristPoint.tipo,
-      horario: touristPoint.horario,
-      img: touristPoint.img,
-      desc: touristPoint.desc,
       cityId: touristPoint.cityId,
+      citySlug: touristPoint.citySlug,
+      name: touristPoint.name,
+      description: touristPoint.description,
+      category: touristPoint.category,
+      address: touristPoint.address,
+      openingHours: touristPoint.openingHours,
+      imageUrl: touristPoint.imageUrl,
+      featured: touristPoint.featured,
+      published: touristPoint.published,
     };
   }
 }

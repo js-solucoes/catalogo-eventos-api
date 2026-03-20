@@ -13,32 +13,32 @@ type Params = {
 export class TouristPointSpecificationBuilder {
   private specs: QuerySpecification[] = [];
 
-  withNome(nome?: string) {
-    if (nome) this.specs.push(like("nome", nome));
+  withName(name?: string) {
+    if (name) this.specs.push(like("name", name));
     return this;
   }
 
-  withCidade(city?: string) {
+  withCity(city?: string) {
     if (city) this.specs.push(eq("city", city));
     return this;
   }
 
-  withEstado(estado?: string) {
-    if (estado) this.specs.push(eq("estado", estado));
+  withState(state?: string) {
+    if (state) this.specs.push(eq("state", state));
     return this;
   }
 
-  withAtivo(ativo?: boolean) {
-    if (ativo !== undefined) this.specs.push(eq("ativo", ativo));
+  withPublished(published?: boolean) {
+    if (published !== undefined) this.specs.push(eq("published", published));
     return this;
   }
 
-  withPrecoRange(min?: number, max?: number) {
-    if (min !== undefined && max !== undefined) {
-      this.specs.push(between("preco", min, max));
-    }
-    return this;
-  }
+  // withPrecoRange(min?: number, max?: number) {
+  //   if (min !== undefined && max !== undefined) {
+  //     this.specs.push(between("preco", min, max));
+  //   }
+  //   return this;
+  // }
 
   build(): QuerySpecification | null {
     if (this.specs.length === 0) return null;

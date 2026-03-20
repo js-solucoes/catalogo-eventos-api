@@ -13,10 +13,10 @@ type Input = {
   limit?: number;
 
   // filtros
-  nome?: string;
+  name?: string;
   city?: string;
-  estado?: string;
-  ativo?: boolean;
+  state?: string;
+  published?: boolean;
 
   // ordenação
   sortBy?: TouristPointSortField;
@@ -34,14 +34,14 @@ export class ListTouristPointsUseCase {
     const { sortBy, sortDir } = normalizeSort<TouristPointSortField>(
       { sortBy: params.sortBy, sortDir: params.sortDir },
       TOURIST_POINT_SORT_FIELDS,
-      { sortBy: "nome", sortDir: "ASC" },
+      { sortBy: "name", sortDir: "ASC" },
     );
 
     const spec = new TouristPointSpecificationBuilder()
-      .withNome(params.nome)
-      .withCidade(params.city)
-      .withEstado(params.estado)
-      .withAtivo(params.ativo)
+      .withName(params.name)
+      .withCity(params.city)
+      .withState(params.state)
+      .withPublished(params.published)
       .build();
 
     const order: [string, "ASC" | "DESC"][] = [[sortBy, sortDir]];

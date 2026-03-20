@@ -4,12 +4,16 @@ import { DataTypes, Model } from "sequelize";
 
 export class TouristPointModel extends Model {
   id!: number;
-  nome!: string;
-  tipo!: string;
-  horario!: string;
-  img!: string;
-  desc!: string;
   cityId!: number;
+  citySlug!: string;
+  name!: string;
+  description!: string;
+  category!: string;
+  address!: string;
+  openingHours!: string;
+  imageUrl!: string;
+  featured!: boolean;
+  published!: boolean;
   city!: CityModel;
 }
 
@@ -20,26 +24,6 @@ TouristPointModel.init(
       autoIncrement: true,
       primaryKey: true,
     },
-    nome: {
-      type: DataTypes.STRING,
-      allowNull: false,
-    },
-    tipo: {
-      type: DataTypes.STRING,
-      allowNull: true,
-    },
-    horario: {
-      type: DataTypes.STRING,
-      allowNull: true,
-    },
-    img: {
-      type: DataTypes.STRING,
-      allowNull: false,
-    },
-    desc: {
-      type: DataTypes.STRING,
-      allowNull: true,
-    },
     cityId: {
       type: DataTypes.INTEGER,
       allowNull: false,
@@ -48,6 +32,30 @@ TouristPointModel.init(
         key: "id", // Key in the target model that we're referencing
       },
     },
+    citySlug: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    name: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    description: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    category: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    address: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    openingHours: { type: DataTypes.TIME, allowNull: false },
+    imageUrl: { type: DataTypes.STRING, allowNull: false },
+    featured: { type: DataTypes.BOOLEAN, allowNull: false },
+    published: { type: DataTypes.BOOLEAN, allowNull: false }
   },
   {
     sequelize,

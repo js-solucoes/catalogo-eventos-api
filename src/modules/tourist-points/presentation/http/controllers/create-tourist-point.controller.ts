@@ -1,6 +1,6 @@
 import { logger } from "@/core/config/logger";
 import { mapErrorToHttpResponse } from "@/core/http/http-error-response";
-import { created, resource } from "@/core/http/http-resource";
+import { created, resource, ResourceBuilder } from "@/core/http/http-resource";
 import { Controller, HttpRequest, HttpResponse } from "@/core/protocols";
 import { CreateTouristPointUseCase } from "../../../application/use-cases/create-tourist-point.usecase";
 import { touristPointLinks } from "../tourist-point-hateoas";
@@ -32,17 +32,23 @@ export class CreateTouristPointController implements Controller {
 
       const data = {
         id: createdEntity.id,
-        nome: createdEntity.nome,
         cityId: createdEntity.cityId,
-        desc: createdEntity.desc,
-        horario: createdEntity.horario,
+        citySlug: createdEntity.citySlug,
+        name: createdEntity.name,
+        description: createdEntity.description,
+        category: createdEntity.category,
+        address: createdEntity.address,
+        openingHours: createdEntity.openingHours,
+        imageUrl: createdEntity.imageUrl,
+        featured: createdEntity.featured, // ✅ obrigatório pela model
+        published: createdEntity.published,
       };
-
-      return created(
-        resource(data, touristPointLinks(createdEntity.id), {
-          version: "1.0.0",
-        }),
-      );
+      const builder = new ResourceBuilder(data);
+      const resource = builder
+        .addAllLinks(touristPointLinks(createdEntity.id))
+        .addMeta({ correlationId, version: "1.0.0" })
+        .build();
+      return created(resource);
     } catch (error) {
       logger.error("Erro ao criar ponto turístico", {
         correlationId,

@@ -18,25 +18,25 @@ import {
 
 export function registerTouristPointsRoutes(router: Router) {
   router.post(
-    "/tourist-points",
+    "/admin/tourist-points",
     validateBody(createTouristPointSchema),
     adaptRoute(makeCreateTouristPointController()),
   );
   router.get(
-    "/tourist-points",
+    "/admin/tourist-points",
     adaptRoute(makeListTouristPointsController()),
   );
   router.get(
-    "/tourist-points/:id",
+    "/admin/tourist-points/:id",
     adaptRoute(makeGetTouristPointByIdController()),
   );
   router.put(
-    "/tourist-points/:id",
+    "/admin/tourist-points/:id",
     validateBody(updateTouristPointSchema),
     adaptRoute(makeUpdateTouristPointController()),
   );
   router.delete(
-    "/tourist-points/:id",
+    "/admin/tourist-points/:id",
     authMiddleware,
     adaptRoute(makeDeleteTouristPointController()),
   );

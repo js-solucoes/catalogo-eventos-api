@@ -1,10 +1,10 @@
 import { Links } from "@/core/http";
 
-const API_PREFIX = "/api";
+const API_PREFIX = "/api/admin";
 
 import { LinksPagination } from "@/core/http/hateoas/pagination-links";
 
-export function touristPointLinks(id: number): LinksPagination {
+export function touristPointLinks(id: number): Links {
   return {
     self: { href: `${API_PREFIX}/tourist-points/${id}`, method: "GET" },
     update: { href: `${API_PREFIX}/tourist-points/${id}`, method: "PUT" },

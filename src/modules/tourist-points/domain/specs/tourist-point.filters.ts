@@ -4,28 +4,28 @@ import { eq, like } from "@/core/domain/specification/builders";
 export type ListPontosParams = {
   search?: string;
   city?: string;
-  estado?: string;
-  categoria?: string;
+  state?: string;
+  category?: string;
 };
 
 const normalize = (v?: string) => (v?.trim() ? v.trim() : undefined);
 
 export const bySearch = (p: ListPontosParams): Specification | null => {
   const v = normalize(p.search);
-  return v ? like("nome", v) : null;
+  return v ? like("name", v) : null;
 };
 
-export const byCidade = (p: ListPontosParams): Specification | null => {
+export const byCity = (p: ListPontosParams): Specification | null => {
   const v = normalize(p.city);
   return v ? eq("city", v) : null;
 };
 
-export const byEstado = (p: ListPontosParams): Specification | null => {
-  const v = normalize(p.estado);
-  return v ? eq("estado", v) : null;
+export const byState = (p: ListPontosParams): Specification | null => {
+  const v = normalize(p.state);
+  return v ? eq("state", v) : null;
 };
 
 export const byCategoria = (p: ListPontosParams): Specification | null => {
-  const v = normalize(p.categoria);
-  return v ? eq("categoria", v) : null;
+  const v = normalize(p.category);
+  return v ? eq("category", v) : null;
 };

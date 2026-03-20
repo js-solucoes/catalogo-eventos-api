@@ -1,53 +1,80 @@
 export interface TouristPointProps {
   id?: number;
-  nome: string;
-  tipo: string;
-  horario: string;
-  img: string;
-  desc: string;
   cityId: number;
+  citySlug: string;
+  name: string;
+  description: string;
+  category: string;
+  address: string;
+  openingHours: string;
+  imageUrl: string;
+  featured: boolean;
+  published: boolean;
 }
 
 export class TouristPointEntity {
-    private props: TouristPointProps
-    constructor(props: TouristPointProps) {
-        this.props = props
-    }
+  private props: TouristPointProps;
+  constructor(props: TouristPointProps) {
+    this.props = props;
+  }
 
-    get id() {
-        return this.props.id
-    }
+  get id() {
+    return this.props.id;
+  }
 
-    get nome() {
-        return this.props.nome
-    }
+  get cityId() {
+    return this.props.cityId;
+  }
 
-    get tipo() {
-        return this.props.tipo
-    }
+  get citySlug() {
+    return this.props.name;
+  }
 
-    get horario() {
-        return this.props.horario
-    }
+  get name() {
+    return this.props.name;
+  }
 
-    get img() {
-        return this.props.img
-    }
+  get description() {
+    return this.props.description;
+  }
 
-    get desc() {
-        return this.props.desc
-    }
+  get category() {
+    return this.props.category;
+  }
 
-    get cityId() {
-        return this.props.cityId
-    }
+  get address() {
+    return this.props.address;
+  }
 
-    toJSON() {
-        return {
-            id: this.props.id,
-            nome: this.props.nome,
-            tipo: this.props.tipo,
-            
-        }
-    }
+  get openingHours() {
+    return this.props.openingHours;
+  }
+
+  get imageUrl() {
+    return this.props.imageUrl;
+  }
+
+  get featured() {
+    return this.props.featured;
+  }
+
+  get published() {
+    return this.props.published;
+  }
+
+  toJSON() {
+    return {
+      id: this.props.id,
+      cityId: this.props.cityId,
+      citySlug: this.props.citySlug,
+      name: this.props.name,
+      description: this.props.description,
+      category: this.props.category,
+      address: this.props.address,
+      openingHours: this.props.openingHours,
+      imageUrl: this.props.imageUrl,
+      featured: this.props.featured,
+      published: this.props.published,
+    };
+  }
 }
