@@ -15,7 +15,7 @@ export type UpdateUserDto = UpdateUserDTO;
 // Tipo básico de usuário “plain”
 export interface UserViewModel {
   id?: number;
-  nome: string;
+  name: string;
   email: string;
   role: UserRole;
 }

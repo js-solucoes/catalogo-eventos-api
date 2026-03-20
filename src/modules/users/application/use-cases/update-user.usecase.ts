@@ -1,7 +1,7 @@
 import { FindUserByIdRepository } from "../../domain/repositories/find-user-by-id.repository";
 import { UpdateUserRepository } from "../../domain/repositories/update-user.repository";
 import { UserEntity, UserProps } from "../../domain/entities/user.entity";
-import { UpdateUserDTO } from "../dto"; // ajuste o nome se necessário
+import { UpdateUserDTO } from "../dto"; // ajuste o name se necessário
 import { Encrypter } from "@/core/interfaces";
 import { logger } from "@/core/config/logger";
 
@@ -20,13 +20,13 @@ export class UpdateUserUseCase {
     }
 
     const dataToUpdate: Partial<UserProps> = {
-      nome: input.nome ?? existing.nome,
+      name: input.name ?? existing.name,
       email: input.email ?? existing.email,
       role: input.role ?? existing.role,
     };
 
-    if (input.senha) {
-      dataToUpdate.senha = await this.encrypter.hash(input.senha);
+    if (input.password) {
+      dataToUpdate.password = await this.encrypter.hash(input.password);
     }
 
     const updated = await this.updateUserRepo.update(id, dataToUpdate);

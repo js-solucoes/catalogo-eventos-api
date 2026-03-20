@@ -5,8 +5,8 @@ import { UserRole } from "../../domain/value-objects/user-role";
 export class User extends Model {
   id!: number;
   email!: string;
-  senha!: string;
-  nome!: string;
+  password!: string;
+  name!: string;
   role!: UserRole;
 }
 
@@ -22,11 +22,11 @@ User.init(
       allowNull: false,
       unique: true,
     },
-    senha: {
+    password: {
       type: DataTypes.STRING,
       allowNull: false,
     },
-    nome: {
+    name: {
       type: DataTypes.STRING,
       allowNull: false,
     },

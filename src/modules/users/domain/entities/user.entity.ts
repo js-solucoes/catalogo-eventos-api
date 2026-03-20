@@ -2,9 +2,9 @@ import { UserRole, UserRoleEnumLiteral } from "../value-objects/user-role";
 
 export interface UserProps {
   id?: number;
-  nome: string;
+  name: string;
   email: string;
-  senha: string;
+  password: string;
   role: UserRole;
 }
 
@@ -19,16 +19,16 @@ export class UserEntity {
     return this.props.id;
   }
 
-  get nome() {
-    return this.props.nome;
+  get name() {
+    return this.props.name;
   }
 
   get email() {
     return this.props.email;
   }
 
-  get senha() {
-    return this.props.senha;
+  get password() {
+    return this.props.password;
   }
 
   get role() {
@@ -38,7 +38,7 @@ export class UserEntity {
   toJSON() {
     return {
       id: this.id,
-      nome: this.nome,
+      name: this.name,
       email: this.email,
       role: this.role,
     };

@@ -21,12 +21,12 @@ export class SequelizeUserRepository
     DeleteUserRepository,
     FindClienteByTelefoneRepository
 {
-  findByTelefone(telefone: string): Promise<{ userId: number; nome?: string; endereco?: string; telefone?: string; } | null> {
+  findByTelefone(telefone: string): Promise<{ userId: number; name?: string; endereco?: string; telefone?: string; } | null> {
     return UserModel.findOne({ where: { telefone } }).then(user => {
       if (!user) return null;
       return {
         userId: user.id,
-        nome: user.nome,
+        name: user.name,
         endereco: "Endereço não informado",
         telefone: "Telefone não informado",
       };
@@ -34,18 +34,18 @@ export class SequelizeUserRepository
   }
   async create(user: UserEntity, t?: Transaction): Promise<UserEntity> {
     const created = await UserModel.create({
-      nome: user.nome,
+      name: user.name,
       email: user.email,
-      senha: user.senha,
+      password: user.password,
       role: user.role,
     }, { transaction: t });
 
     await UserModel.sync();
     return new UserEntity({
       id: created.id,
-      nome: created.nome,
+      name: created.name,
       email: created.email,
-      senha: created.senha,
+      password: created.password,
       role: created.role,
     });
   }
@@ -56,9 +56,9 @@ export class SequelizeUserRepository
 
     return new UserEntity({
       id: user.id,
-      nome: user.nome,
+      name: user.name,
       email: user.email,
-      senha: user.senha,
+      password: user.password,
       role: user.role,
     });
   }
@@ -69,9 +69,9 @@ export class SequelizeUserRepository
 
     return new UserEntity({
       id: user.id,
-      nome: user.nome,
+      name: user.name,
       email: user.email,
-      senha: user.senha,
+      password: user.password,
       role: user.role,
     });
   }
@@ -83,9 +83,9 @@ export class SequelizeUserRepository
       (u) =>
         new UserEntity({
           id: u.id,
-          nome: u.nome,
+          name: u.name,
           email: u.email,
-          senha: u.senha,
+          password: u.password,
           role: u.role,
         })
     );
@@ -99,17 +99,17 @@ export class SequelizeUserRepository
     if (!user) return null;
 
     await user.update({
-      nome: (data as any)?.nome ?? user.nome,
+      name: (data as any)?.name ?? user.name,
       email: (data as any)?.email ?? user.email,
-      senha: (data as any)?.senha ?? user.senha,
+      password: (data as any)?.password ?? user.password,
       role: (data as any)?.role ?? user.role,
     });
 
     return new UserEntity({
       id: user.id,
-      nome: user.nome,
+      name: user.name,
       email: user.email,
-      senha: user.senha,
+      password: user.password,
       role: user.role,
     });
   }

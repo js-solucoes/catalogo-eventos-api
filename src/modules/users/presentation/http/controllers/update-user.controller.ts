@@ -1,31 +1,36 @@
 import { logger } from "@/core/config/logger";
-import { resourceOf } from "@/core/helpers/hateoas";
-import { ok, serverError } from "@/core/helpers/http-helper";
+import {
+  badRequestResource,
+  notFound,
+  serverError,
+} from "@/core/helpers/http-helper";
 import { Controller, HttpRequest, HttpResponse } from "@/core/protocols";
-import { UpdateUserDTO } from "@/modules/users/application/dto";
+import { UpdateUserDTO, UserViewModel } from "@/modules/users/application/dto";
 import { UpdateUserUseCase } from "../../../application/use-cases/update-user.usecase";
+import { ok, ResourceBuilder } from "@/core/http";
+import { userLinks } from "../user-hateoas";
 
 export class UpdateUserController implements Controller {
   constructor(private readonly useCase: UpdateUserUseCase) {}
 
   async handle(httpRequest: HttpRequest): Promise<HttpResponse> {
+    const correlationId = httpRequest.correlationId;
     try {
       const id = Number(httpRequest.params.id);
 
       if (Number.isNaN(id)) {
-        const resource = resourceOf({
+        const data = {
           error: {
             code: "INVALID_ID",
             message: "ID inválido",
           },
-        })
-          .addLink("list", "GET", "/usuarios")
-          .build();
-
-        return {
-          statusCode: 400,
-          body: resource,
         };
+        const builder = new ResourceBuilder(data);
+        const resource = builder
+          .addOneLink("list", "GET", "/users")
+          .addMeta({ correlationId, version: "1.0.0" })
+          .build();
+        return badRequestResource(resource);
       }
 
       const body = httpRequest.body as UpdateUserDTO;
@@ -33,35 +38,26 @@ export class UpdateUserController implements Controller {
       const updated = await this.useCase.execute(id, body);
 
       if (!updated) {
-        const resource = resourceOf({
+        const data = {
           error: {
             code: "USER_NOT_FOUND",
             message: "Usuário não encontrado",
           },
-        })
-          .addLink("list", "GET", "/usuarios")
-          .addLink("create", "POST", "/usuarios")
-          .build();
-
-        return {
-          statusCode: 404,
-          body: resource,
         };
+        const builder = new ResourceBuilder(data);
+        const resource = builder
+          .addOneLink("list", "GET", "/users")
+          .addOneLink("create", "POST", "/users")
+          .addMeta({ correlationId, version: "1.0.0" })
+          .build();
+        return notFound(resource);
       }
 
-      const resource = resourceOf({
-        id: updated.id,
-        nome: updated.nome,
-        email: updated.email,
-        role: updated.role,
-      })
-        .addLink("self", "GET", `/usuarios/${updated.id}`)
-        .addLink("delete", "DELETE", `/usuarios/${updated.id}`)
+      const builder = new ResourceBuilder<UserViewModel>(updated);
+      const resource = builder
+        .addAllLinks(userLinks(updated.id))
+        .addMeta({ correlationId, version: "1.0.0" })
         .build();
-
-      logger.info("UpdateUserController: usuário atualizado", {
-        userId: updated.id,
-      });
 
       return ok(resource);
     } catch (error) {

@@ -3,7 +3,7 @@ import { pt } from "zod/locales";
 z.config(pt());
 
 export const createUserSchema = z.object({
-  nome: z
+  name: z
     .string({
       error: (issue) =>
         issue.input === undefined
@@ -19,7 +19,7 @@ export const createUserSchema = z.object({
         : "Email deve ser uma string",
   }),
 
-  senha: z
+  password: z
     .string({
       error: (issue) =>
         issue.input === undefined
@@ -30,11 +30,7 @@ export const createUserSchema = z.object({
 
   role: z.enum(["Admin"], {
     error: (issue) => {
-      if (
-        !["Admin"].some(
-          (element) => element === issue.input
-        )
-      ) {
+      if (!["Admin"].some((element) => element === issue.input)) {
         return `A Role ${issue.input} é inválida`;
       }
     },
@@ -42,7 +38,7 @@ export const createUserSchema = z.object({
 });
 
 export const updateUserSchema = z.object({
-  nome: z
+  name: z
     .string({
       error: (issue) => {
         if (typeof issue.input !== "string") {
@@ -62,7 +58,7 @@ export const updateUserSchema = z.object({
     })
     .optional(),
 
-  senha: z
+  password: z
     .string({
       error: (issue) => {
         if (typeof issue.input !== "string") {
@@ -76,11 +72,7 @@ export const updateUserSchema = z.object({
   role: z
     .enum(["Admin"], {
       error: (issue) => {
-        if (
-          !["Admin"].some(
-            (element) => element === issue.input
-          )
-        ) {
+        if (!["Admin"].some((element) => element === issue.input)) {
           return `A Role ${issue.input} é inválida`;
         }
       },

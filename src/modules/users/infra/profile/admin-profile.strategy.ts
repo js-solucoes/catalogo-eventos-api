@@ -16,7 +16,7 @@ export class AdminProfileStrategy implements ProfileCreationStrategy {
   }: ProfileCreationContext): Promise<void> {
     await Admin.create({
       userId: user.id,
-      nome: user.nome,
+      name: user.name,
     }, { transaction });
   }
 }

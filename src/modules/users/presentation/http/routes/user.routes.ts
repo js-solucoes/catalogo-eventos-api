@@ -50,7 +50,7 @@ export function registerUserRoutes(router: Router): void {
 
   // 🔐 Proteção: crie usuário só com Admin (ajuste como você quiser)
   router.post(
-    "/usuarios",
+    "/admin/users",
     authMiddleware,
     authorizeRoles(["Admin"]),
     validateBody(createUserSchema),
@@ -58,21 +58,21 @@ export function registerUserRoutes(router: Router): void {
   );
 
   router.get(
-    "/usuarios",
+    "/admin/users",
     authMiddleware,
     authorizeRoles(["Admin"]),
     adaptRoute(listUsersController),
   );
 
   router.get(
-    "/usuarios/:id",
+    "/admin/users/:id",
     authMiddleware,
     authorizeRoles(["Admin"]),
     adaptRoute(getUserByIdController),
   );
 
-  router.put(
-    "/usuarios/:id",
+  router.patch(
+    "/admin/users/:id",
     authMiddleware,
     authorizeRoles(["Admin"]),
     validateBody(updateUserSchema),
@@ -80,7 +80,7 @@ export function registerUserRoutes(router: Router): void {
   );
 
   router.delete(
-    "/usuarios/:id",
+    "/admin/users/:id",
     authMiddleware,
     authorizeRoles(["Admin"]),
     adaptRoute(deleteUserController),
