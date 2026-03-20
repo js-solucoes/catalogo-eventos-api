@@ -61,9 +61,10 @@ components:
         email:
           type: string
           format: email
-        senha:
+        password:
           type: string
-      required: [email, senha]
+          format: password
+      required: [email, password]
 
     LoginResponse:
       type: object
@@ -76,7 +77,7 @@ components:
             refreshToken:
               type: string
             user:
-              $ref: '#/components/schemas/User'
+              $ref: '#/components/schemas/UserLogin'
         links:
           $ref: '#/components/schemas/Links'
         meta:
@@ -105,12 +106,12 @@ components:
           $ref: '#/components/schemas/Meta'
       required: [data]
 
-    User:
+    UserLogin:
       type: object
       properties:
         id:
           type: integer
-        nome:
+        name:
           type: string
         email:
           type: string
@@ -118,4 +119,4 @@ components:
         role:
           type: string
           enum: [Admin]
-      required: [id, nome, email, role]
+      required: [id, name, email, role]

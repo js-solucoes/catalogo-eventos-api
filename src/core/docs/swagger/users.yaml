@@ -15,7 +15,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/CreateUserRequest'
+              $ref: '#/components/schemas/UserAdmin'
       responses:
         '201':
           description: Usuário criado
@@ -128,31 +128,17 @@ paths:
 
 components:
   schemas:
-    CreateUserRequest:
-      type: object
-      properties:
-        nome:
-          type: string
-        email:
-          type: string
-          format: email
-        senha:
-          type: string
-        role:
-          type: string
-          enum: [Admin]
-      required: [nome, email, senha, role]
-
     UpdateUserRequest:
       type: object
       properties:
-        nome:
+        name:
           type: string
         email:
           type: string
           format: email
-        senha:
+        password:
           type: string
+          format: password
         role:
           type: string
           enum: [Admin]
@@ -161,7 +147,7 @@ components:
       type: object
       properties:
         data:
-          $ref: '#/components/schemas/User'
+          $ref: '#/components/schemas/UserAdminResponse'
         links:
           $ref: '#/components/schemas/Links'
         meta:
@@ -174,9 +160,40 @@ components:
         data:
           type: array
           items:
-            $ref: '#/components/schemas/User'
+            $ref: '#/components/schemas/UserAdminResponse'
         links:
           $ref: '#/components/schemas/Links'
         meta:
           $ref: '#/components/schemas/Meta'
       required: [data]
+    UserAdmin:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        email:
+          type: string
+          format: email
+        role:
+          type: string
+          enum: [Admin]
+        password:
+          type: string
+          format: password
+      required: [id, name, password, email, role]
+    UserAdminResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        email:
+          type: string
+          format: email
+        role:
+          type: string
+          enum: [Admin]
+      required: [id, name, email, role]

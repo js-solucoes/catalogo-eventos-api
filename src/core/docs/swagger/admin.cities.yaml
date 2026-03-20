@@ -3,7 +3,7 @@ tags:
     description: Endpoints relacionados as cidades da região do Celeiro do MS
 
 paths:
-  /api/admin/cities:
+  /admin/cities:
     get:
       summary: Lista as cidades da região do Celeiro do MS
       tags: 
@@ -37,7 +37,7 @@ paths:
             application/json:
               schema:
                 $ref: "#components/schemas/AdminCity"
-  /api/admin/cities/{id}:
+  /admin/cities/{id}:
     get:
       summary: Busca uma cidade pelo ID
       tags: 

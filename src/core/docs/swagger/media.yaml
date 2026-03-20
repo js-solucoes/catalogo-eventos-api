@@ -3,7 +3,7 @@ tags:
     description: Upload de mídia (base64)
 
 paths:
-  /api/media:
+  /media:
     post:
       tags: [Media]
       summary: Upload de uma mídia (base64)
