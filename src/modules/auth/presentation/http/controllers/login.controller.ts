@@ -3,7 +3,7 @@ import { LoginUseCase } from "@/modules/auth/application/use-cases/login.usecase
 import { loginLinks } from "../auth-hateoas";
 import { resource } from "@/core/http/http-resource";
 import { mapErrorToHttpResponse } from "@/core/http/http-error-response";
-import { logger } from "@/core/logger";
+import { logger } from "@/core/config/logger";
 
 export class LoginController implements Controller {
   constructor(private readonly useCase: LoginUseCase) {}
@@ -20,7 +20,7 @@ export class LoginController implements Controller {
     try {
       const result = await this.useCase.execute({
         email: httpRequest.body.email,
-        senha: httpRequest.body.senha,
+        password: httpRequest.body.password,
       });
 
       const body = resource(

@@ -2,7 +2,7 @@ import * as z from "zod";
 
 export const loginSchema = z.object({
   email: z.email({ error: "O email está no formato incorreto" }),
-  senha: z
+  password: z
     .string()
     .min(6, { error: "A senha deve ter no minimo 6 caracteres" })
     .max(8, { error: "A senha deve ter no máximo 8 caracteres" }),

@@ -1,9 +1,9 @@
+import { logger } from "@/core/config/logger";
+import { mapErrorToHttpResponse } from "@/core/http/http-error-response";
+import { resource } from "@/core/http/http-resource";
 import { Controller, HttpRequest, HttpResponse } from "@/core/protocols";
 import { RefreshTokenUseCase } from "@/modules/auth/application/use-cases/refresh-token.usecase";
 import { refreshTokenLinks } from "../auth-hateoas";
-import { resource } from "@/core/http/http-resource";
-import { mapErrorToHttpResponse } from "@/core/http/http-error-response";
-import { logger } from "@/core/logger/logger";
 
 export class RefreshTokenController implements Controller {
   constructor(private readonly useCase: RefreshTokenUseCase) {}
@@ -24,7 +24,7 @@ export class RefreshTokenController implements Controller {
       const body = resource(
         { accessToken: result.accessToken },
         refreshTokenLinks(),
-        { correlationId }
+        { correlationId },
       );
 
       logger.info("Refresh token bem-sucedido", {

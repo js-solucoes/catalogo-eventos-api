@@ -1,6 +1,6 @@
 import { Links } from "@/core/http/http-resource";
 
-const API_PREFIX = "/api";
+const API_PREFIX = "/api/auth";
 
 export const loginLinks = (): Links => ({
   self: {

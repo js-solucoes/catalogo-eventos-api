@@ -23,7 +23,6 @@ export function registerAuthRoutes(router: Router): void {
 
   const loginUseCase = new LoginUseCase(userRepo, encrypter, tokenService, logger);
 
-  // ✅ AGORA o refresh precisa do repo pra pegar email/role
   const refreshUseCase = new RefreshTokenUseCase(tokenService, userRepo, logger);
 
   const loginController = new LoginController(loginUseCase);
