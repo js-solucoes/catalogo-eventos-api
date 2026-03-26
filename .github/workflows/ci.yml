@@ -24,4 +24,9 @@ jobs:
         run: npm ci
 
       - name: Typecheck, lint e testes com cobertura
+        env:
+          # env.ts exige JWT_*; não há .env no CI (gitignore). jest-ci-env.js também preenche quando CI=true.
+          JWT_SECRET: ffffffffffffffffffffffffffffffff
+          JWT_ACCESS_SECRET: ffffffffffffffffffffffffffffffff
+          JWT_REFRESH_SECRET: ffffffffffffffffffffffffffffffff
         run: npm run check

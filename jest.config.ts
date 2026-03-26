@@ -1,4 +1,5 @@
 module.exports = {
+  setupFiles: ['<rootDir>/test/jest-ci-env.js'],
   roots: ['<rootDir>/src', '<rootDir>/test'],
   collectCoverageFrom: [
     '<rootDir>/src/**/*.ts',
