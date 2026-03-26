@@ -4,6 +4,7 @@ import { mapErrorToHttpResponse } from "@/core/http/http-error-response";
 import { ok, ResourceBuilder } from "@/core/http/http-resource";
 import { Controller, HttpRequest, HttpResponse } from "@/core/protocols";
 import { UpdateEventUseCase } from "@/modules/events/application/use-cases/update-event.usecase";
+import { UpdateEventDTO } from "@/modules/events/application/dto";
 import { eventLinks } from "../event-hateoas";
 
 export class UpdateEventController implements Controller {
@@ -21,11 +22,9 @@ export class UpdateEventController implements Controller {
 
     try {
       const id = Number(req.params?.id);
-      const body = req.body as any;
+      const body = req.body as UpdateEventDTO;
 
-      const updated = await this.useCase.execute(id, {
-        ...body,
-      });
+      const updated = await this.useCase.execute(id, body);
 
       const payload = {
         id: updated.id,
@@ -33,7 +32,7 @@ export class UpdateEventController implements Controller {
         citySlug: updated.citySlug,
         name: updated.name,
         description: updated.description,
-        category: updated.category as any,
+        category: updated.category,
         startDate: updated.startDate,
         endDate: updated.endDate,
         formattedDate: updated.formattedDate,

@@ -21,7 +21,7 @@ export class DeleteUserUseCase {
         return false; // ✅ o sequelize vai commitar “nada” e ok
       }
 
-      const strategy = this.profileStrategyFactory.getStrategy(existing.role as any);
+      const strategy = this.profileStrategyFactory.getStrategy(existing.role);
 
       // ✅ Remover perfil com a MESMA transaction
       await strategy.removeProfile(existing.id, t);

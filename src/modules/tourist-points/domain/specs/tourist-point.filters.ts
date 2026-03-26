@@ -1,11 +1,12 @@
 import { Specification } from "@/core/domain/specification/specification";
 import { eq, like } from "@/core/domain/specification/builders";
+import { TouristPointCategory } from "../value-objects/tourist-point-category";
 
 export type ListPontosParams = {
   search?: string;
   city?: string;
   state?: string;
-  category?: string;
+  category?: TouristPointCategory;
 };
 
 const normalize = (v?: string) => (v?.trim() ? v.trim() : undefined);

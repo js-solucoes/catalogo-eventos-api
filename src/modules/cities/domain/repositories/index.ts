@@ -4,6 +4,8 @@ import { EditCityRepository } from "./edit-city.repository";
 import { FindCityByIdRepository } from "./find-city-by-id.repository";
 import { FindCityByNameRepository } from "./find-city-by-name.repository";
 import { ListCityRepository } from "./list-city.repository";
+import { FindCityBySlugRepository } from './find-city-by-slug.repository'
+import { PublicListCityRepository } from './public-list-city.repository'
 
 export {
   CreateCityRepository,
@@ -12,4 +14,6 @@ export {
   FindCityByIdRepository,
   FindCityByNameRepository,
   ListCityRepository,
+  FindCityBySlugRepository,
+  PublicListCityRepository
 };

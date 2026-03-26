@@ -9,7 +9,7 @@ export const userLinks = (id?: number): Links => ({
   },
   update: {
     href: `${API_PREFIX}/users/${id}`,
-    method: "PUT",
+    method: "PATCH",
   },
   delete: {
     href: `${API_PREFIX}/users/${id}`,

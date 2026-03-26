@@ -11,7 +11,7 @@ export class AdminProfileStrategy implements ProfileCreationStrategy {
   }
   async createProfile({
     user,
-    payload,
+    payload: _payload,
     transaction
   }: ProfileCreationContext): Promise<void> {
     await Admin.create({

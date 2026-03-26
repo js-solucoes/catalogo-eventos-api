@@ -3,7 +3,7 @@ import { UserEntity } from "../entities/user.entity";
 
 export interface ProfileCreationContext {
   user: UserEntity;
-  payload: any;
+  payload: unknown;
   transaction: Transaction;
 }
 

@@ -6,7 +6,7 @@ describe("user-hateoas", () => {
 
     expect(links).toEqual({
       self: { href: "/api/admin/users/10", method: "GET" },
-      update: { href: "/api/admin/users/10", method: "PUT" },
+      update: { href: "/api/admin/users/10", method: "PATCH" },
       delete: { href: "/api/admin/users/10", method: "DELETE" },
       list: { href: "/api/admin/users", method: "GET" },
     });

@@ -1,6 +1,7 @@
 import { Links } from "@/core/http/http-resource";
 
 const API_ADMIN_PREFIX = "/api/admin";
+const API_PUBLIC_PREFIX = "/api/public";
 
 export const adminCityLinks = (id?: number): Links => ({
   self: {
@@ -9,7 +10,7 @@ export const adminCityLinks = (id?: number): Links => ({
   },
   update: {
     href: `${API_ADMIN_PREFIX}/cities/${id}`,
-    method: "PUT",
+    method: "PATCH",
   },
   delete: {
     href: `${API_ADMIN_PREFIX}/cities/${id}`,
@@ -29,5 +30,34 @@ export const adminCitiesCollectionLinks = (): Links => ({
   create: {
     href: `${API_ADMIN_PREFIX}/cities`,
     method: "POST",
+  },
+});
+
+export const publicCitiesCollectionLinks = (): Links => ({
+  self: {
+    href: `${API_PUBLIC_PREFIX}/cities`,
+    method: "GET",
+  },
+});
+
+export const publicCityBySlugLinks = (slug: string): Links => ({
+  self: {
+    href: `${API_PUBLIC_PREFIX}/cities/${encodeURIComponent(slug)}`,
+    method: "GET",
+  },
+  list: {
+    href: `${API_PUBLIC_PREFIX}/cities`,
+    method: "GET",
+  },
+});
+
+export const publicCityByIdLinks = (id: number): Links => ({
+  self: {
+    href: `${API_PUBLIC_PREFIX}/cities/by-id/${id}`,
+    method: "GET",
+  },
+  list: {
+    href: `${API_PUBLIC_PREFIX}/cities`,
+    method: "GET",
   },
 });

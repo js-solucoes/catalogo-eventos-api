@@ -2,22 +2,43 @@
 import { Controller, HttpRequest, HttpResponse } from "@/core/protocols";
 import { CollectionResourceBuilder, ok } from "@/core/http/http-resource";
 import { ListEventsUseCase } from "@/modules/events/application/use-cases/list-events.usecase";
-import { eventListLinks } from "../event-hateoas";
+import { eventListLinks, eventPublicListLinks } from "../event-hateoas";
 import { ListEventsDTO } from "@/modules/events/application/dto";
+import { EventCategory, isEventCategory } from "@/modules/events/domain/value-objects/event-category";
+
+export type EventsListAudience = "admin" | "public";
+
+type ListEventsQueryParams = {
+  page?: string;
+  limit?: string;
+  name?: string;
+  category?: string;
+  cityId?: string;
+  sortBy?: string;
+  sortDir?: string;
+};
 
 export class ListEventsController implements Controller {
-  constructor(private readonly useCase: ListEventsUseCase) {}
+  constructor(
+    private readonly useCase: ListEventsUseCase,
+    private readonly audience: EventsListAudience = "admin",
+  ) {}
 
   async handle(httpRequest: HttpRequest): Promise<HttpResponse> {
     const correlationId = httpRequest.correlationId;
-    const q = (httpRequest.query ?? {}) as any;
+    const q = (httpRequest.query ?? {}) as ListEventsQueryParams;
+
+    const categoryFilter: EventCategory | undefined =
+      q.category !== undefined && isEventCategory(q.category)
+        ? q.category
+        : undefined;
 
     const result = await this.useCase.execute({
       page: q.page ? Number(q.page) : undefined,
       limit: q.limit ? Number(q.limit) : undefined,
 
       name: q.name,
-      category: q.category,
+      category: categoryFilter,
       cityId: q.cityId ? Number(q.cityId) : undefined,
 
       sortBy: q.sortBy,
@@ -31,7 +52,7 @@ export class ListEventsController implements Controller {
         citySlug: e.citySlug,
         name: e.name,
         description: e.description,
-        category: e.category as any,
+        category: e.category,
         startDate: e.startDate,
         endDate: e.endDate,
         formattedDate: e.formattedDate,
@@ -49,13 +70,21 @@ export class ListEventsController implements Controller {
       sort: result.sort,
     };
 
-    const links = eventListLinks({
+    const listParams = {
       page: result.page,
       limit: result.limit,
       totalPages: result.totalPages,
-      filters: q.filters,
-      sort: q.sortBy ? { by: q.sortBy, dir: q.sortDir } : undefined,
-    });
+      filters: {
+        ...(q.name !== undefined && { name: q.name }),
+        ...(categoryFilter !== undefined && { category: categoryFilter }),
+        ...(q.cityId !== undefined && { cityId: q.cityId }),
+      },
+      sort: q.sortBy ? { by: q.sortBy, dir: q.sortDir as "asc" | "desc" } : undefined,
+    };
+    const links =
+      this.audience === "public"
+        ? eventPublicListLinks(listParams)
+        : eventListLinks(listParams);
 
     const meta = {
       total: result.total,

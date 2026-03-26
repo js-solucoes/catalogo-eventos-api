@@ -7,8 +7,11 @@ const ALLOWED_ORIGINS = parseOrigins(process.env.CORS_ORIGINS); // ex: "https://
 const ALLOW_CREDENTIALS = (process.env.CORS_CREDENTIALS ?? "false").toLowerCase() === "true";
 
 function isOriginAllowed(origin?: string): boolean {
-  if (!origin) return true; // non-CORS or same-origin
-  if (ALLOWED_ORIGINS.length === 0) return true; // fallback: liberar tudo em dev
+  if (!origin) return true; // non-CORS ou clientes sem Origin (curl, mobile nativo)
+  if (ALLOWED_ORIGINS.length === 0) {
+    // Em produção, lista vazia não pode equivaler a "qualquer origem"
+    return process.env.NODE_ENV !== "production";
+  }
   return ALLOWED_ORIGINS.includes(origin);
 }
 

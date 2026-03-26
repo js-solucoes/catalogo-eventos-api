@@ -11,6 +11,14 @@ module.exports = {
   },
   testEnvironment: 'node',
   coverageDirectory: 'coverage',
+  coverageThreshold: {
+    global: {
+      statements: 80,
+      branches: 55,
+      functions: 75,
+      lines: 80,
+    },
+  },
   transform: {
     '.+\\.ts$': 'ts-jest'
   }

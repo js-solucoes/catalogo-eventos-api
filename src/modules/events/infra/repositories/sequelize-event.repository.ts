@@ -14,6 +14,7 @@ import { UpdateEventRepository } from "../../domain/repositories/update-event.re
 
 import { SpecificationBuilder } from "@/core/domain/specification/specification-builder";
 import { eq, like } from "@/core/domain/specification/builders";
+import { eventModelToEntity } from "../mappers/event-model.mapper";
 
 const ALLOWED_SORT_FIELDS = new Set([
   "id",
@@ -41,26 +42,6 @@ export class SequelizeEventRepository
     UpdateEventRepository,
     DeleteEventRepository
 {
-  private toEntity(m: EventModel): EventEntity {
-    return new EventEntity({
-      id: m.id,
-      cityId: m.cityId,
-      citySlug: m.citySlug,
-      name: m.name,
-      description: m.description,
-      category: m.category as any,
-      startDate: m.startDate,
-      endDate: m.endDate,
-      formattedDate: m.formattedDate,
-      location: m.location,
-      imageUrl: m.imageUrl,
-      featured: m.featured,
-      published: m.published,
-      createdAt: (m as any).createdAt,
-      updatedAt: (m as any).updatedAt,
-    });
-  }
-
   async create(event: EventEntity, t?: Transaction): Promise<EventEntity> {
     const created = await EventModel.create(
       {
@@ -68,7 +49,7 @@ export class SequelizeEventRepository
         citySlug: event.citySlug,
         name: event.name,
         description: event.description,
-        category: event.category as any,
+        category: event.category,
         startDate: event.startDate,
         endDate: event.endDate,
         formattedDate: event.formattedDate,
@@ -80,12 +61,12 @@ export class SequelizeEventRepository
       { transaction: t },
     );
 
-    return this.toEntity(created);
+    return eventModelToEntity(created);
   }
 
   async findById(id: number): Promise<EventEntity | null> {
     const found = await EventModel.findByPk(id);
-    return found ? this.toEntity(found) : null;
+    return found ? eventModelToEntity(found) : null;
   }
 
   async update(
@@ -102,7 +83,7 @@ export class SequelizeEventRepository
         citySlug: data.citySlug ?? found.citySlug,
         name: data.name ?? found.name,
         description: data.description ?? found.description,
-        category: (data as any).category ?? found.category,
+        category: data.category ?? found.category,
         startDate: data.startDate ?? found.startDate,
         endDate: data.endDate ?? found.endDate,
         formattedDate: data.formattedDate ?? found.formattedDate,
@@ -114,7 +95,7 @@ export class SequelizeEventRepository
       { transaction: t },
     );
 
-    return this.toEntity(found);
+    return eventModelToEntity(found);
   }
 
   async delete(id: number, t?: Transaction): Promise<boolean> {
@@ -162,7 +143,7 @@ export class SequelizeEventRepository
     const totalPages = Math.max(1, Math.ceil(total / limit));
 
     return {
-      items: rows.map((r) => this.toEntity(r)),
+      items: rows.map((r) => eventModelToEntity(r)),
       page,
       limit,
       total,

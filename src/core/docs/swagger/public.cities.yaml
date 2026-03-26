@@ -3,7 +3,7 @@ tags:
     description: Endpoints relacionados as cidades da região do Celeiro do MS
 
 paths:
-  /api/public/cities:
+  /public/cities:
     get:
       summary: Lista as cidades da região do Celeiro do MS
       tags: 
@@ -16,18 +16,18 @@ paths:
               schema:
                 $ref: "#components/schemas/PublicCityPagedResponse"
                 
-  /api/public/cities/{id}:
+  /public/cities/{slug}:
     get:
-      summary: Busca uma cidade pelo ID
+      summary: Busca uma cidade pelo slug
       tags: 
         - Cities PUBLIC
       parameters:
         - in: path
-          name: id
+          name: slug
           required: true
           schema:
-            type: integer
-          description: ID da cidade que deseja buscar
+            type: string
+          description: Slug da cidade que deseja buscar
       responses:
         200:
           description: A cidades foi obtida com sucesso!

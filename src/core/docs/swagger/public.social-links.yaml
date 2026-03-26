@@ -3,7 +3,7 @@ tags:
     description: Endpoints relacionados aos links de redes sociais
 
 paths:
-  /api/public/social-links:
+  /public/social-links:
     get:
       summary: Lista de links de redes sociais do Celeiro do MS
       tags:
@@ -16,7 +16,7 @@ paths:
               schema:
                 $ref: "#components/schemas/AdminSocialLinkPagedResponse"
 
-  /api/public/social-links/{id}:
+  /public/social-links/{id}:
     get:
       summary: Busca um link de rede social pelo ID
       tags:

@@ -1,10 +1,12 @@
+import { TouristPointCategory } from "../value-objects/tourist-point-category";
+
 export interface TouristPointProps {
   id?: number;
   cityId: number;
   citySlug: string;
   name: string;
   description: string;
-  category: string;
+  category: TouristPointCategory;
   address: string;
   openingHours: string;
   imageUrl: string;
@@ -27,7 +29,7 @@ export class TouristPointEntity {
   }
 
   get citySlug() {
-    return this.props.name;
+    return this.props.citySlug;
   }
 
   get name() {

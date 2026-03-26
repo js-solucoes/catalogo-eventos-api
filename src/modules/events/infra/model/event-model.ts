@@ -17,6 +17,8 @@ class EventModel extends Model {
   imageUrl!: string;
   featured!: boolean;
   published!: boolean;
+  createdAt?: Date;
+  updatedAt?: Date;
 }
 
 EventModel.init(
@@ -45,6 +47,7 @@ EventModel.init(
   {
     sequelize,
     tableName: "events",
+    timestamps: true,
   },
 );
 

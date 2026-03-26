@@ -3,6 +3,7 @@ import { created, resource, ResourceBuilder } from "@/core/http/http-resource";
 import { logger } from "@/core/config/logger";
 import { mapErrorToHttpResponse } from "@/core/http/http-error-response";
 import { CreateEventUseCase } from "@/modules/events/application/use-cases/create-event.usecase";
+import { CreateEventDTO } from "@/modules/events/application/dto";
 import { eventLinks } from "../event-hateoas";
 
 export class CreateEventController implements Controller {
@@ -17,7 +18,7 @@ export class CreateEventController implements Controller {
     });
 
     try {
-      const createdEvent = await this.useCase.execute(req.body as any);
+      const createdEvent = await this.useCase.execute(req.body as CreateEventDTO);
 
       const builder = new ResourceBuilder(createdEvent);
       const resource = builder

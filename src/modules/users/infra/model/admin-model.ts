@@ -30,14 +30,14 @@ Admin.init(
       type: DataTypes.INTEGER,
       allowNull: false,
       references: {
-        model: "Users", // Nome do modelo alvo
-        key: "id", // Chave no modelo alvo que estamos referenciando
+        model: "Users",
+        key: "id",
       },
     },
   },
   {
     sequelize,
-    modelName: "Admins",
+    modelName: "admins",
   }
 );
 Admin.belongsTo(User, { foreignKey: "userId", as: "user", onDelete: "CASCADE", onUpdate: "CASCADE" });

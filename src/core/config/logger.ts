@@ -6,6 +6,7 @@ export interface Logger {
   info: (message: string, meta?: Record<string, unknown>) => void;
   warn: (message: string, meta?: Record<string, unknown>) => void;
   error: (message: string, meta?: Record<string, unknown>) => void;
+  database: (message: string, meta?: Record<string, unknown>) => void;
 }
 
 const formatLog = (
@@ -59,5 +60,10 @@ export const logger: Logger = {
   error: (message, meta) => {
     // eslint-disable-next-line no-console
     console.error(addColorConsole.red(JSON.stringify(formatLog("error", message, meta))));
+  },
+  database: (message, meta) => {
+    if (process.env.NODE_ENV === "production") return; // opcional: mutar debug em prod
+    // eslint-disable-next-line no-console
+    console.debug(addColorConsole.magenta(JSON.stringify(formatLog("debug", message, meta))));
   },
 };

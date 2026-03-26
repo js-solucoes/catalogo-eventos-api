@@ -1,6 +1,10 @@
 import sequelize from "@/core/database";
 import CityModel from "@/modules/cities/infra/models/city-model";
 import { DataTypes, Model } from "sequelize";
+import {
+  TOURIST_POINT_CATEGORIES,
+  TouristPointCategory,
+} from "../../domain/value-objects/tourist-point-category";
 
 export class TouristPointModel extends Model {
   id!: number;
@@ -8,7 +12,7 @@ export class TouristPointModel extends Model {
   citySlug!: string;
   name!: string;
   description!: string;
-  category!: string;
+  category!: TouristPointCategory;
   address!: string;
   openingHours!: string;
   imageUrl!: string;
@@ -45,7 +49,7 @@ TouristPointModel.init(
       allowNull: true,
     },
     category: {
-      type: DataTypes.STRING,
+      type: DataTypes.ENUM("parque", "praça", "museu", "igreja"),
       allowNull: false,
     },
     address: {
@@ -55,7 +59,7 @@ TouristPointModel.init(
     openingHours: { type: DataTypes.TIME, allowNull: false },
     imageUrl: { type: DataTypes.STRING, allowNull: false },
     featured: { type: DataTypes.BOOLEAN, allowNull: false },
-    published: { type: DataTypes.BOOLEAN, allowNull: false }
+    published: { type: DataTypes.BOOLEAN, allowNull: false },
   },
   {
     sequelize,

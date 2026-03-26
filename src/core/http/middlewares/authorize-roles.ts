@@ -26,7 +26,7 @@ export default function authorizeRoles(roles: string[]) {
         },
         links: [
           { rel: "self", href: req.path, method: req.method },
-          { rel: "login", href: "/login", method: "POST" },
+          { rel: "login", href: "/api/auth/login", method: "POST" },
         ],
       });
     }

@@ -1,10 +1,13 @@
 import { Transaction } from "sequelize";
-import { TouristPointEntity } from "../entities/tourist-point.entity";
+import {
+  TouristPointEntity,
+  TouristPointProps,
+} from "../entities/tourist-point.entity";
 
 export interface UpdateTouristPointRepository {
   update(
     id: number,
-    data: Partial<TouristPointEntity>,
+    data: Partial<TouristPointProps>,
     t?: Transaction,
   ): Promise<TouristPointEntity | null>;
 }

@@ -1,3 +1,4 @@
+import { TOURIST_POINT_CATEGORIES } from "@/modules/tourist-points/domain/value-objects/tourist-point-category";
 import { z } from "zod";
 import { id } from "zod/locales";
 
@@ -30,18 +31,9 @@ export const createTouristPointSchema = z.object({
     .min(3, "Nome deve ter pelo menos 3 caracteres"),
   description: z.string(),
   category: z
-    .string({
-      error: (issue) => {
-        if (issue.code === "invalid_type" && issue.expected === "string") {
-          return { message: "Tipo deve ser uma string" };
-        }
-        if (issue.code === "invalid_type" && issue.expected === "undefined") {
-          return { message: "Tipo é obrigatório" };
-        }
-        return { message: "Tipo é inválido" };
-      },
-    })
-    .min(3, "Tipo deve ter pelo menos 3 caracteres"),
+    .enum(TOURIST_POINT_CATEGORIES,{
+    error: (issue) => `Categoria ${String(issue.input)} é inválida`,
+  }),
   address: z.string(),
   openingHours: z
     .string({
@@ -82,7 +74,6 @@ export const createTouristPointSchema = z.object({
 });
 
 export const updateTouristPointSchema = z.object({
-  id: z.number().optional(),
   cityId: z
     .number({
       error: (issue) => {

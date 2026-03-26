@@ -58,7 +58,7 @@ export class CreateUserUseCase {
 
       const created = await this.createUserRepo.create(user, transaction);
 
-      const strategy = this.profileStrategyFactory.getStrategy(created.role as any);
+      const strategy = this.profileStrategyFactory.getStrategy(created.role);
 
       await strategy.createProfile({
         user: created,

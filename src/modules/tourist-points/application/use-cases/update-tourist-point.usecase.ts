@@ -1,9 +1,9 @@
 import { AppError } from "@/core/errors-app-error";
-import { SequelizeTouristPointRepository } from "../../infra/sequelize/sequelize-tourist-point.repository";
+import { UpdateTouristPointRepository } from "../../domain/repositories/update-tourist-point.repository";
 import { updateTouristPointDTO } from "../dto";
 
 export class UpdateTouristPointUseCase {
-  constructor(private readonly repository: SequelizeTouristPointRepository) {}
+  constructor(private readonly repository: UpdateTouristPointRepository) {}
 
   async execute(
     id: number,

@@ -1,9 +1,9 @@
 import { TouristPointEntity } from "../../domain/entities/tourist-point.entity";
-import { SequelizeTouristPointRepository } from "../../infra/sequelize/sequelize-tourist-point.repository";
+import { CreateTouristPointRepository } from "../../domain/repositories/create-tourist-point.repository";
 import { createTouristPointDTO } from "../dto";
 
 export class CreateTouristPointUseCase {
-  constructor(private readonly repository: SequelizeTouristPointRepository) {}
+  constructor(private readonly repository: CreateTouristPointRepository) {}
 
   async execute(
     touristPointDTO: createTouristPointDTO,

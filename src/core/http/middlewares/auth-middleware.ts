@@ -37,15 +37,14 @@ export default function authMiddleware(
         error: {
           code: "UNAUTHORIZED",
           message: "Credenciais ausentes ou inválidas",
-          token: req.headers.authorization, // para debug
         },
-        links: [{ rel: "login", href: "/login", method: "POST" }],
+        links: [{ rel: "login", href: "/api/auth/login", method: "POST" }],
       });
     }
 
     const secret = ENV.JWT_ACCESS_SECRET;
     if (!secret) {
-      logger.error("JWT_SECRET is not configured");
+      logger.error("JWT_ACCESS_SECRET is not configured");
       return res.status(500).json({
         error: {
           code: "INTERNAL_ERROR",
@@ -78,7 +77,7 @@ export default function authMiddleware(
         code: "UNAUTHORIZED",
         message: "Credenciais ausentes ou inválidas",
       },
-      links: [{ rel: "login", href: "/api/login", method: "POST" }],
+      links: [{ rel: "login", href: "/api/auth/login", method: "POST" }],
     });
   }
 }

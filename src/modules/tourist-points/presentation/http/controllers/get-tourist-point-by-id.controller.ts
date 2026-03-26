@@ -3,10 +3,15 @@ import { mapErrorToHttpResponse } from "@/core/http/http-error-response";
 import { ok, resource, ResourceBuilder } from "@/core/http/http-resource";
 import { Controller, HttpRequest, HttpResponse } from "@/core/protocols";
 import { GetTouristPointByIdUseCase } from "@/modules/tourist-points/application/use-cases/get-tourist-point-by-id.usecase";
-import { touristPointLinks } from "../tourist-point-hateoas";
+import { touristPointLinks, touristPointPublicLinks } from "../tourist-point-hateoas";
+
+export type TouristPointByIdAudience = "admin" | "public";
 
 export class GetTouristPointByIdController implements Controller {
-  constructor(private readonly useCase: GetTouristPointByIdUseCase) {}
+  constructor(
+    private readonly useCase: GetTouristPointByIdUseCase,
+    private readonly audience: TouristPointByIdAudience = "admin",
+  ) {}
 
   async handle(req: HttpRequest): Promise<HttpResponse> {
     const correlationId = req.correlationId;
@@ -40,8 +45,13 @@ export class GetTouristPointByIdController implements Controller {
         featured: entity.featured, // ✅ obrigatório pela model
         published: entity.published,
       };
-      const builder = new ResourceBuilder(data)
-      const resource = builder.addAllLinks(touristPointLinks(entity.id)).addMeta({correlationId, version: "1.0.0"}).build()
+      const linkFn =
+        this.audience === "public" ? touristPointPublicLinks : touristPointLinks;
+      const builder = new ResourceBuilder(data);
+      const resource = builder
+        .addAllLinks(linkFn(entity.id))
+        .addMeta({ correlationId, version: "1.0.0" })
+        .build();
 
       return ok(resource);
     } catch (error) {

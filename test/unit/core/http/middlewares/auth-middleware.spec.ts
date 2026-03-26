@@ -33,8 +33,12 @@ describe("auth-middleware", () => {
     expect(res.json).toHaveBeenCalledWith(
       expect.objectContaining({
         error: expect.objectContaining({ code: "UNAUTHORIZED" }),
-      })
+        links: expect.arrayContaining([
+          expect.objectContaining({ href: "/api/auth/login" }),
+        ]),
+      }),
     );
+    expect(res.json.mock.calls[0][0].error?.token).toBeUndefined();
     expect(next).not.toHaveBeenCalled();
   });
 

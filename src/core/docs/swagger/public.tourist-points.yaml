@@ -3,7 +3,7 @@ tags:
     description: Endpoints relacionados aos pontos turísiticos
 
 paths:
-  /api/public/tourist-points:
+  /public/tourist-points:
     get:
       summary: Lista de pontos turísiticos do Celeiro do MS
       tags:
@@ -40,7 +40,7 @@ paths:
               schema:
                 $ref: "#components/schemas/AdminTouristPointPagedResponse"
 
-  /api/public/tourist-points/{id}:
+  /public/tourist-points/{id}:
     get:
       summary: Busca um link de ponto turístico pelo ID
       tags:

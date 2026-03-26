@@ -1,5 +1,8 @@
 import { Transaction } from "sequelize";
-import { TouristPointEntity } from "../../domain/entities/tourist-point.entity";
+import {
+  TouristPointEntity,
+  TouristPointProps,
+} from "../../domain/entities/tourist-point.entity";
 import {
   CreateTouristPointRepository,
   DeleteTouristPointRepository,
@@ -115,7 +118,7 @@ export class SequelizeTouristPointRepository
 
   async update(
     id: number,
-    data: Partial<TouristPointEntity>,
+    data: Partial<TouristPointProps>,
     t?: Transaction,
   ): Promise<TouristPointEntity | null> {
     const [affected] = await TouristPointModel.update(

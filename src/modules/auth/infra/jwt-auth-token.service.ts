@@ -27,7 +27,11 @@ export class JwtAuthTokenService implements AuthTokenService {
     return jwt.sign(
       { email: payload.email, role: payload.role },
       this.accessSecret,
-      { subject: payload.sub, expiresIn: ACCESS_TOKEN_EXP },
+      {
+        subject: payload.sub,
+        expiresIn: ACCESS_TOKEN_EXP,
+        algorithm: "HS256",
+      },
     );
   }
 
@@ -35,12 +39,15 @@ export class JwtAuthTokenService implements AuthTokenService {
     return jwt.sign({}, this.refreshSecret, {
       subject: payload.sub,
       expiresIn: REFRESH_TOKEN_EXP,
+      algorithm: "HS256",
     });
   }
   decodeRefreshToken(
     token: string,
   ): { sub: string; email?: string; role?: string } | null {
-    const decoded = jwt.verify(token, this.refreshSecret) as jwt.JwtPayload;
+    const decoded = jwt.verify(token, this.refreshSecret, {
+      algorithms: ["HS256"],
+    }) as jwt.JwtPayload;
     return {
       sub: String(decoded.sub),
       email: decoded.email as string | undefined,

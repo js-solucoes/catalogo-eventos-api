@@ -1,59 +1,56 @@
 import adaptRoute from "@/core/adapters/express-route-adapter";
-import {
-  CreateCityUseCase,
-  DeleteCityUseCase,
-  ListCityUseCase,
-  UpdateCityUseCase,
-} from "@/modules/cities/application/use-cases";
-import { FindCityByIdUseCase } from "@/modules/cities/application/use-cases/find-city-by-id.usecase";
-import { SequelizeCityRepository } from "@/modules/cities/infra/sequelize/sequelize-city.repository";
-import { NextFunction, Request, Response } from "express";
+import authMiddleware from "@/core/http/middlewares/auth-middleware";
+import authorizeRoles from "@/core/http/middlewares/authorize-roles";
 import { Router } from "express-serve-static-core";
 import {
-  CreateCityController,
-  DeleteCityController,
-  ListCityController,
-  UpdateCityController,
-} from "../controller";
-import { FindCityByIdController } from "../controller/find-city-by-id.controller";
+  makeCreateCityController,
+  makeDeleteCityController,
+  makeFindCityByIdController,
+  makeFindCityBySlugController,
+  makeListCityController,
+  makePublicListCityController,
+  makeUpdateCityController,
+} from "../factories";
 
 export function registerCityRoutes(router: Router): void {
-  const cityRepo = new SequelizeCityRepository();
-  const createCityUseCase = new CreateCityUseCase(cityRepo, cityRepo);
-  const listCityUseCase = new ListCityUseCase(cityRepo);
-  const updateCityUseCase = new UpdateCityUseCase(cityRepo);
-  const deleteCityUseCase = new DeleteCityUseCase(cityRepo);
-  const findCityByIdUseCase = new FindCityByIdUseCase(cityRepo);
-
-  // ADMIN ROUTE
   router.get(
     "/admin/cities",
-    adaptRoute(new ListCityController(listCityUseCase)),
+    authMiddleware,
+    authorizeRoles(["Admin"]),
+    adaptRoute(makeListCityController()),
   );
   router.get(
     "/admin/cities/:id",
-    adaptRoute(new FindCityByIdController(findCityByIdUseCase)),
+    authMiddleware,
+    authorizeRoles(["Admin"]),
+    adaptRoute(makeFindCityByIdController("admin")),
   );
   router.post(
     "/admin/cities",
-    adaptRoute(new CreateCityController(createCityUseCase)),
+    authMiddleware,
+    authorizeRoles(["Admin"]),
+    adaptRoute(makeCreateCityController()),
   );
   router.patch(
     "/admin/cities/:id",
-    adaptRoute(new UpdateCityController(updateCityUseCase)),
+    authMiddleware,
+    authorizeRoles(["Admin"]),
+    adaptRoute(makeUpdateCityController()),
   );
   router.delete(
     "/admin/cities/:id",
-    adaptRoute(new DeleteCityController(deleteCityUseCase)),
+    authMiddleware,
+    authorizeRoles(["Admin"]),
+    adaptRoute(makeDeleteCityController()),
   );
 
-  // PUBLIC ROUTE
   router.get(
-    "/public/cities",
-    (req: Request, res: Response, next: NextFunction) => {},
+    "/public/cities/by-id/:id",
+    adaptRoute(makeFindCityByIdController("public")),
   );
+  router.get("/public/cities", adaptRoute(makePublicListCityController()));
   router.get(
     "/public/cities/:slug",
-    (req: Request, res: Response, next: NextFunction) => {},
+    adaptRoute(makeFindCityBySlugController()),
   );
 }

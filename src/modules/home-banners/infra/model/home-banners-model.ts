@@ -8,8 +8,9 @@ class HomeBannerModel extends Model {
   subtitle!: string;
   imageUrl!: string;
   ctaLabel!: string;
-  active!: string;
-  order!: string;
+  ctaUrl!: string;
+  active!: boolean;
+  order!: number;
   createdAt!: Date;
   updatedAt!: Date;
 }
@@ -21,10 +22,9 @@ HomeBannerModel.init(
     subtitle: { type: DataTypes.STRING, allowNull: false },
     imageUrl: { type: DataTypes.STRING, allowNull: false },
     ctaLabel: { type: DataTypes.STRING, allowNull: false },
-    active: { type: DataTypes.STRING, allowNull: false },
-    order: { type: DataTypes.STRING, allowNull: false },
-    createdAt: { type: DataTypes.DATE, allowNull: false },
-    updatedAt: { type: DataTypes.DATE, allowNull: true }
+    ctaUrl: { type: DataTypes.STRING, allowNull: false },
+    active: { type: DataTypes.BOOLEAN, allowNull: false },
+    order: { type: DataTypes.INTEGER, allowNull: false } 
   },
   {
     sequelize,

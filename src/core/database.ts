@@ -16,7 +16,7 @@ const sequelize = isTest
       port: ENV.DB_PORT,
       dialect: ENV.DB_DIALECT as Dialect,
       logging:
-        ENV.NODE_ENV === "development" ? (msg) => logger.debug(msg) : false,
+        ENV.NODE_ENV === "development" ? (msg) => logger.database(msg) : false,
     });
 
 logger.info("Sequelize instance created", {
