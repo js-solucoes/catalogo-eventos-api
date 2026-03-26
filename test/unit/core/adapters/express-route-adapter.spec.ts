@@ -44,4 +44,34 @@ describe("core/adapters/express-route-adapter", () => {
     // não deveria ter chamado next em sucesso
     expect(next).not.toHaveBeenCalled();
   });
+
+  it("deve repassar validatedQuery quando presente no Request", async () => {
+    const { default: adaptRoute } = await import("@/core/adapters/express-route-adapter");
+
+    const controller: Controller = {
+      handle: jest.fn(async (req: HttpRequest): Promise<HttpResponse> => {
+        expect(req.validatedQuery).toEqual({ page: 2, limit: 5 });
+        return { statusCode: 200, body: {} };
+      }),
+    };
+
+    const req = {
+      body: {},
+      params: {},
+      query: { page: "2", limit: "5" },
+      headers: {},
+      validatedQuery: { page: 2, limit: 5 },
+    } as unknown as Request;
+
+    const res = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn().mockReturnThis(),
+    } as unknown as Response;
+
+    const handler = adaptRoute(controller);
+    await handler(req, res);
+
+    expect(controller.handle).toHaveBeenCalledTimes(1);
+    expect((res.status as jest.Mock)).toHaveBeenCalledWith(200);
+  });
 });

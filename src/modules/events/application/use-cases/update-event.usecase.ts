@@ -1,7 +1,8 @@
 import { AppError } from "@/core/errors-app-error";
 import { DomainLogger, NoopDomainLogger } from "@/core/logger/domain-logger";
 import { FindCityByIdUseCase } from "@/modules/cities/application/use-cases/find-city-by-id.usecase";
-import { EventEntity } from "../../domain/entities/event.entity";
+import type { PublicWebImageUploader } from "@/modules/media/domain/ports/public-web-image.uploader";
+import { EventEntity, EventProps } from "../../domain/entities/event.entity";
 import { FindEventByIdRepository } from "../../domain/repositories/find-event-by-id.repository";
 import { UpdateEventRepository } from "../../domain/repositories/update-event.repository";
 import { UpdateEventDTO } from "../dto";
@@ -11,6 +12,7 @@ export class UpdateEventUseCase {
     private readonly findByIdRepo: FindEventByIdRepository,
     private readonly updateRepo: UpdateEventRepository,
     private readonly findCityById: FindCityByIdUseCase,
+    private readonly images: PublicWebImageUploader,
     private readonly logger: DomainLogger = new NoopDomainLogger(),
   ) {}
 
@@ -26,18 +28,22 @@ export class UpdateEventUseCase {
     }
 
     if (dto.cityId !== undefined) {
-      const city = await this.findCityById.execute(Number(dto.cityId));
-      if (!city) {
-        throw new AppError({
-          code: "CIDADE_NOT_FOUND",
-          message: `Cidade ${dto.cityId} não encontrada`,
-          statusCode: 404,
-          details: { cityId: dto.cityId },
-        });
-      }
+      await this.findCityById.execute(Number(dto.cityId));
     }
 
-    const updated = await this.updateRepo.update(id, dto);
+    const { image, ...rest } = dto;
+    const payload: Partial<EventProps> = { ...rest };
+
+    if (image) {
+      const { url } = await this.images.replacePublicWebImage(
+        existing.imageUrl,
+        image,
+        "events",
+      );
+      payload.imageUrl = url;
+    }
+
+    const updated = await this.updateRepo.update(id, payload);
     if (!updated) {
       throw new AppError({
         code: "EVENT_UPDATE_FAILED",

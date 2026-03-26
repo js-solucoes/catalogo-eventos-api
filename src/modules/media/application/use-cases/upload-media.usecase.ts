@@ -1,12 +1,14 @@
 // src/modules/media/application/use-cases/upload-media.usecase.ts
+import { ENV } from "@/core/config/env";
 import { AppError } from "@/core/errors-app-error";
 import { DomainLogger, NoopDomainLogger } from "@/core/logger/domain-logger";
+import { decodeBase64PayloadToBuffer } from "../helpers/base64";
 import { MediaStorageService } from "../../domain/services/media-storage.service";
+import type { WebImageProcessor } from "../../domain/services/web-image.processor";
 import { UploadMediaDTO } from "../dto/upload-media.dto";
 
-function stripDataUrl(b64: string) {
-  const idx = b64.indexOf("base64,");
-  return idx >= 0 ? b64.slice(idx + "base64,".length) : b64;
+function isRasterImageMime(mime: string): boolean {
+  return /^image\/(jpeg|jpg|png|webp|gif)$/i.test(mime.trim());
 }
 
 export interface UploadMediaResult {
@@ -20,7 +22,8 @@ export interface UploadMediaResult {
 export class UploadMediaUseCase {
   constructor(
     private readonly storage: MediaStorageService,
-    private readonly logger: DomainLogger = new NoopDomainLogger()
+    private readonly imageProcessor: WebImageProcessor | null = null,
+    private readonly logger: DomainLogger = new NoopDomainLogger(),
   ) {}
 
   async execute(dto: UploadMediaDTO): Promise<UploadMediaResult> {
@@ -38,8 +41,23 @@ export class UploadMediaUseCase {
       });
     }
 
-    const raw = stripDataUrl(dto.file.base64);
-    const buffer = Buffer.from(raw, "base64");
+    let buffer: Buffer;
+    try {
+      buffer = decodeBase64PayloadToBuffer(dto.file.base64);
+    } catch (err) {
+      if (err instanceof Error && err.message === "File too large") {
+        throw new AppError({
+          code: "MEDIA_TOO_LARGE",
+          message: "Arquivo excede o tamanho máximo permitido",
+          statusCode: 413,
+        });
+      }
+      throw new AppError({
+        code: "MEDIA_INVALID_BASE64",
+        message: "Arquivo vazio ou base64 inválido",
+        statusCode: 400,
+      });
+    }
 
     if (!buffer.length) {
       throw new AppError({
@@ -49,12 +67,26 @@ export class UploadMediaUseCase {
       });
     }
 
+    const outMime = dto.file.mimeType;
+    const outName = dto.file.filename;
+    if (
+      this.imageProcessor &&
+      isRasterImageMime(dto.file.mimeType) &&
+      dto.visibility === "public"
+    ) {
+      buffer = Buffer.from(
+        await this.imageProcessor.process(buffer, dto.file.mimeType),
+      );
+    }
+
     const saved = await this.storage.save({
-      filename: dto.file.filename,
-      mimeType: dto.file.mimeType,
+      filename: outName,
+      mimeType: outMime,
       buffer,
       folder: dto.folder,
       visibility: dto.visibility,
+      storageClass:
+        ENV.MEDIA_STORAGE === "s3" ? ENV.S3_STORAGE_CLASS : undefined,
     });
 
     this.logger.info("UploadMediaUseCase: done", {
@@ -63,7 +95,7 @@ export class UploadMediaUseCase {
     });
 
     return {
-      filename: dto.file.filename,
+      filename: outName,
       mimeType: saved.mimeType,
       size: saved.size,
       path: saved.path,

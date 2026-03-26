@@ -4,8 +4,9 @@ import { Router } from "express";
 import authMiddleware from "@/core/http/middlewares/auth-middleware";
 import authorizeRoles from "@/core/http/middlewares/authorize-roles";
 import { validateBody } from "@/core/http/middlewares/validate-body";
+import { validateQuery } from "@/core/http/middlewares/validate-query";
 
-import { createUserSchema, updateUserSchema } from "../validators/user-schemas";
+import { createUserSchema, listUsersQuerySchema, updateUserSchema } from "../validators/user-schemas";
 import {
   makeCreateUserController,
   makeDeleteUserController,
@@ -27,6 +28,7 @@ export function registerUserRoutes(router: Router): void {
     "/admin/users",
     authMiddleware,
     authorizeRoles(["Admin"]),
+    validateQuery(listUsersQuerySchema),
     adaptRoute(makeListUsersController()),
   );
 

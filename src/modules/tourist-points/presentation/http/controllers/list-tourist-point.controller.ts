@@ -1,15 +1,31 @@
 import { logger } from "@/core/config/logger";
 import { buildPaginationLinks } from "@/core/http/hateoas/pagination-links";
-import { mapErrorToHttpResponse } from "@/core/http/http-error-response";
-import { CollectionResourceBuilder, Links, ok } from "@/core/http/http-resource";
+import {
+  CollectionResourceBuilder,
+  Links,
+  mapErrorToHttpResponse,
+  ok,
+} from "@/core/http";
 import { Controller, HttpRequest, HttpResponse } from "@/core/protocols";
+import { TouristPointEntity } from "@/modules/tourist-points/domain/entities/tourist-point.entity";
 import { ListTouristPointsUseCase } from "../../../application/use-cases/list-tourist-points.usecase";
+import { toListTouristPointsUseCaseInput } from "../mappers/list-tourist-points-query.mapper";
+import { toTouristPointListItemPayload } from "../mappers/tourist-point-response.mapper";
 import {
   touristPointsCollectionLinks,
   touristPointsPublicCollectionLinks,
 } from "../tourist-point-hateoas";
+import {
+  listTouristPointsQuerySchema,
+  type ListTouristPointsQueryDTO,
+} from "../validators/tourist-point-schemas";
 
 export type TouristPointsListAudience = "admin" | "public";
+
+type TouristPointListRow = TouristPointEntity & {
+  createdAt?: Date;
+  updatedAt?: Date;
+};
 
 export class ListTouristPointsController implements Controller {
   constructor(
@@ -19,42 +35,29 @@ export class ListTouristPointsController implements Controller {
 
   async handle(req: HttpRequest): Promise<HttpResponse> {
     const correlationId = req.correlationId;
-    const q = (req.query ?? {}) as any;
+
+    const query: ListTouristPointsQueryDTO =
+      (req.validatedQuery as ListTouristPointsQueryDTO | undefined) ??
+      listTouristPointsQuerySchema.parse(req.query ?? {});
 
     logger.info("Listando pontos turísticos", {
       correlationId,
       route: "ListTouristPointsController",
-      query: q,
+      query,
     });
 
     try {
-      const result = await this.useCase.execute({
-        page: q.page,
-        limit: q.limit,
-        name: q.name,
-        city: q.city,
-        state: q.state,
-        published:
-          q.published === "true" ? true : q.published === "false" ? false : undefined,
-        sortBy: q.sortBy,
-        sortDir: q.sortDir,
-      });
+      const result = await this.useCase.execute(
+        toListTouristPointsUseCaseInput(query),
+      );
 
-      const data = result.items.map((item: any) => ({
-        id: item.id,
-        cityId: item.cityId,
-        citySlug: item.citySlug,
-        name: item.name,
-        description: item.description,
-        category: item.category,
-        address: item.address,
-        openingHours: item.openingHours,
-        imageUrl: item.imageUrl,
-        featured: item.featured, // ✅ obrigatório pela model
-        published: item.published,
-        createdAt: item.createdAt,
-        updatedAt: item.updatedAt,
-      }));
+      const rows = result.items as TouristPointListRow[];
+      const data = rows.map((item) =>
+        toTouristPointListItemPayload(item, {
+          createdAt: item.createdAt,
+          updatedAt: item.updatedAt,
+        }),
+      );
 
       const basePath =
         this.audience === "public"
@@ -67,12 +70,12 @@ export class ListTouristPointsController implements Controller {
         limit: result.limit,
         totalPages: result.totalPages,
         query: {
-          name: q.name,
-          city: q.city,
-          state: q.state,
-          published: q.published,
-          sortBy: q.sortBy,
-          sortDir: q.sortDir,
+          name: query.name,
+          city: query.city,
+          state: query.state,
+          published: query.published,
+          sortBy: query.sortBy,
+          sortDir: query.sortDir,
         },
       });
 
@@ -93,15 +96,19 @@ export class ListTouristPointsController implements Controller {
         totalPages: result.totalPages,
         sort: result.sort,
         correlationId,
+        version: "1.0.0",
       };
-      const builder = new CollectionResourceBuilder(data);
-      const collectionResource = builder.addAllLinks(links).addMeta(meta).build();
+      const resourceBuild = new CollectionResourceBuilder(data);
+      const collectionResource = resourceBuild
+        .addAllLinks(links)
+        .addMeta(meta)
+        .build();
 
       return ok(collectionResource);
     } catch (error) {
       logger.error("Erro ao listar pontos turísticos", {
         correlationId,
-        route: "ListPontosTuristicosController",
+        route: "ListTouristPointsController",
         error,
       });
       return mapErrorToHttpResponse(error, correlationId);

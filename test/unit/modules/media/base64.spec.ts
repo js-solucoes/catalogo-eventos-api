@@ -1,4 +1,32 @@
-import { normalizeToArray, parseBase64 } from "@/modules/media/application/helpers/base64";
+import {
+  decodeBase64PayloadToBuffer,
+  normalizeToArray,
+  parseBase64,
+  stripBase64DataUrlPrefix,
+} from "@/modules/media/application/helpers/base64";
+
+describe("stripBase64DataUrlPrefix", () => {
+  it("remove prefixo data URL", () => {
+    expect(stripBase64DataUrlPrefix("data:image/png;base64,QUJD")).toBe("QUJD");
+  });
+
+  it("retorna string sem prefixo inalterada", () => {
+    expect(stripBase64DataUrlPrefix("YWJj")).toBe("YWJj");
+  });
+});
+
+describe("decodeBase64PayloadToBuffer", () => {
+  it("decodifica payload após prefixo", () => {
+    const b64 = Buffer.from("x").toString("base64");
+    const buf = decodeBase64PayloadToBuffer(`data:image/png;base64,${b64}`);
+    expect(buf.equals(Buffer.from("x"))).toBe(true);
+  });
+
+  it("rejeita buffer acima do limite", () => {
+    const payload = Buffer.alloc(200).toString("base64");
+    expect(() => decodeBase64PayloadToBuffer(payload, 100)).toThrow("File too large");
+  });
+});
 
 describe("parseBase64", () => {
   const small = Buffer.from("hi").toString("base64");

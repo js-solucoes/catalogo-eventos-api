@@ -1,8 +1,9 @@
 import { logger } from "@/core/config/logger";
-import { mapErrorToHttpResponse } from "@/core/http/http-error-response";
-import { ok, resource, ResourceBuilder } from "@/core/http/http-resource";
+import { AppError } from "@/core/errors-app-error";
+import { mapErrorToHttpResponse, ok, ResourceBuilder } from "@/core/http";
 import { Controller, HttpRequest, HttpResponse } from "@/core/protocols";
 import { GetTouristPointByIdUseCase } from "@/modules/tourist-points/application/use-cases/get-tourist-point-by-id.usecase";
+import { toTouristPointHttpPayload } from "../mappers/tourist-point-response.mapper";
 import { touristPointLinks, touristPointPublicLinks } from "../tourist-point-hateoas";
 
 export type TouristPointByIdAudience = "admin" | "public";
@@ -18,38 +19,25 @@ export class GetTouristPointByIdController implements Controller {
 
     try {
       const id = Number(req.params?.id);
-      const entity = await this.useCase.execute(id);
-
-      if (!entity || !entity.id) {
-        logger.warn("Ponto turístico não encontrado", {
-          correlationId,
-          route: "GetPontoTuristicoByIdController",
-          id,
-        });
+      if (Number.isNaN(id)) {
         return mapErrorToHttpResponse(
-          new Error("Ponto turístico não encontrado"),
+          new AppError({
+            code: "INVALID_ID",
+            message: "ID inválido",
+            statusCode: 400,
+          }),
           correlationId,
         );
       }
 
-      const data = {
-        id: entity.id,
-        cityId: entity.cityId,
-        citySlug: entity.citySlug,
-        name: entity.name,
-        description: entity.description,
-        category: entity.category,
-        address: entity.address,
-        openingHours: entity.openingHours,
-        imageUrl: entity.imageUrl,
-        featured: entity.featured, // ✅ obrigatório pela model
-        published: entity.published,
-      };
+      const entity = await this.useCase.execute(id);
+      const payload = toTouristPointHttpPayload(entity);
+
       const linkFn =
         this.audience === "public" ? touristPointPublicLinks : touristPointLinks;
-      const builder = new ResourceBuilder(data);
-      const resource = builder
-        .addAllLinks(linkFn(entity.id))
+      const resourceBuild = new ResourceBuilder(payload);
+      const resource = resourceBuild
+        .addAllLinks(linkFn(entity.id as number))
         .addMeta({ correlationId, version: "1.0.0" })
         .build();
 
@@ -57,7 +45,7 @@ export class GetTouristPointByIdController implements Controller {
     } catch (error) {
       logger.error("Erro ao buscar ponto turístico", {
         correlationId,
-        route: "GetPontoTuristicoByIdController",
+        route: "GetTouristPointByIdController",
         error,
       });
       return mapErrorToHttpResponse(error, correlationId);

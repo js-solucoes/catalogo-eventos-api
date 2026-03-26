@@ -1,6 +1,7 @@
 import sequelize from "@/core/database";
 import { AppError } from "@/core/errors-app-error";
 import { DomainLogger, NoopDomainLogger } from "@/core/logger/domain-logger";
+import type { PublicWebImageUploader } from "@/modules/media/domain/ports/public-web-image.uploader";
 import { CityEntity } from "../../domain/entities/city.entity";
 import { FindCityByNameRepository } from "../../domain/repositories";
 import { CreateCityRepository } from "../../domain/repositories/create-city.repository";
@@ -10,6 +11,7 @@ export class CreateCityUseCase {
   constructor(
     private createCityRepository: CreateCityRepository,
     private readonly findCityByNameRepository: FindCityByNameRepository,
+    private readonly images: PublicWebImageUploader,
     private readonly logger: DomainLogger = new NoopDomainLogger(),
   ) {}
 
@@ -32,15 +34,17 @@ export class CreateCityUseCase {
     const transaction = await sequelize.transaction();
 
     try {
+      const { image, ...fields } = dto;
+      const { url: imageUrl } = await this.images.uploadPublicWebImage(
+        image,
+        "cities",
+      );
+
       const city = new CityEntity({
         id: 0,
-        name: dto.name,
-        slug: dto.slug,
-        state: dto.state,
-        summary: dto.summary,
-        description: dto.description,
-        imageUrl: dto.imageUrl,
-        published: dto.published
+        ...fields,
+        imageUrl,
+        published: dto.published,
       });
 
       const created = await this.createCityRepository.create(

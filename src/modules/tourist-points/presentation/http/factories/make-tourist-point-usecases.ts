@@ -4,10 +4,12 @@ import { GetTouristPointByIdUseCase } from "@/modules/tourist-points/application
 import { ListTouristPointsUseCase } from "@/modules/tourist-points/application/use-cases/list-tourist-points.usecase";
 import { UpdateTouristPointUseCase } from "@/modules/tourist-points/application/use-cases/update-tourist-point.usecase";
 import { SequelizeTouristPointRepository } from "@/modules/tourist-points/infra/sequelize/sequelize-tourist-point.repository";
+import { getPublicWebImageUploader } from "@/modules/media/infra/factories/compose-public-web-image-uploader";
 
 export function makeCreateTouristPointUseCase() {
   const repo = new SequelizeTouristPointRepository();
-  return new CreateTouristPointUseCase(repo);
+  const images = getPublicWebImageUploader();
+  return new CreateTouristPointUseCase(repo, images);
 }
 
 export function makeListTouristPointsUseCase() {
@@ -22,7 +24,8 @@ export function makeGetTouristPointByIdUseCase() {
 
 export function makeUpdateTouristPointUseCase() {
   const repo = new SequelizeTouristPointRepository();
-  return new UpdateTouristPointUseCase(repo);
+  const images = getPublicWebImageUploader();
+  return new UpdateTouristPointUseCase(repo, repo, images);
 }
 
 export function makeDeleteTouristPointUseCase() {

@@ -3,6 +3,7 @@ import adaptRoute from "@/core/adapters/express-route-adapter";
 import authMiddleware from "@/core/http/middlewares/auth-middleware";
 import authorizeRoles from "@/core/http/middlewares/authorize-roles";
 import { validateBody } from "@/core/http/middlewares/validate-body";
+import { validateQuery } from "@/core/http/middlewares/validate-query";
 
 import { makeListEventsController } from "../factories/make-list-events.controller";
 import { makeCreateEventController } from "../factories/make-create-event.controller";
@@ -12,6 +13,7 @@ import { makeGetEventByIdController } from "../factories/make-get-event-by-id.co
 
 import {
   createEventSchema,
+  listEventsQuerySchema,
   updateEventSchema,
 } from "../validators/event-schemas";
 
@@ -20,6 +22,7 @@ export function registerEventRoutes(router: Router) {
     "/admin/events",
     authMiddleware,
     authorizeRoles(["Admin"]),
+    validateQuery(listEventsQuerySchema),
     adaptRoute(makeListEventsController("admin")),
   );
 
@@ -45,7 +48,11 @@ export function registerEventRoutes(router: Router) {
     authorizeRoles(["Admin"]),
     adaptRoute(makeDeleteEventController()),
   );
-  router.get("/public/events", adaptRoute(makeListEventsController("public")));
+  router.get(
+    "/public/events",
+    validateQuery(listEventsQuerySchema),
+    adaptRoute(makeListEventsController("public")),
+  );
   router.get(
     "/public/events/:id",
     adaptRoute(makeGetEventByIdController()),

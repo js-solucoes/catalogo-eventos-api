@@ -1,9 +1,12 @@
 import { logger } from "@/core/config/logger";
-import { serverError } from "@/core/helpers/http-helper";
-import { CollectionResourceBuilder, ok } from "@/core/http/http-resource";
+import { CollectionResourceBuilder, mapErrorToHttpResponse, ok } from "@/core/http";
 import { Controller, HttpRequest, HttpResponse } from "@/core/protocols";
+import { ListUsersQueryDTO, UserViewModel } from "../../../application/dto";
+import { toUserViewModel } from "../../../application/mappers/user-view-model.mapper";
 import { ListUsersUseCase } from "../../../application/use-cases/list-users.usecase";
-import { usersCollectionLinks } from "../user-hateoas";
+import { toListUsersSearchParams } from "../mappers/list-users-query.mapper";
+import { listUsersQuerySchema } from "../validators/user-schemas";
+import { usersAdminListLinks } from "../user-hateoas";
 
 export class ListUsersController implements Controller {
   constructor(private readonly useCase: ListUsersUseCase) {}
@@ -11,13 +14,37 @@ export class ListUsersController implements Controller {
   async handle(httpRequest: HttpRequest): Promise<HttpResponse> {
     const correlationId = httpRequest.correlationId;
     try {
-      const users = await this.useCase.execute();
+      const query: ListUsersQueryDTO =
+        (httpRequest.validatedQuery as ListUsersQueryDTO | undefined) ??
+        listUsersQuerySchema.parse(httpRequest.query ?? {});
 
-      const builder = new CollectionResourceBuilder(users);
-      const resourceList = builder
-        .addAllLinks(usersCollectionLinks())
-        .addMeta({ correlationId, version: "1.0.0" })
-        .build();
+      const params = toListUsersSearchParams(query);
+      const result = await this.useCase.execute(params);
+
+      const items = result.items.map(toUserViewModel);
+      const links = usersAdminListLinks({
+        page: result.page,
+        limit: result.limit,
+        totalPages: result.totalPages,
+        filters: {
+          ...(query.name !== undefined ? { name: query.name } : {}),
+          ...(query.email !== undefined ? { email: query.email } : {}),
+        },
+        sort: result.sort,
+      });
+
+      const meta = {
+        total: result.total,
+        totalPages: result.totalPages,
+        page: result.page,
+        limit: result.limit,
+        sort: result.sort,
+        correlationId,
+        version: "1.0.0",
+      };
+
+      const builder = new CollectionResourceBuilder<UserViewModel>(items);
+      const resourceList = builder.addAllLinks(links).addMeta(meta).build();
       return ok(resourceList);
     } catch (error) {
       logger.error("ListUsersController: erro inesperado", {
@@ -27,7 +54,7 @@ export class ListUsersController implements Controller {
             : error,
       });
 
-      return serverError(error as Error);
+      return mapErrorToHttpResponse(error, correlationId);
     }
   }
 }

@@ -30,3 +30,12 @@ jobs:
           JWT_ACCESS_SECRET: ffffffffffffffffffffffffffffffff
           JWT_REFRESH_SECRET: ffffffffffffffffffffffffffffffff
         run: npm run check
+
+      - name: Smoke HTTP — servidor sobe e /health responde
+        env:
+          JWT_SECRET: ffffffffffffffffffffffffffffffff
+          JWT_ACCESS_SECRET: ffffffffffffffffffffffffffffffff
+          JWT_REFRESH_SECRET: ffffffffffffffffffffffffffffffff
+          NODE_ENV: test
+          SMOKE_PORT: "34581"
+        run: npm run smoke:http

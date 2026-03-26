@@ -1,3 +1,4 @@
+import { webImageFileSchema } from "@/modules/media/application/validators/web-image.schema";
 import { z } from "zod";
 
 export const createHomeBannerSchema = z.object({
@@ -7,7 +8,7 @@ export const createHomeBannerSchema = z.object({
   subtitle: z
     .string("Subtitulo é obrigatório.")
     .min(3, "Subtitulo deve ter pelo menos 3 caracteres"),
-  imageUrl: z.url("imageUrl deve ser uma url válida."),
+  image: webImageFileSchema,
   ctaLabel: z.string("ctaLabel é obrigatório."),
   ctaUrl: z.url("ctaUrl deve ser uma url válida."),
   active: z.boolean().default(true),

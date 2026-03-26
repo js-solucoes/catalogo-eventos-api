@@ -18,7 +18,7 @@ describe("UploadMediaUseCase", () => {
       error: jest.fn(),
     };
 
-    const sut = new UploadMediaUseCase(storageMock as any, loggerMock);
+    const sut = new UploadMediaUseCase(storageMock as any, null, loggerMock);
 
     return { sut, storageMock, loggerMock };
   };

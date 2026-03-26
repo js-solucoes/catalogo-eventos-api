@@ -1,23 +1,10 @@
 import { logger } from "@/core/config/logger";
-import { notFound } from "@/core/helpers/http-helper";
+import { AppError } from "@/core/errors-app-error";
 import { mapErrorToHttpResponse, ok, ResourceBuilder } from "@/core/http";
 import { Controller, HttpRequest, HttpResponse } from "@/core/protocols";
 import { FindCityByIdUseCase } from "@/modules/cities/application/use-cases/find-city-by-id.usecase";
-import { CityEntity } from "@/modules/cities/domain/entities/city.entity";
+import { toCityHttpPayload } from "../mappers/city-response.mapper";
 import { adminCityLinks, publicCityByIdLinks } from "../city-hateoas";
-
-function cityToJson(c: CityEntity) {
-  return {
-    id: c.id,
-    name: c.name,
-    state: c.state,
-    slug: c.slug,
-    summary: c.summary,
-    description: c.description,
-    imageUrl: c.imageUrl,
-    published: c.published,
-  };
-}
 
 export type FindCityByIdAudience = "admin" | "public";
 
@@ -31,9 +18,21 @@ export class FindCityByIdController implements Controller {
     const correlationId = request.correlationId;
     try {
       const cityId = Number(request.params?.id);
+      if (Number.isNaN(cityId)) {
+        return mapErrorToHttpResponse(
+          new AppError({
+            code: "INVALID_ID",
+            message: "ID inválido",
+            statusCode: 400,
+          }),
+          correlationId,
+        );
+      }
+
       const city = await this.findCityByIdUseCase.execute(cityId);
-      if (!city) return notFound(city);
-      const resourceBuild = new ResourceBuilder(cityToJson(city));
+      const payload = toCityHttpPayload(city);
+
+      const resourceBuild = new ResourceBuilder(payload);
       const resource = resourceBuild
         .addAllLinks(
           this.audience === "public"
@@ -46,7 +45,7 @@ export class FindCityByIdController implements Controller {
     } catch (error) {
       logger.error("Erro ao buscar cidade", {
         correlationId,
-        route: "FindCidadeByIdController",
+        route: "FindCityByIdController",
         error,
       });
 

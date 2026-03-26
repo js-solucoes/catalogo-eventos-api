@@ -14,24 +14,28 @@ paths:
           schema: { type: integer, minimum: 1, default: 1 }
         - in: query
           name: limit
-          schema: { type: integer, minimum: 1, maximum: 100, default: 10 }
+          schema: { type: integer, minimum: 1, maximum: 50, default: 10 }
         - in: query
-          name: titulo
+          name: name
           schema: { type: string }
         - in: query
-          name: category
-          schema:
-            type: string
-            enum: [show, esporte, feira, teatro, gastronomia]
+          name: city
+          schema: { type: string }
         - in: query
-          name: cityId
-          schema: { type: integer }
+          name: state
+          schema: { type: string }
+        - in: query
+          name: published
+          schema: { type: string, enum: [true, false] }
+          description: Filtra por publicado; use os literais true ou false
         - in: query
           name: sortBy
-          schema: { type: string, example: createdAt }
+          schema:
+            type: string
+            enum: [name, city, state, createdAt]
         - in: query
           name: sortDir
-          schema: { type: string, enum: [asc, desc], default: desc }
+          schema: { type: string, example: ASC }
       responses:
         200:
           description: A listagem de pontos turísiticos foi obtida com sucesso!
@@ -39,6 +43,12 @@ paths:
             application/json:
               schema:
                 $ref: "#components/schemas/AdminTouristPointPagedResponse"
+        400:
+          description: Parâmetros de query inválidos ou chaves não permitidas (strict)
+          content:
+            application/json:
+              schema:
+                $ref: "#components/schemas/InvalidQueryResponse"
 
   /public/tourist-points/{id}:
     get:
@@ -62,6 +72,22 @@ paths:
 
 components:
   schemas:
+    InvalidQueryResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          example: Invalid query params
+        errors:
+          type: array
+          items:
+            type: object
+            properties:
+              path:
+                type: string
+              message:
+                type: string
+      required: [message, errors]
     AdminTouristPoint:
       type: object
       properties:

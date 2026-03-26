@@ -37,17 +37,17 @@ describe("LocalMediaStorageService", () => {
     });
 
     // dir normalizado (remove / inicial)
-    expect(ensureDir).toHaveBeenCalledWith(path.join("/tmp/uploads", "users/10"));
+    expect(ensureDir).toHaveBeenCalledWith(path.join("/tmp/uploads", "public", "users/10"));
 
     // arquivo salvo
     expect(writeBufferFile).toHaveBeenCalledWith(
-      path.join("/tmp/uploads", "users/10", "uuid-1-uuid-1-uuid-1-uuid-1.png"),
+      path.join("/tmp/uploads/public", "users/10", "uuid-1-uuid-1-uuid-1-uuid-1.png"),
       buffer
     );
 
     // retorno
     expect(result).toEqual({
-      path: "/uploads/users/10/uuid-1-uuid-1-uuid-1-uuid-1.png",
+      path: "/uploads/public/users/10/uuid-1-uuid-1-uuid-1-uuid-1.png",
       size: 5,
       mimeType: "image/png",
     });

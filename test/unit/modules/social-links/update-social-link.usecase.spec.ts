@@ -41,4 +41,15 @@ describe("UpdateSocialLinkUseCase", () => {
     const result = await sut.execute(99, { label: "X" });
     expect(result).toBeNull();
   });
+
+  it("retorna null quando o repositório update falha após encontrar", async () => {
+    const findById: FindSocialLinkByIdRepository = {
+      findById: jest.fn(async () => existing),
+    };
+    const update: UpdateSocialLinkRepository = {
+      update: jest.fn(async () => null),
+    };
+    const sut = new UpdateSocialLinkUseCase(findById, update);
+    expect(await sut.execute(1, { label: "X" })).toBeNull();
+  });
 });

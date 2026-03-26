@@ -4,6 +4,10 @@ import jwt from "jsonwebtoken";
 
 jest.mock("jsonwebtoken");
 
+jest.mock("@/core/config/logger", () => ({
+  logger: { warn: jest.fn(), error: jest.fn(), info: jest.fn() },
+}));
+
 describe("auth-middleware", () => {
   const makeReqResNext = (auth?: string) => {
     const req: any = {
@@ -54,6 +58,40 @@ describe("auth-middleware", () => {
     expect(jwt.verify).toHaveBeenCalled();
     expect(res.status).toHaveBeenCalledWith(401);
     expect(next).not.toHaveBeenCalled();
+  });
+
+  it("deve retornar 401 quando scheme não for Bearer", () => {
+    const { req, res, next } = makeReqResNext("Basic dGVzdA==");
+    authMiddleware(req, res, next);
+    expect(res.status).toHaveBeenCalledWith(401);
+    expect(jwt.verify).not.toHaveBeenCalled();
+    expect(next).not.toHaveBeenCalled();
+  });
+
+  it("deve retornar 401 quando header for só Bearer sem token", () => {
+    const { req, res, next } = makeReqResNext("Bearer");
+    authMiddleware(req, res, next);
+    expect(res.status).toHaveBeenCalledWith(401);
+    expect(jwt.verify).not.toHaveBeenCalled();
+  });
+
+  it("deve retornar 500 quando JWT_ACCESS_SECRET não estiver configurado", () => {
+    const prev = ENV.JWT_ACCESS_SECRET;
+    try {
+      (ENV as { JWT_ACCESS_SECRET: string }).JWT_ACCESS_SECRET = "";
+      const { req, res, next } = makeReqResNext("Bearer token");
+      authMiddleware(req, res, next);
+      expect(res.status).toHaveBeenCalledWith(500);
+      expect(res.json).toHaveBeenCalledWith(
+        expect.objectContaining({
+          error: expect.objectContaining({ code: "INTERNAL_ERROR" }),
+        }),
+      );
+      expect(jwt.verify).not.toHaveBeenCalled();
+      expect(next).not.toHaveBeenCalled();
+    } finally {
+      (ENV as { JWT_ACCESS_SECRET: string }).JWT_ACCESS_SECRET = prev;
+    }
   });
 
   it("deve chamar next e injetar req.user quando token for válido", () => {

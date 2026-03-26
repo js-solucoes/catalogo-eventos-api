@@ -1,10 +1,9 @@
-// src/modules/events/presentation/http/controllers/update-event.controller.ts
 import { logger } from "@/core/config/logger";
-import { mapErrorToHttpResponse } from "@/core/http/http-error-response";
-import { ok, ResourceBuilder } from "@/core/http/http-resource";
+import { mapErrorToHttpResponse, ok, ResourceBuilder } from "@/core/http";
 import { Controller, HttpRequest, HttpResponse } from "@/core/protocols";
 import { UpdateEventUseCase } from "@/modules/events/application/use-cases/update-event.usecase";
 import { UpdateEventDTO } from "@/modules/events/application/dto";
+import { toEventHttpPayload } from "../mappers/event-response.mapper";
 import { eventLinks } from "../event-hateoas";
 
 export class UpdateEventController implements Controller {
@@ -25,26 +24,10 @@ export class UpdateEventController implements Controller {
       const body = req.body as UpdateEventDTO;
 
       const updated = await this.useCase.execute(id, body);
+      const payload = toEventHttpPayload(updated);
 
-      const payload = {
-        id: updated.id,
-        cityId: updated.cityId,
-        citySlug: updated.citySlug,
-        name: updated.name,
-        description: updated.description,
-        category: updated.category,
-        startDate: updated.startDate,
-        endDate: updated.endDate,
-        formattedDate: updated.formattedDate,
-        location: updated.location,
-        imageUrl: updated.imageUrl,
-        featured: updated.featured,
-        published: updated.published,
-        createdAt: updated.createdAt,
-        updatedAt: updated.updatedAt,
-      };
-      const builder = new ResourceBuilder(payload);
-      const resource = builder
+      const resourceBuild = new ResourceBuilder(payload);
+      const resource = resourceBuild
         .addAllLinks(eventLinks(updated.id))
         .addMeta({ correlationId, version: "1.0.0" })
         .build();

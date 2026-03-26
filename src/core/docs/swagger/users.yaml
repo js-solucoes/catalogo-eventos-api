@@ -1,11 +1,11 @@
 tags:
   - name: Users ADMIN
-    description: Endpoints relacionados aos usuários do Celeiro do MS
+    description: Endpoints relacionados aos usu?rios do Celeiro do MS
 
 paths:
   /admin/users:
     post:
-      summary: Cria um novo usuário
+      summary: Cria um novo usu?rio
       tags:
         - Users ADMIN
       security:
@@ -18,34 +18,76 @@ paths:
               $ref: '#/components/schemas/UserAdmin'
       responses:
         '201':
-          description: Usuário criado
+          description: Usu?rio criado
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/UserResponse'
         '409':
-          description: E-mail já em uso
+          description: E-mail j? em uso
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
     get:
-      summary: Lista usuários
+      summary: Lista usu?rios (paginado)
       tags:
         - Users ADMIN
       security:
         - bearerAuth: []
+      parameters:
+        - in: query
+          name: page
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 10
+        - in: query
+          name: name
+          description: Filtro parcial por nome (LIKE)
+          schema:
+            type: string
+        - in: query
+          name: email
+          description: Filtro por e-mail exato
+          schema:
+            type: string
+            format: email
+        - in: query
+          name: sortBy
+          schema:
+            type: string
+            enum: [name, email, createdAt]
+        - in: query
+          name: sortDir
+          schema:
+            type: string
+            enum: [asc, desc]
+            default: asc
       responses:
         '200':
-          description: Lista de usuários
+          description: Cole??o paginada de usu?rios (sem senha); meta com total, p?gina e ordena??o; links HATEOAS incluindo pagina??o e create
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/UsersCollectionResponse'
+        '400':
+          description: Query inv?lida (campos n?o permitidos ou tipos incorretos)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InvalidQueryResponse'
 
   /admin/users/{id}:
     get:
-      summary: Busca usuário por id
+      summary: Busca usu?rio por id
       tags:
         - Users ADMIN
       security:
@@ -58,20 +100,20 @@ paths:
             type: integer
       responses:
         '200':
-          description: Usuário encontrado
+          description: Usu?rio encontrado
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/UserResponse'
         '404':
-          description: Usuário não encontrado
+          description: Usu?rio n?o encontrado
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
 
     patch:
-      summary: Atualiza usuário por id
+      summary: Atualiza usu?rio por id
       tags:
         - Users ADMIN
       security:
@@ -82,7 +124,7 @@ paths:
           schema:
             type: integer
           required: true
-          description: ID do usuário a ser atualizado
+          description: ID do usu?rio a ser atualizado
       requestBody:
         required: true
         content:
@@ -91,20 +133,20 @@ paths:
               $ref: '#/components/schemas/UpdateUserRequest'
       responses:
         '200':
-          description: Usuário atualizado
+          description: Usu?rio atualizado
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/UserResponse'
         '404':
-          description: Usuário não encontrado
+          description: Usu?rio n?o encontrado
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse' 
+                $ref: '#/components/schemas/ErrorResponse'
 
     delete:
-      summary: Remove usuário por id
+      summary: Remove usu?rio por id
       tags:
         - Users ADMIN
       security:
@@ -115,12 +157,12 @@ paths:
           schema:
             type: integer
           required: true
-          description: ID do usuário a ser removido
+          description: ID do usu?rio a ser removido
       responses:
         '204':
-          description: Usuário removido
+          description: Usu?rio removido
         '404':
-          description: Usuário não encontrado
+          description: Usu?rio n?o encontrado
           content:
             application/json:
               schema:
@@ -128,6 +170,48 @@ paths:
 
 components:
   schemas:
+    InvalidQueryResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          example: Invalid query params
+        errors:
+          type: array
+          items:
+            type: object
+            properties:
+              path:
+                type: string
+              message:
+                type: string
+      required: [message, errors]
+
+    UsersListMeta:
+      allOf:
+        - $ref: '#/components/schemas/Meta'
+      properties:
+        version:
+          type: string
+          example: "1.0.0"
+        total:
+          type: integer
+        totalPages:
+          type: integer
+        page:
+          type: integer
+        limit:
+          type: integer
+        sort:
+          type: object
+          properties:
+            by:
+              type: string
+              enum: [name, email, createdAt]
+            dir:
+              type: string
+              enum: [asc, desc]
+
     UpdateUserRequest:
       type: object
       properties:
@@ -164,8 +248,9 @@ components:
         links:
           $ref: '#/components/schemas/Links'
         meta:
-          $ref: '#/components/schemas/Meta'
-      required: [data]
+          $ref: '#/components/schemas/UsersListMeta'
+      required: [data, meta]
+
     UserAdmin:
       type: object
       properties:

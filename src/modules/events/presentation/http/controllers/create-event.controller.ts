@@ -1,9 +1,9 @@
-import { Controller, HttpRequest, HttpResponse } from "@/core/protocols";
-import { created, resource, ResourceBuilder } from "@/core/http/http-resource";
 import { logger } from "@/core/config/logger";
-import { mapErrorToHttpResponse } from "@/core/http/http-error-response";
+import { created, mapErrorToHttpResponse, ResourceBuilder } from "@/core/http";
+import { Controller, HttpRequest, HttpResponse } from "@/core/protocols";
 import { CreateEventUseCase } from "@/modules/events/application/use-cases/create-event.usecase";
 import { CreateEventDTO } from "@/modules/events/application/dto";
+import { toEventHttpPayload } from "../mappers/event-response.mapper";
 import { eventLinks } from "../event-hateoas";
 
 export class CreateEventController implements Controller {
@@ -19,9 +19,10 @@ export class CreateEventController implements Controller {
 
     try {
       const createdEvent = await this.useCase.execute(req.body as CreateEventDTO);
+      const payload = toEventHttpPayload(createdEvent);
 
-      const builder = new ResourceBuilder(createdEvent);
-      const resource = builder
+      const resourceBuild = new ResourceBuilder(payload);
+      const resource = resourceBuild
         .addAllLinks(eventLinks(createdEvent.id))
         .addMeta({ correlationId, version: "1.0.0" })
         .build();

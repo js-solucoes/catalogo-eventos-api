@@ -1,4 +1,7 @@
-import { HomeBannerEntity } from "../../domain/entities/home-banner.entity";
+import {
+  HomeBannerEntity,
+  HomeBannerProps,
+} from "../../domain/entities/home-banner.entity";
 import {
   CreateHomeBannerRepository,
   DeleteHomeBannerRepository,
@@ -69,7 +72,7 @@ export class SequelizeHomeBannerRepository
   }
   async update(
     id: number,
-    homeBanner: Partial<HomeBannerEntity>,
+    homeBanner: Partial<HomeBannerProps>,
   ): Promise<HomeBannerEntity | null> {
     const found = await HomeBannerModel.findByPk(id)
     if(!found) return null

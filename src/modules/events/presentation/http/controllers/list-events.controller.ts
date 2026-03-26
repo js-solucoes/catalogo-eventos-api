@@ -1,22 +1,22 @@
-// src/modules/events/presentation/http/controllers/list-events.controller.ts
+import { logger } from "@/core/config/logger";
+import {
+  CollectionResourceBuilder,
+  mapErrorToHttpResponse,
+  ok,
+} from "@/core/http";
 import { Controller, HttpRequest, HttpResponse } from "@/core/protocols";
-import { CollectionResourceBuilder, ok } from "@/core/http/http-resource";
 import { ListEventsUseCase } from "@/modules/events/application/use-cases/list-events.usecase";
 import { eventListLinks, eventPublicListLinks } from "../event-hateoas";
-import { ListEventsDTO } from "@/modules/events/application/dto";
-import { EventCategory, isEventCategory } from "@/modules/events/domain/value-objects/event-category";
+import { toListEventsUseCaseInput } from "../mappers/list-events-query.mapper";
+import { toEventHttpPayload } from "../mappers/event-response.mapper";
+import {
+  listEventsQuerySchema,
+  type ListEventsQueryDTO,
+} from "../validators/event-schemas";
+
+type EventListItemPayload = ReturnType<typeof toEventHttpPayload>;
 
 export type EventsListAudience = "admin" | "public";
-
-type ListEventsQueryParams = {
-  page?: string;
-  limit?: string;
-  name?: string;
-  category?: string;
-  cityId?: string;
-  sortBy?: string;
-  sortDir?: string;
-};
 
 export class ListEventsController implements Controller {
   constructor(
@@ -26,77 +26,69 @@ export class ListEventsController implements Controller {
 
   async handle(httpRequest: HttpRequest): Promise<HttpResponse> {
     const correlationId = httpRequest.correlationId;
-    const q = (httpRequest.query ?? {}) as ListEventsQueryParams;
 
-    const categoryFilter: EventCategory | undefined =
-      q.category !== undefined && isEventCategory(q.category)
-        ? q.category
-        : undefined;
+    try {
+      const query: ListEventsQueryDTO =
+        (httpRequest.validatedQuery as ListEventsQueryDTO | undefined) ??
+        listEventsQuerySchema.parse(httpRequest.query ?? {});
 
-    const result = await this.useCase.execute({
-      page: q.page ? Number(q.page) : undefined,
-      limit: q.limit ? Number(q.limit) : undefined,
+      const useCaseInput = toListEventsUseCaseInput(query);
+      const result = await this.useCase.execute(useCaseInput);
 
-      name: q.name,
-      category: categoryFilter,
-      cityId: q.cityId ? Number(q.cityId) : undefined,
+      const data = result.items.map<EventListItemPayload>((e) =>
+        toEventHttpPayload(e),
+      );
 
-      sortBy: q.sortBy,
-      sortDir: q.sortDir,
-    });
+      const listParams = {
+        page: result.page,
+        limit: result.limit,
+        totalPages: result.totalPages,
+        filters: {
+          ...(useCaseInput.name !== undefined && { name: useCaseInput.name }),
+          ...(useCaseInput.category !== undefined && {
+            category: useCaseInput.category,
+          }),
+          ...(useCaseInput.cityId !== undefined && {
+            cityId: useCaseInput.cityId,
+          }),
+        },
+        sort: useCaseInput.sortBy
+          ? {
+              by: useCaseInput.sortBy,
+              dir: useCaseInput.sortDir as "asc" | "desc",
+            }
+          : undefined,
+      };
+      const links =
+        this.audience === "public"
+          ? eventPublicListLinks(listParams)
+          : eventListLinks(listParams);
 
-    const data = {
-      items: result.items.map<ListEventsDTO>((e) => ({
-        id: e.id,
-        cityId: e.cityId,
-        citySlug: e.citySlug,
-        name: e.name,
-        description: e.description,
-        category: e.category,
-        startDate: e.startDate,
-        endDate: e.endDate,
-        formattedDate: e.formattedDate,
-        location: e.location,
-        imageUrl: e.imageUrl,
-        featured: e.featured,
-        published: e.published,
-        createdAt: e.createdAt,
-        updatedAt: e.updatedAt,
-      })),
-      page: result.page,
-      limit: result.limit,
-      total: result.total,
-      totalPages: result.totalPages,
-      sort: result.sort,
-    };
+      const meta = {
+        total: result.total,
+        totalPages: result.totalPages,
+        page: result.page,
+        limit: result.limit,
+        sort: result.sort,
+        correlationId,
+        version: "1.0.0",
+      };
+      const resourceBuild = new CollectionResourceBuilder<EventListItemPayload>(
+        data,
+      );
+      const collectionResource = resourceBuild
+        .addAllLinks(links)
+        .addMeta(meta)
+        .build();
 
-    const listParams = {
-      page: result.page,
-      limit: result.limit,
-      totalPages: result.totalPages,
-      filters: {
-        ...(q.name !== undefined && { name: q.name }),
-        ...(categoryFilter !== undefined && { category: categoryFilter }),
-        ...(q.cityId !== undefined && { cityId: q.cityId }),
-      },
-      sort: q.sortBy ? { by: q.sortBy, dir: q.sortDir as "asc" | "desc" } : undefined,
-    };
-    const links =
-      this.audience === "public"
-        ? eventPublicListLinks(listParams)
-        : eventListLinks(listParams);
-
-    const meta = {
-      total: result.total,
-      totalPages: result.totalPages,
-      page: result.page,
-      limit: result.limit,
-      sort: result.sort,
-      correlationId,
-    };
-    const builder = new CollectionResourceBuilder<ListEventsDTO>(data.items);
-    const collectionResource = builder.addAllLinks(links).addMeta(meta).build();
-
-    return ok(collectionResource);
+      return ok(collectionResource);
+    } catch (error) {
+      logger.error("Erro ao listar eventos", {
+        correlationId,
+        route: "ListEventsController",
+        error,
+      });
+      return mapErrorToHttpResponse(error, correlationId);
+    }
   }
 }

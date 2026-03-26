@@ -5,6 +5,7 @@ import { FindCityBySlugController } from "@/modules/cities/presentation/http/con
 import { ListCityController } from "@/modules/cities/presentation/http/controller/list-city.controller";
 import { PublicListCityController } from "@/modules/cities/presentation/http/controller/public-list-city.controller";
 import { UpdateCityController } from "@/modules/cities/presentation/http/controller/update-city.controller";
+import { AppError } from "@/core/errors-app-error";
 import { CityEntity } from "@/modules/cities/domain/entities/city.entity";
 
 jest.mock("@/core/config/logger", () => ({
@@ -61,7 +62,13 @@ describe("FindCityByIdController", () => {
   const pub = new FindCityByIdController({ execute } as never, "public");
 
   it("404 e 200 admin/público", async () => {
-    execute.mockResolvedValue(null);
+    execute.mockRejectedValue(
+      new AppError({
+        code: "CIDADE_NOT_FOUND",
+        message: "Cidade 1 não encontrada",
+        statusCode: 404,
+      }),
+    );
     expect((await admin.handle({ correlationId: "c", params: { id: "1" } })).statusCode).toBe(
       404,
     );

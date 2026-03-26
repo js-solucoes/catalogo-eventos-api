@@ -1,7 +1,12 @@
 import adaptRoute from "@/core/adapters/express-route-adapter";
 import authMiddleware from "@/core/http/middlewares/auth-middleware";
 import authorizeRoles from "@/core/http/middlewares/authorize-roles";
+import { validateBody } from "@/core/http/middlewares/validate-body";
 import { Router } from "express-serve-static-core";
+import {
+  createCitySchema,
+  updateCitySchema,
+} from "../validators/city-schemas";
 import {
   makeCreateCityController,
   makeDeleteCityController,
@@ -29,12 +34,14 @@ export function registerCityRoutes(router: Router): void {
     "/admin/cities",
     authMiddleware,
     authorizeRoles(["Admin"]),
+    validateBody(createCitySchema),
     adaptRoute(makeCreateCityController()),
   );
   router.patch(
     "/admin/cities/:id",
     authMiddleware,
     authorizeRoles(["Admin"]),
+    validateBody(updateCitySchema),
     adaptRoute(makeUpdateCityController()),
   );
   router.delete(

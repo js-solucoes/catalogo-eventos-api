@@ -1,9 +1,12 @@
-// src/modules/events/presentation/http/event-hateoas.ts
+import { buildPaginationLinks } from "@/core/http/hateoas/pagination-links";
 import { Links } from "@/core/http/http-resource";
 
 type SortDir = "asc" | "desc";
 const API_ADMIN_PREFIX = "/api/admin";
 const API_PUBLIC_PREFIX = "/api/public";
+
+const EVENTS_ADMIN_BASE = `${API_ADMIN_PREFIX}/events`;
+const EVENTS_PUBLIC_BASE = `${API_PUBLIC_PREFIX}/events`;
 
 export function eventPublicLinks(id: string | number): Links {
   const eventId = String(id);
@@ -32,75 +35,36 @@ type ListLinksParams = {
   sort?: { by?: string; dir?: SortDir };
 };
 
-function toQueryString(params: Record<string, string | number | boolean | undefined>) {
-  const qs = new URLSearchParams();
-  Object.entries(params).forEach(([k, v]) => {
-    if (v === undefined || v === null || v === "") return;
-    qs.set(k, String(v));
-  });
-  const s = qs.toString();
-  return s ? `?${s}` : "";
-}
+export function eventListLinks(params: ListLinksParams): Links {
+  const query: Record<string, string | number | boolean | undefined> = {
+    limit: params.limit,
+    ...(params.filters ?? {}),
+  };
+  if (params.sort?.by !== undefined) query.sortBy = params.sort.by;
+  if (params.sort?.dir !== undefined) query.sortDir = params.sort.dir;
 
-const EVENTS_ADMIN_BASE = `${API_ADMIN_PREFIX}/events`;
-const EVENTS_PUBLIC_BASE = `${API_PUBLIC_PREFIX}/events`;
-
-export function eventListLinks({
-  page,
-  limit,
-  totalPages,
-  filters,
-  sort,
-}: ListLinksParams): Links {
-  return buildEventListLinksForBase(EVENTS_ADMIN_BASE, {
-    page,
-    limit,
-    totalPages,
-    filters,
-    sort,
+  return buildPaginationLinks({
+    basePath: EVENTS_ADMIN_BASE,
+    page: params.page,
+    limit: params.limit,
+    totalPages: params.totalPages,
+    query,
   });
 }
 
 export function eventPublicListLinks(params: ListLinksParams): Links {
-  return buildEventListLinksForBase(EVENTS_PUBLIC_BASE, params);
-}
-
-function buildEventListLinksForBase(
-  basePath: string,
-  {
-    page,
-    limit,
-    totalPages,
-    filters,
-    sort,
-  }: ListLinksParams,
-): Links {
-  const baseQuery = {
-    page,
-    limit,
-    ...(filters ?? {}),
-    sortBy: sort?.by,
-    sortDir: sort?.dir,
+  const query: Record<string, string | number | boolean | undefined> = {
+    limit: params.limit,
+    ...(params.filters ?? {}),
   };
+  if (params.sort?.by !== undefined) query.sortBy = params.sort.by;
+  if (params.sort?.dir !== undefined) query.sortDir = params.sort.dir;
 
-  const self = `${basePath}${toQueryString(baseQuery)}`;
-
-  const next =
-    page < totalPages
-      ? `${basePath}${toQueryString({ ...baseQuery, page: page + 1 })}`
-      : undefined;
-
-  const prev =
-    page > 1 ? `${basePath}${toQueryString({ ...baseQuery, page: page - 1 })}` : undefined;
-
-  const first = `${basePath}${toQueryString({ ...baseQuery, page: 1 })}`;
-  const last = `${basePath}${toQueryString({ ...baseQuery, page: totalPages })}`;
-
-  return {
-    self: { href: self, method: "GET" },
-    first: { href: first, method: "GET" },
-    last: { href: last, method: "GET" },
-    ...(next ? { next: { href: next, method: "GET" } } : {}),
-    ...(prev ? { prev: { href: prev, method: "GET" } } : {}),
-  };
+  return buildPaginationLinks({
+    basePath: EVENTS_PUBLIC_BASE,
+    page: params.page,
+    limit: params.limit,
+    totalPages: params.totalPages,
+    query,
+  });
 }

@@ -1,4 +1,5 @@
 import z from "zod";
+import { webImageFileSchema } from "@/modules/media/application/validators/web-image.schema";
 
 export const createCitySchema = z.object({
   name: z
@@ -58,7 +59,7 @@ export const createCitySchema = z.object({
     })
     .min(10, "Descrição deve ter pelo menos 10 caracteres"),
 
-  imageUrl: z.url(),
+  image: webImageFileSchema,
 
   published: z.boolean(),
 });
@@ -117,7 +118,7 @@ export const updateCitySchema = z.object({
     .min(10, "Descrição deve ter pelo menos 10 caracteres")
     .optional(),
 
-  imageUrl: z.url().optional(),
+  image: webImageFileSchema.optional(),
 
   published: z.boolean().optional(),
 });

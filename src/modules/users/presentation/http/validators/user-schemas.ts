@@ -79,3 +79,14 @@ export const updateUserSchema = z.object({
     })
     .optional(),
 });
+
+export const listUsersQuerySchema = z
+  .object({
+    page: z.coerce.number().int().min(1).default(1),
+    limit: z.coerce.number().int().min(1).max(100).default(10),
+    name: z.string().trim().min(1).optional(),
+    email: z.string().trim().email().optional(),
+    sortBy: z.enum(["name", "email", "createdAt"]).optional(),
+    sortDir: z.enum(["asc", "desc"]).default("asc"),
+  })
+  .strict();

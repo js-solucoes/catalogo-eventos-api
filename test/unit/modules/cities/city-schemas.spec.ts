@@ -6,13 +6,19 @@ import {
   updateCitySchema,
 } from "@/modules/cities/presentation/http/validators/city-schemas";
 
+const tinyPngB64 =
+  "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==";
+
 const validCreate = {
   name: "Campo Grande",
   slug: "campo-grande",
   state: "MS",
   summary: "Resumo ok",
   description: "Descrição com mais de dez chars.",
-  imageUrl: "https://example.com/c.jpg",
+  image: {
+    base64: tinyPngB64,
+    mimeType: "image/png" as const,
+  },
   published: true,
 };
 
@@ -56,9 +62,12 @@ describe("city-schemas", () => {
     expect(
       createCitySchema.safeParse({ ...validCreate, description: "curta" }).success,
     ).toBe(false);
-    expect(createCitySchema.safeParse({ ...validCreate, imageUrl: "não-url" }).success).toBe(
-      false,
-    );
+    expect(
+      createCitySchema.safeParse({
+        ...validCreate,
+        image: { base64: "curto", mimeType: "image/png" },
+      }).success,
+    ).toBe(false);
   });
 
   it("updateCitySchema rejeita tipos inválidos quando campo presente", () => {
@@ -74,5 +83,26 @@ describe("city-schemas", () => {
   it("listCitiesQuerySchema page/limit não numéricos", () => {
     expect(listCitiesQuerySchema.safeParse({ page: "a" }).success).toBe(false);
     expect(listCitiesQuerySchema.safeParse({ limit: "x" }).success).toBe(false);
+  });
+
+  it("createCitySchema rejeita resumo curto", () => {
+    expect(
+      createCitySchema.safeParse({ ...validCreate, summary: "ab" }).success,
+    ).toBe(false);
+  });
+
+  it("updateCitySchema rejeita slug curto e descrição curta quando informados", () => {
+    expect(updateCitySchema.safeParse({ slug: "ab" }).success).toBe(false);
+    expect(
+      updateCitySchema.safeParse({ description: "123456789" }).success,
+    ).toBe(false);
+  });
+
+  it("updateCitySchema aceita imagem opcional válida", () => {
+    expect(
+      updateCitySchema.safeParse({
+        image: { base64: tinyPngB64, mimeType: "image/png" },
+      }).success,
+    ).toBe(true);
   });
 });

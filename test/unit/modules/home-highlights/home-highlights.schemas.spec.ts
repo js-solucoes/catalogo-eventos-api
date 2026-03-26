@@ -3,13 +3,16 @@ import {
   updateHomeHighlightSchema,
 } from "@/modules/home-highlights/presentation/http/validators/home-highlights.schemas";
 
+const tinyPngB64 =
+  "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==";
+
 const valid = {
   type: "event" as const,
   referenceId: 1,
   title: "Título",
   description: "Descrição ok",
   cityName: "Cidade",
-  imageUrl: "https://example.com/i.jpg",
+  image: { base64: tinyPngB64, mimeType: "image/png" as const },
   ctaUrl: "https://example.com/c",
   active: true,
   order: 1,

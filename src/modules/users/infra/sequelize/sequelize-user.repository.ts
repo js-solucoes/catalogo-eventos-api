@@ -1,6 +1,6 @@
 import UserModel from "@/modules/users/infra/model/user-model";
 import { userModelToEntity } from "../mappers/user-model.mapper";
-import { Transaction } from "sequelize";
+import { Op, Order, Transaction, WhereOptions } from "sequelize";
 import { UserEntity, UserProps } from "../../domain/entities/user.entity";
 import {
   CreateUserRepository,
@@ -8,6 +8,8 @@ import {
   FindUserByEmailRepository,
   FindUserByIdRepository,
   ListUsersRepository,
+  ListUsersPageResult,
+  ListUsersSearchParams,
   UpdateUserRepository,
 } from "../../domain/repositories";
 import { FindClienteByTelefoneRepository } from "../../domain/repositories/find-cliente-by-telefone.repository";
@@ -22,6 +24,35 @@ export class SequelizeUserRepository
     DeleteUserRepository,
     FindClienteByTelefoneRepository
 {
+  async list(params: ListUsersSearchParams): Promise<ListUsersPageResult> {
+    const where: WhereOptions = {};
+    if (params.nameContains !== undefined && params.nameContains !== "") {
+      where.name = { [Op.like]: `%${params.nameContains}%` };
+    }
+    if (params.emailEquals !== undefined && params.emailEquals !== "") {
+      where.email = params.emailEquals;
+    }
+
+    const offset = (params.page - 1) * params.limit;
+    const order: Order = [
+      [params.sortBy, params.sortDir.toUpperCase() as "ASC" | "DESC"],
+    ];
+
+    const { rows, count } = await UserModel.findAndCountAll({
+      where,
+      limit: params.limit,
+      offset,
+      order,
+    });
+
+    return {
+      items: rows.map((u) => userModelToEntity(u)),
+      total: count,
+      page: params.page,
+      limit: params.limit,
+    };
+  }
+
   findByTelefone(telefone: string): Promise<{ userId: number; name?: string; endereco?: string; telefone?: string; } | null> {
     return UserModel.findOne({ where: { telefone } }).then(user => {
       if (!user) return null;
@@ -57,12 +88,6 @@ export class SequelizeUserRepository
     if (!user) return null;
 
     return userModelToEntity(user);
-  }
-
-  async findAll(): Promise<UserEntity[]> {
-    const users = await UserModel.findAll();
-
-    return users.map((u) => userModelToEntity(u));
   }
 
   async update(

@@ -8,7 +8,7 @@ jest.mock("@/modules/users/infra/model/user-model", () => ({
     create: jest.fn(),
     findByPk: jest.fn(),
     findOne: jest.fn(),
-    findAll: jest.fn(),
+    findAndCountAll: jest.fn(),
     update: jest.fn(),
     destroy: jest.fn(),
     sync: jest.fn().mockResolvedValue(undefined),
@@ -55,9 +55,20 @@ describe("SequelizeUserRepository", () => {
     expect((await repo.findByEmail("u@b.com"))?.id).toBe(9);
   });
 
-  it("findAll", async () => {
-    (UserModel.findAll as jest.Mock).mockResolvedValue([{ ...row }]);
-    expect((await repo.findAll()).length).toBe(1);
+  it("list paginado", async () => {
+    (UserModel.findAndCountAll as jest.Mock).mockResolvedValue({
+      rows: [{ ...row }],
+      count: 1,
+    });
+    const out = await repo.list({
+      page: 1,
+      limit: 10,
+      sortBy: "name",
+      sortDir: "asc",
+    });
+    expect(out.items.length).toBe(1);
+    expect(out.total).toBe(1);
+    expect(UserModel.findAndCountAll).toHaveBeenCalled();
   });
 
   it("update", async () => {

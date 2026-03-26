@@ -12,6 +12,14 @@ import setupRoutes from "@/core/config/routes";
 export const createApp = (): Application => {
   const app = express();
 
+  // Health check para ALB/ECS (sem tocar no banco)
+  app.get("/health", (_req, res) => {
+    res.status(200).json({
+      status: "ok",
+      uptimeSeconds: Math.round(process.uptime()),
+    });
+  });
+
   // Swagger opcional
   if (ENV.SWAGGER_ENABLED) {
     const swaggerDocument = loadSwaggerDocument();

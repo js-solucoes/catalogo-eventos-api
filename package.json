@@ -14,6 +14,7 @@
     "lint": "eslint src",
     "lint:ci": "eslint src",
     "copy:swagger": "copyfiles -u 2 \"src/docs/**/*\" dist/docs",
+    "copy:src/core/docs": "copyfiles -u 1 \"src/core/docs/**/*\" dist",
     "test": "NODE_ENV=test jest --passWithNoTests --silent --noStackTrace --runInBand",
     "test:verbose": "NODE_ENV=test jest --passWithNoTests --runInBand",
     "test:clear": "npx jest --clearCache",
@@ -21,6 +22,7 @@
     "test:integration": "npm test -- --watchAll -c jest-integration-config.js",
     "test:staged": "npm test -- --findRelatedTests",
     "test:ci": "npm test -- --coverage",
+    "smoke:http": "node scripts/smoke-http.cjs",
     "check": "npm run typecheck && npm run lint && npm run test:ci"
   },
   "devDependencies": {
@@ -59,6 +61,7 @@
     "module-alias": "^2.2.3",
     "mysql2": "^3.14.1",
     "sequelize": "^6.37.7",
+    "sharp": "^0.33.5",
     "swagger-jsdoc": "^6.2.8",
     "swagger-ui-express": "^5.0.1",
     "yamljs": "^0.3.0",

@@ -25,6 +25,8 @@ describe("S3MediaStorageService", () => {
       bucket: "my-bucket",
       region: "us-east-1",
       publicBaseUrl: "https://my-bucket.s3.amazonaws.com",
+      publicKeyPrefix: "public",
+      defaultStorageClass: "STANDARD",
     });
 
     const buffer = Buffer.from("hello");
@@ -43,10 +45,11 @@ describe("S3MediaStorageService", () => {
     expect(cmdArg).toEqual(
       expect.objectContaining({
         Bucket: "my-bucket",
-        Key: "users/10/uuid-1-uuid-1-uuid-1-uuid-1.png",
+        Key: "public/users/10/uuid-1-uuid-1-uuid-1-uuid-1.png",
         Body: buffer,
         ContentType: "image/png",
-        ACL: "public-read",
+        CacheControl: "public, max-age=31536000, immutable",
+        StorageClass: "STANDARD",
       })
     );
 
@@ -54,8 +57,8 @@ describe("S3MediaStorageService", () => {
 
     expect(result).toEqual(
       expect.objectContaining({
-        path: "s3://my-bucket/users/10/uuid-1-uuid-1-uuid-1-uuid-1.png",
-        url: "https://my-bucket.s3.amazonaws.com/users/10/uuid-1-uuid-1-uuid-1-uuid-1.png",
+        path: "s3://my-bucket/public/users/10/uuid-1-uuid-1-uuid-1-uuid-1.png",
+        url: "https://my-bucket.s3.amazonaws.com/public/users/10/uuid-1-uuid-1-uuid-1-uuid-1.png",
         size: 5,
         mimeType: "image/png",
       })
@@ -69,6 +72,8 @@ describe("S3MediaStorageService", () => {
       bucket: "my-bucket",
       region: "us-east-1",
       publicBaseUrl: "https://my-bucket.s3.amazonaws.com",
+      publicKeyPrefix: "public",
+      defaultStorageClass: "STANDARD",
     });
 
     await svc.save({

@@ -1,6 +1,7 @@
+import { TOURIST_POINT_SORT_FIELDS } from "@/modules/tourist-points/application/sorting/tourist-point.sort";
 import { TOURIST_POINT_CATEGORIES } from "@/modules/tourist-points/domain/value-objects/tourist-point-category";
+import { webImageFileSchema } from "@/modules/media/application/validators/web-image.schema";
 import { z } from "zod";
-import { id } from "zod/locales";
 
 export const createTouristPointSchema = z.object({
   id: z.number().optional(),
@@ -54,19 +55,7 @@ export const createTouristPointSchema = z.object({
     )
     .min(3, "Horário deve ter pelo menos 3 caracteres"),
 
-  imageUrl: z
-    .string({
-      error: (issue) => {
-        if (issue.code === "invalid_type" && issue.expected === "string") {
-          return { message: "Imagem deve ser uma string" };
-        }
-        if (issue.code === "invalid_type" && issue.expected === "undefined") {
-          return { message: "Imagem é obrigatória" };
-        }
-        return { message: "Imagem é inválida" };
-      },
-    })
-    .min(3, "Imagem deve ter pelo menos 3 caracteres"),
+  image: webImageFileSchema,
 
   featured: z.boolean(),
 
@@ -138,22 +127,27 @@ export const updateTouristPointSchema = z.object({
     .min(3, "Horário deve ter pelo menos 3 caracteres")
     .optional(),
 
-  imageUrl: z
-    .string({
-      error: (issue) => {
-        if (issue.code === "invalid_type" && issue.expected === "string") {
-          return { message: "Imagem deve ser uma string" };
-        }
-        if (issue.code === "invalid_type" && issue.expected === "undefined") {
-          return { message: "Imagem é obrigatória" };
-        }
-        return { message: "Imagem é inválida" };
-      },
-    })
-    .min(3, "Imagem deve ter pelo menos 3 caracteres")
-    .optional(),
+  image: webImageFileSchema.optional(),
 
   featured: z.boolean().optional(),
 
   published: z.boolean().optional(),
 });
+
+/** Query string para GET listagens de pontos turísticos (admin e público). */
+export const listTouristPointsQuerySchema = z
+  .object({
+    page: z.coerce.number().int().min(1).default(1),
+    limit: z.coerce.number().int().min(1).max(50).default(10),
+    name: z.string().trim().min(1).optional(),
+    city: z.string().trim().min(1).optional(),
+    state: z.string().trim().min(1).optional(),
+    published: z.enum(["true", "false"]).optional(),
+    sortBy: z.enum(TOURIST_POINT_SORT_FIELDS).optional(),
+    sortDir: z.string().trim().optional(),
+  })
+  .strict();
+
+export type ListTouristPointsQueryDTO = z.infer<
+  typeof listTouristPointsQuerySchema
+>;

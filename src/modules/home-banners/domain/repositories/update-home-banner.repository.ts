@@ -1,5 +1,11 @@
-import { HomeBannerEntity } from "../entities/home-banner.entity";
+import {
+  HomeBannerEntity,
+  HomeBannerProps,
+} from "../entities/home-banner.entity";
 
 export interface UpdateHomeBannerRepository {
-    update(id: number,homeBanner: Partial<HomeBannerEntity>): Promise<HomeBannerEntity|null>
+  update(
+    id: number,
+    homeBanner: Partial<HomeBannerProps>,
+  ): Promise<HomeBannerEntity | null>;
 }

@@ -1,28 +1,30 @@
+import type { PublicWebImageUploader } from "@/modules/media/domain/ports/public-web-image.uploader";
 import { TouristPointEntity } from "../../domain/entities/tourist-point.entity";
 import { CreateTouristPointRepository } from "../../domain/repositories/create-tourist-point.repository";
-import { createTouristPointDTO } from "../dto";
+import { createTouristPointDTO, TouristPointPersistedDTO } from "../dto";
 
 export class CreateTouristPointUseCase {
-  constructor(private readonly repository: CreateTouristPointRepository) {}
+  constructor(
+    private readonly repository: CreateTouristPointRepository,
+    private readonly images: PublicWebImageUploader,
+  ) {}
 
   async execute(
     touristPointDTO: createTouristPointDTO,
-  ): Promise<createTouristPointDTO> {
+  ): Promise<TouristPointPersistedDTO> {
+    const { image, ...fields } = touristPointDTO;
+    const { url: imageUrl } = await this.images.uploadPublicWebImage(
+      image,
+      "tourist-points",
+    );
+
     const input: TouristPointEntity = new TouristPointEntity({
-      cityId: touristPointDTO.cityId,
-      citySlug: touristPointDTO.citySlug,
-      name: touristPointDTO.name,
-      description: touristPointDTO.description,
-      category: touristPointDTO.category,
-      address: touristPointDTO.address,
-      openingHours: touristPointDTO.openingHours,
-      imageUrl: touristPointDTO.imageUrl,
-      featured: touristPointDTO.featured,
-      published: touristPointDTO.published,
+      ...fields,
+      imageUrl,
     });
     const touristPoint = await this.repository.create(input);
     return {
-      id: touristPoint.id,
+      id: touristPoint.id!,
       cityId: touristPoint.cityId,
       citySlug: touristPoint.citySlug,
       name: touristPoint.name,

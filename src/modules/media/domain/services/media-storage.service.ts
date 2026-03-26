@@ -2,20 +2,24 @@
 export type MediaVisibility = "private" | "public";
 
 export interface SaveMediaInput {
-  filename: string;        // ex: "foto.png"
-  mimeType: string;        // ex: "image/png"
-  buffer: Buffer;          // conteúdo
+  filename: string;
+  mimeType: string;
+  buffer: Buffer;
   visibility?: MediaVisibility;
-  folder?: string;         // ex: "users/10"
+  folder?: string;
+  /** Classe S3 (ex.: INTELLIGENT_TIERING). Ignorado em armazenamento local. */
+  storageClass?: string;
 }
 
 export interface SaveMediaOutput {
-  path: string;            // caminho lógico (ex: "/uploads/..") ou s3 key
-  url?: string;            // quando for S3 público, ou URL assinada se quiser
+  path: string;
+  url?: string;
   size: number;
   mimeType: string;
 }
 
 export interface MediaStorageService {
   save(input: SaveMediaInput): Promise<SaveMediaOutput>;
+  /** Remove objeto apenas se a URL pública pertencer a este storage (mesmo bucket/prefixo ou disco local). */
+  deleteIfOwnedPublicUrl(url: string): Promise<void>;
 }

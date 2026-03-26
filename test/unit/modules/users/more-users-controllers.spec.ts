@@ -5,6 +5,7 @@ import { DeleteUserUseCase } from "@/modules/users/application/use-cases/delete-
 import { ListUsersUseCase } from "@/modules/users/application/use-cases/list-users.usecase";
 import { UpdateUserUseCase } from "@/modules/users/application/use-cases/update-user.usecase";
 import { UserEntity } from "@/modules/users/domain/entities/user.entity";
+import { listUsersQuerySchema } from "@/modules/users/presentation/http/validators/user-schemas";
 
 describe("DeleteUserController", () => {
   const uc: Pick<DeleteUserUseCase, "execute"> = { execute: jest.fn() };
@@ -33,17 +34,28 @@ describe("ListUsersController", () => {
   const sut = new ListUsersController(uc as ListUsersUseCase);
 
   it("200 lista", async () => {
-    (uc.execute as jest.Mock).mockResolvedValue([
-      new UserEntity({
-        id: 1,
-        name: "A",
-        email: "a@b.com",
-        password: "p",
-        role: "Admin",
-      }),
-    ]);
-    const r = await sut.handle({ correlationId: "c" });
+    (uc.execute as jest.Mock).mockResolvedValue({
+      items: [
+        new UserEntity({
+          id: 1,
+          name: "A",
+          email: "a@b.com",
+          password: "p",
+          role: "Admin",
+        }),
+      ],
+      total: 1,
+      page: 1,
+      limit: 10,
+      totalPages: 1,
+      sort: { by: "name" as const, dir: "asc" as const },
+    });
+    const r = await sut.handle({
+      correlationId: "c",
+      validatedQuery: listUsersQuerySchema.parse({}),
+    });
     expect(r.statusCode).toBe(200);
+    expect((r.body as { data: unknown[] }).data).toHaveLength(1);
   });
 });
 

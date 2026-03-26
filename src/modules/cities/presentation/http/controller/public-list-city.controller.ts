@@ -3,20 +3,8 @@ import { mapErrorToHttpResponse, ok, CollectionResourceBuilder } from "@/core/ht
 import { Controller, HttpRequest, HttpResponse } from "@/core/protocols";
 import { PublicListCityUsecase } from "@/modules/cities/application/use-cases/public-list-city.usecase";
 import { CityEntity } from "@/modules/cities/domain/entities/city.entity";
+import { toCityHttpPayload } from "../mappers/city-response.mapper";
 import { publicCitiesCollectionLinks } from "../city-hateoas";
-
-function cityToJson(c: CityEntity) {
-  return {
-    id: c.id,
-    name: c.name,
-    state: c.state,
-    slug: c.slug,
-    summary: c.summary,
-    description: c.description,
-    imageUrl: c.imageUrl,
-    published: c.published,
-  };
-}
 
 export class PublicListCityController implements Controller {
   constructor(private readonly usecase: PublicListCityUsecase) {}
@@ -25,7 +13,7 @@ export class PublicListCityController implements Controller {
     const correlationId = httpRequest.correlationId;
     try {
       const cities = (await this.usecase.execute()) ?? [];
-      const items = cities.map(cityToJson);
+      const items = cities.map(toCityHttpPayload);
       const builder = new CollectionResourceBuilder(items);
       const resource = builder
         .addAllLinks(publicCitiesCollectionLinks())

@@ -1,8 +1,9 @@
 import { logger } from "@/core/config/logger";
-import { mapErrorToHttpResponse } from "@/core/http/http-error-response";
-import { created, resource, ResourceBuilder } from "@/core/http/http-resource";
+import { AppError } from "@/core/errors-app-error";
+import { created, mapErrorToHttpResponse, ResourceBuilder } from "@/core/http";
 import { Controller, HttpRequest, HttpResponse } from "@/core/protocols";
 import { CreateTouristPointUseCase } from "../../../application/use-cases/create-tourist-point.usecase";
+import { toTouristPointHttpPayload } from "../mappers/tourist-point-response.mapper";
 import { touristPointLinks } from "../tourist-point-hateoas";
 
 export class CreateTouristPointController implements Controller {
@@ -13,38 +14,30 @@ export class CreateTouristPointController implements Controller {
 
     logger.info("Criando ponto turístico", {
       correlationId,
-      route: "CreatePontoTuristicoController",
+      route: "CreateTouristPointController",
     });
 
     try {
       const createdEntity = await this.useCase.execute(req.body);
 
-      if (!createdEntity || !createdEntity.id) {
-        logger.warn("CreatePontoTuristicoController: entidade criada é nula", {
+      if (!createdEntity?.id) {
+        logger.warn("CreateTouristPointController: entidade criada é nula", {
           correlationId,
-          route: "CreatePontoTuristicoController",
+          route: "CreateTouristPointController",
         });
         return mapErrorToHttpResponse(
-          new Error("Erro ao criar ponto turístico"),
+          new AppError({
+            code: "TOURIST_POINT_CREATE_FAILED",
+            message: "Erro ao criar ponto turístico",
+            statusCode: 500,
+          }),
           correlationId,
         );
       }
 
-      const data = {
-        id: createdEntity.id,
-        cityId: createdEntity.cityId,
-        citySlug: createdEntity.citySlug,
-        name: createdEntity.name,
-        description: createdEntity.description,
-        category: createdEntity.category,
-        address: createdEntity.address,
-        openingHours: createdEntity.openingHours,
-        imageUrl: createdEntity.imageUrl,
-        featured: createdEntity.featured, // ✅ obrigatório pela model
-        published: createdEntity.published,
-      };
-      const builder = new ResourceBuilder(data);
-      const resource = builder
+      const payload = toTouristPointHttpPayload(createdEntity);
+      const resourceBuild = new ResourceBuilder(payload);
+      const resource = resourceBuild
         .addAllLinks(touristPointLinks(createdEntity.id))
         .addMeta({ correlationId, version: "1.0.0" })
         .build();
@@ -52,7 +45,7 @@ export class CreateTouristPointController implements Controller {
     } catch (error) {
       logger.error("Erro ao criar ponto turístico", {
         correlationId,
-        route: "CreatePontoTuristicoController",
+        route: "CreateTouristPointController",
         error,
       });
       return mapErrorToHttpResponse(error, correlationId);

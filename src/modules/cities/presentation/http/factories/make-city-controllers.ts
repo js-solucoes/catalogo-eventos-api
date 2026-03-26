@@ -19,12 +19,14 @@ import { FindCityByIdController } from "../controller/find-city-by-id.controller
 import { FindCityBySlugController } from "../controller/find-city-by-slug.controller";
 import { PublicListCityController } from "../controller/public-list-city.controller";
 import type { FindCityByIdAudience } from "../controller/find-city-by-id.controller";
+import { getPublicWebImageUploader } from "@/modules/media/infra/factories/compose-public-web-image-uploader";
 
 const cityRepo = new SequelizeCityRepository();
+const images = getPublicWebImageUploader();
 
-const createCityUseCase = new CreateCityUseCase(cityRepo, cityRepo);
+const createCityUseCase = new CreateCityUseCase(cityRepo, cityRepo, images);
 const listCityUseCase = new ListCityUseCase(cityRepo);
-const updateCityUseCase = new UpdateCityUseCase(cityRepo);
+const updateCityUseCase = new UpdateCityUseCase(cityRepo, cityRepo, images);
 const deleteCityUseCase = new DeleteCityUseCase(cityRepo);
 const findCityByIdUseCase = new FindCityByIdUseCase(cityRepo);
 const findCityBySlugUsecase = new FindCityBySlugUsecase(cityRepo);

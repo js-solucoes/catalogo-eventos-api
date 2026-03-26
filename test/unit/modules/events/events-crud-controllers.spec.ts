@@ -24,6 +24,9 @@ const entity = new EventEntity({
   published: true,
 });
 
+const tinyPngB64 =
+  "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==";
+
 const createDto = {
   cityId: 1,
   citySlug: "cg",
@@ -34,7 +37,7 @@ const createDto = {
   endDate: new Date(),
   formattedDate: "—",
   location: "L",
-  imageUrl: "https://x.com/e.jpg",
+  image: { base64: tinyPngB64, mimeType: "image/png" as const },
   featured: false,
   published: true,
 };

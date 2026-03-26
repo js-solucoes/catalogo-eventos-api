@@ -20,9 +20,9 @@ paths:
           schema: { type: string }
         - in: query
           name: category
+          description: Valores que não forem categoria válida são ignorados no filtro
           schema:
             type: string
-            enum: [show, esporte, feira, teatro, gastronomia]
         - in: query
           name: cityId
           schema: { type: integer }
@@ -31,7 +31,7 @@ paths:
           schema: { type: string, example: createdAt }
         - in: query
           name: sortDir
-          schema: { type: string, enum: [asc, desc], default: desc }
+          schema: { type: string, enum: [asc, desc], default: asc }
       responses:
         200:
           description: A listagem de eventos foi obtida com sucesso!
@@ -39,6 +39,12 @@ paths:
             application/json:
               schema:
                 $ref: "#components/schemas/PublicEventPagedResponse"
+        400:
+          description: Parâmetros de query inválidos ou chaves não permitidas (strict)
+          content:
+            application/json:
+              schema:
+                $ref: "#components/schemas/InvalidQueryResponse"
 
   /public/events/{id}:
     get:
@@ -62,6 +68,22 @@ paths:
    
 components:
   schemas:
+    InvalidQueryResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          example: Invalid query params
+        errors:
+          type: array
+          items:
+            type: object
+            properties:
+              path:
+                type: string
+              message:
+                type: string
+      required: [message, errors]
     PublicEvent:
       type: object
       properties:

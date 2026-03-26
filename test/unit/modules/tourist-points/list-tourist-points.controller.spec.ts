@@ -1,5 +1,6 @@
 import { ListTouristPointsController } from "@/modules/tourist-points/presentation/http/controllers/list-tourist-point.controller";
 import { ListTouristPointsUseCase } from "@/modules/tourist-points/application/use-cases/list-tourist-points.usecase";
+import { listTouristPointsQuerySchema } from "@/modules/tourist-points/presentation/http/validators/tourist-point-schemas";
 
 describe("ListTouristPointsController", () => {
   const listRow = {
@@ -43,7 +44,10 @@ describe("ListTouristPointsController", () => {
     (useCase.execute as jest.Mock).mockResolvedValue(listResult);
 
     const res = await sut.handle({
-      query: { page: "1", limit: "10" },
+      validatedQuery: listTouristPointsQuerySchema.parse({
+        page: "1",
+        limit: "10",
+      }),
       correlationId: "lc-1",
     });
 
@@ -58,7 +62,9 @@ describe("ListTouristPointsController", () => {
     (useCase.execute as jest.Mock).mockResolvedValue(listResult);
 
     await sut.handle({
-      query: { published: "true" },
+      validatedQuery: listTouristPointsQuerySchema.parse({
+        published: "true",
+      }),
       correlationId: "lc-2",
     });
 
@@ -72,7 +78,7 @@ describe("ListTouristPointsController", () => {
     (useCase.execute as jest.Mock).mockResolvedValue(listResult);
 
     const res = await sut.handle({
-      query: {},
+      validatedQuery: listTouristPointsQuerySchema.parse({}),
       correlationId: "lc-3",
     });
 

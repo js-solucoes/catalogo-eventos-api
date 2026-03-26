@@ -1,23 +1,35 @@
 import { DomainLogger, NoopDomainLogger } from "@/core/logger";
-import { UpdateHomeBannerRepository } from "../../domain/repositories";
+import type { PublicWebImageUploader } from "@/modules/media/domain/ports/public-web-image.uploader";
+import {
+  FindHomeBannerByIdRepository,
+  UpdateHomeBannerRepository,
+} from "../../domain/repositories";
 import { UpdateHomeBannerDTO } from "../dto";
-import { HomeBannerEntity } from "../../domain/entities/home-banner.entity";
+import { HomeBannerProps } from "../../domain/entities/home-banner.entity";
 
 export class UpdateHomeBannerUseCase {
   constructor(
+    private readonly findById: FindHomeBannerByIdRepository,
     private readonly repo: UpdateHomeBannerRepository,
+    private readonly images: PublicWebImageUploader,
     private readonly logger: DomainLogger = new NoopDomainLogger(),
   ) {}
   async execute(id: number, homeBanner: UpdateHomeBannerDTO) {
-    const entity:Partial<HomeBannerEntity> = {
-      title: homeBanner.title,
-      subtitle: homeBanner.subtitle,
-      imageUrl: homeBanner.imageUrl,
-      ctaLabel: homeBanner.ctaLabel,
-      ctaUrl: homeBanner.ctaUrl,
-      active: homeBanner.active,
-      order: homeBanner.order
+    const existing = await this.findById.findById(id);
+    if (!existing) return null;
+
+    const { image, ...rest } = homeBanner;
+    const entity: Partial<HomeBannerProps> = { ...rest };
+
+    if (image) {
+      const { url } = await this.images.replacePublicWebImage(
+        existing.imageUrl,
+        image,
+        "home-banners",
+      );
+      entity.imageUrl = url;
     }
-    return await this.repo.update(id, entity)
+
+    return await this.repo.update(id, entity);
   }
 }

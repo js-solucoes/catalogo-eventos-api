@@ -1,5 +1,6 @@
 import { AppError } from "@/core/errors-app-error";
 import { DomainLogger, NoopDomainLogger } from "@/core/logger/domain-logger";
+import type { PublicWebImageUploader } from "@/modules/media/domain/ports/public-web-image.uploader";
 import { EventEntity } from "../../domain/entities/event.entity";
 import { CreateEventDTO } from "../dto";
 
@@ -10,6 +11,7 @@ export class CreateEventUseCase {
   constructor(
     private readonly createRepo: CreateEventRepository,
     private readonly findCityById: FindCityByIdUseCase,
+    private readonly images: PublicWebImageUploader,
     private readonly logger: DomainLogger = new NoopDomainLogger(),
   ) {}
 
@@ -19,19 +21,18 @@ export class CreateEventUseCase {
       cat: dto.category,
     });
 
-    const city = await this.findCityById.execute(dto.cityId);
-    if (!city) {
-      throw new AppError({
-        code: "CIDADE_NOT_FOUND",
-        message: `Cidade ${dto.cityId} não encontrada`,
-        statusCode: 404,
-        details: { cityId: dto.cityId },
-      });
-    }
+    await this.findCityById.execute(dto.cityId);
+
+    const { image, ...fields } = dto;
+    const { url: imageUrl } = await this.images.uploadPublicWebImage(
+      image,
+      "events",
+    );
 
     const entity = new EventEntity({
       id: 0,
-      ...dto,
+      ...fields,
+      imageUrl,
     });
 
     const created = await this.createRepo.create(entity);

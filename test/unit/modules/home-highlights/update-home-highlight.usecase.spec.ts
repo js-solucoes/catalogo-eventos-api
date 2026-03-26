@@ -27,10 +27,14 @@ describe("UpdateHomeHighlightUseCase", () => {
           id === 1 ? entity : null,
       ),
     } as UpdateHomeHighlightRepository;
+    const images = {
+      replacePublicWebImage: jest.fn(),
+    };
     return {
-      sut: new UpdateHomeHighlightUseCase(findById, update),
+      sut: new UpdateHomeHighlightUseCase(findById, update, images as never),
       findById,
       update,
+      images,
     };
   };
 
