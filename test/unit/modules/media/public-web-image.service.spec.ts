@@ -29,6 +29,7 @@ describe("PublicWebImageService", () => {
     const storage: jest.Mocked<MediaStorageService> = {
       save: jest.fn(),
       deleteIfOwnedPublicUrl: jest.fn(),
+      headOwnedPublicUrl: jest.fn(),
     };
     const logger: DomainLogger = {
       info: jest.fn(),

@@ -1,11 +1,13 @@
 import {
   DeleteObjectCommand,
+  HeadObjectCommand,
   PutObjectCommand,
   PutObjectCommandInput,
   S3Client,
 } from "@aws-sdk/client-s3";
 import crypto from "crypto";
 import {
+  MediaHeadResult,
   MediaStorageService,
   SaveMediaInput,
   SaveMediaOutput,
@@ -37,6 +39,15 @@ export class S3MediaStorageService implements MediaStorageService {
 
   private normalizeBaseUrl(): string {
     return this.cfg.publicBaseUrl.replace(/\/+$/, "");
+  }
+
+  private normalizedPublicPrefix(): string {
+    return this.cfg.publicKeyPrefix.replace(/^\/+|\/+$/g, "");
+  }
+
+  private keyOwnedByPublicPrefix(key: string): boolean {
+    const p = this.normalizedPublicPrefix();
+    return key === p || key.startsWith(`${p}/`);
   }
 
   async save(input: SaveMediaInput): Promise<SaveMediaOutput> {
@@ -85,5 +96,29 @@ export class S3MediaStorageService implements MediaStorageService {
     await this.client.send(
       new DeleteObjectCommand({ Bucket: this.cfg.bucket, Key: key }),
     );
+  }
+
+  async headOwnedPublicUrl(url: string): Promise<MediaHeadResult | null> {
+    const base = this.normalizeBaseUrl();
+    const trimmed = url.trim();
+    if (!trimmed.startsWith(base)) return null;
+
+    const key = trimmed.slice(base.length).replace(/^\//, "");
+    if (!key || !this.keyOwnedByPublicPrefix(key)) return null;
+
+    try {
+      const out = await this.client.send(
+        new HeadObjectCommand({ Bucket: this.cfg.bucket, Key: key }),
+      );
+      return {
+        contentType: out.ContentType ?? "application/octet-stream",
+        contentLength: Number(out.ContentLength ?? 0),
+      };
+    } catch (err: unknown) {
+      const status = (err as { $metadata?: { httpStatusCode?: number } })
+        .$metadata?.httpStatusCode;
+      if (status === 404) return null;
+      throw err;
+    }
   }
 }

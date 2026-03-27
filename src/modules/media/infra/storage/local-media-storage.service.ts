@@ -9,11 +9,28 @@ import {
   writeBufferFile,
 } from "@/core/config/paths";
 import {
+  MediaHeadResult,
   MediaStorageService,
   SaveMediaInput,
   SaveMediaOutput,
 } from "../../domain/services/media-storage.service";
 import { resolveUploadExtension } from "./resolve-upload-extension";
+
+function contentTypeFromExtension(ext: string): string {
+  const e = ext.toLowerCase();
+  const map: Record<string, string> = {
+    ".png": "image/png",
+    ".jpg": "image/jpeg",
+    ".jpeg": "image/jpeg",
+    ".gif": "image/gif",
+    ".webp": "image/webp",
+    ".svg": "image/svg+xml",
+    ".txt": "text/plain",
+    ".json": "application/json",
+    ".pdf": "application/pdf",
+  };
+  return map[e] ?? "application/octet-stream";
+}
 
 export interface LocalMediaStorageConfig {
   rootDir: string;
@@ -90,6 +107,50 @@ export class LocalMediaStorageService implements MediaStorageService {
       await fs.unlink(fileResolved);
     } catch {
       /* já removido ou inexistente */
+    }
+  }
+
+  async headOwnedPublicUrl(url: string): Promise<MediaHeadResult | null> {
+    const origin = this.cfg.publicOrigin?.replace(/\/+$/, "");
+    const basePath = this.cfg.publicBasePath;
+    if (!origin || !basePath) return null;
+
+    const trimmed = url.trim();
+    if (!trimmed.startsWith(origin)) return null;
+
+    const afterOrigin = trimmed.slice(origin.length);
+    if (!afterOrigin.startsWith(basePath)) return null;
+
+    const relativeFromRoot = afterOrigin
+      .slice(basePath.length)
+      .replace(/^\//, "");
+    if (!relativeFromRoot) return null;
+
+    const prefix = (this.cfg.publicKeyPrefix ?? "public").replace(
+      /^\/+|\/+$/g,
+      "",
+    );
+    if (
+      relativeFromRoot !== prefix &&
+      !relativeFromRoot.startsWith(`${prefix}/`)
+    ) {
+      return null;
+    }
+
+    const abs = path.join(this.cfg.rootDir, relativeFromRoot);
+    const rootResolved = path.resolve(this.cfg.rootDir);
+    const fileResolved = path.resolve(abs);
+    if (!fileResolved.startsWith(rootResolved)) return null;
+
+    try {
+      const st = await fs.stat(fileResolved);
+      if (!st.isFile()) return null;
+      return {
+        contentType: contentTypeFromExtension(path.extname(fileResolved)),
+        contentLength: st.size,
+      };
+    } catch {
+      return null;
     }
   }
 }

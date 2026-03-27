@@ -1,6 +1,8 @@
 // src/database.ts
 import { ENV } from "@/core/config/env";
 import { logger } from "@/core/config/logger";
+import fs from "node:fs";
+import path from "node:path";
 import { Dialect, Options, Sequelize } from "sequelize";
 
 const isTest = ENV.NODE_ENV === "test";
@@ -11,6 +13,16 @@ function buildMysqlOptions(): Options {
         ssl: {
           require: true,
           rejectUnauthorized: ENV.DB_SSL_REJECT_UNAUTHORIZED,
+          ...(ENV.DB_SSL_CA_PATH
+            ? {
+                ca: fs.readFileSync(
+                  path.isAbsolute(ENV.DB_SSL_CA_PATH)
+                    ? ENV.DB_SSL_CA_PATH
+                    : path.resolve(process.cwd(), ENV.DB_SSL_CA_PATH),
+                  "utf8",
+                ),
+              }
+            : {}),
         },
       }
     : undefined;

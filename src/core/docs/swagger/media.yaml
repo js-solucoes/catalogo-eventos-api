@@ -3,6 +3,32 @@ tags:
     description: Upload de mídia (base64)
 
 paths:
+  /media/verify:
+    get:
+      tags: [Media]
+      summary: Verifica leitura (HEAD) de URL pública owned pelo storage (Fase 1 / diagnóstico S3)
+      parameters:
+        - name: url
+          in: query
+          required: true
+          schema:
+            type: string
+            format: uri
+          description: URL pública retornada em POST /media (visibility public)
+      responses:
+        "200":
+          description: Objeto existe e é legível pelas credenciais da API
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VerifyMediaResponse"
+        "400":
+          description: Query inválida
+        "401":
+          description: Unauthorized
+        "404":
+          description: URL não owned ou objeto inexistente
+
   /media:
     post:
       tags: [Media]
@@ -69,6 +95,24 @@ components:
       properties:
         data:
           $ref: "#/components/schemas/UploadMediaData"
+        links:
+          type: object
+        meta:
+          type: object
+
+    VerifyMediaData:
+      type: object
+      properties:
+        url: { type: string, format: uri }
+        contentType: { type: string, example: "image/png" }
+        contentLength: { type: integer, example: 1234 }
+        readable: { type: boolean, example: true }
+
+    VerifyMediaResponse:
+      type: object
+      properties:
+        data:
+          $ref: "#/components/schemas/VerifyMediaData"
         links:
           type: object
         meta:

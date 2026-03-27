@@ -1,0 +1,23 @@
+# Copie para terraform.tfvars (gitignored no repo raiz **/terraform.tfvars).
+# Subnets: use 2+ AZs. Para teste a partir da sua máquina com IP público:
+# - database_subnet_ids = subnets PÚBLICAS do foundation
+# - publicly_accessible = true
+# - allowed_cidr_blocks = ["SEU_IP/32"]
+
+aws_region   = "us-east-1"
+project_name = "celeiro-api"
+environment  = "dev"
+
+vpc_id = "vpc-xxxxxxxx"
+
+database_subnet_ids = [
+  "subnet-aaaaaaa",
+  "subnet-bbbbbbb",
+]
+
+allowed_cidr_blocks = ["203.0.113.50/32"]
+
+# Quando a API rodar no ECS no mesmo VPC:
+# allowed_security_group_ids = ["sg-ecs-tasks"]
+
+publicly_accessible = true

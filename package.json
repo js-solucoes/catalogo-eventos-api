@@ -23,7 +23,18 @@
     "test:staged": "npm test -- --findRelatedTests",
     "test:ci": "npm test -- --coverage",
     "smoke:http": "node scripts/smoke-http.cjs",
-    "check": "npm run typecheck && npm run lint && npm run test:ci"
+    "smoke:alb": "node scripts/smoke-alb.cjs",
+    "deploy:ecr": "bash scripts/ecr-build-push.sh",
+    "deploy:ecs:roll": "bash scripts/ecs-force-new-deployment.sh",
+    "verify:aurora-db": "node scripts/verify-aurora-db.cjs",
+    "check": "npm run typecheck && npm run lint && npm run test:ci",
+    "db:migrate": "sequelize-cli db:migrate",
+    "db:migrate:undo": "sequelize-cli db:migrate:undo",
+    "db:migrate:status": "sequelize-cli db:migrate:status",
+    "db:seed": "sequelize-cli db:seed:all",
+    "db:seed:undo": "sequelize-cli db:seed:undo:all",
+    "db:bootstrap": "npm run db:migrate && npm run db:seed",
+    "verify:dist": "node scripts/verify-dist.cjs"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
@@ -42,6 +53,7 @@
     "jest": "^29.7.0",
     "nodemon": "^3.1.10",
     "rimraf": "^6.0.1",
+    "sequelize-cli": "^6.6.5",
     "sqlite3": "^5.1.7",
     "supertest": "^7.1.4",
     "ts-jest": "^29.2.5",
@@ -54,6 +66,7 @@
   "dependencies": {
     "@aws-sdk/client-s3": "^3.995.0",
     "bcrypt": "^6.0.0",
+    "deepmerge": "^4.3.1",
     "dotenv": "^16.5.0",
     "express": "^5.1.0",
     "fast-glob": "^3.3.3",

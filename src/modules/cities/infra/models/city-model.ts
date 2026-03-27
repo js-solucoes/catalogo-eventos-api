@@ -27,6 +27,7 @@ CityModel.init(
     slug: {
       type: DataTypes.STRING,
       allowNull: false,
+      unique: true,
     },
     state: {
       type: DataTypes.STRING,

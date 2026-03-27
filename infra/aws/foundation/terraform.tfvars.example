@@ -1,0 +1,28 @@
+# Copie para terraform.tfvars (não commitar segredos reais).
+# JWT: cada um com pelo menos 16 caracteres (regra do env.ts).
+
+aws_region   = "us-east-1"
+project_name = "celeiro-api"
+environment  = "dev"
+
+# Saídas do módulo infra/aws/s3-phase1
+media_bucket_name    = "celeiro-api-media-a3aa2da3"
+s3_public_base_url   = "https://celeiro-api-media-a3aa2da3.s3.us-east-1.amazonaws.com"
+
+jwt_secret          = "troque-por-32-chars-minimo-segredo-jwt"
+jwt_access_secret   = "troque-por-32-chars-minimo-access-xx"
+jwt_refresh_secret  = "troque-por-32-chars-minimo-refresh-x"
+
+# Imagem inicial (valida ALB/ECS). Depois do push para o ECR (Fase 3):
+# container_image     = "123456789012.dkr.ecr.us-east-1.amazonaws.com/celeiro-api-dev-api:v1"
+# container_port      = 3000
+# health_check_path   = "/health"
+
+# Banco: RDS criado por este stack (padrão) OU Aurora (Fase 2):
+# use_managed_rds        = true   # default
+# use_managed_rds        = false
+# external_db_host       = "meu-cluster.cluster-xxxxx.us-east-1.rds.amazonaws.com"
+# external_db_password   = "mesma-senha-do-master-aurora"
+# No aurora-phase2: allowed_security_group_ids = [ "<output ecs_tasks_security_group_id>" ]
+
+# --- Produção (NAT, HTTPS, RDS endurecido, WAF, alarmes): veja terraform.tfvars.production.example ---

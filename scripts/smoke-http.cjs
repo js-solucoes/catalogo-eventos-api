@@ -4,7 +4,8 @@
  *
  * Uso: npm run smoke:http
  * Env opcional: SMOKE_PORT (default 34581), JWT_* (default alinhado ao jest-ci-env.js).
- * Pós-deploy (CD): use curl no URL público, ex.: curl -fsS "$BASE_URL/health".
+ * Pós-deploy (CD): curl -fsS "$BASE_URL/health" e "$BASE_URL/ready".
+ * Env: SMOKE_SKIP_READY=true pula GET /ready (ex.: ambiente sem DB no smoke).
  */
 const { spawn } = require("node:child_process");
 const http = require("node:http");
@@ -26,11 +27,11 @@ const env = {
     process.env.JWT_REFRESH_SECRET || "ffffffffffffffffffffffffffffffff",
 };
 
-function httpGetHealth() {
+function httpGetJson(path, { okStatus, assertBody }) {
   return new Promise((resolve, reject) => {
     const req = http.get(
-      `http://127.0.0.1:${PORT}/health`,
-      { timeout: 3000 },
+      `http://127.0.0.1:${PORT}${path}`,
+      { timeout: 5000 },
       (res) => {
         let raw = "";
         res.on("data", (c) => {
@@ -39,13 +40,13 @@ function httpGetHealth() {
         res.on("end", () => {
           try {
             const body = JSON.parse(raw);
-            if (res.statusCode === 200 && body.status === "ok") {
+            if (res.statusCode === okStatus && assertBody(body)) {
               resolve();
               return;
             }
             reject(
               new Error(
-                `unexpected /health: status=${res.statusCode} body=${raw}`,
+                `unexpected ${path}: status=${res.statusCode} body=${raw}`,
               ),
             );
           } catch (e) {
@@ -59,6 +60,20 @@ function httpGetHealth() {
       req.destroy();
       reject(new Error("request timeout"));
     });
+  });
+}
+
+function httpGetHealth() {
+  return httpGetJson("/health", {
+    okStatus: 200,
+    assertBody: (b) => b.status === "ok",
+  });
+}
+
+function httpGetReady() {
+  return httpGetJson("/ready", {
+    okStatus: 200,
+    assertBody: (b) => b.status === "ready",
   });
 }
 
@@ -126,7 +141,14 @@ async function main() {
     while (Date.now() < deadline) {
       try {
         await httpGetHealth();
-        console.log("smoke-http: OK (GET /health)");
+        if (process.env.SMOKE_SKIP_READY !== "true") {
+          await httpGetReady();
+        }
+        console.log(
+          "smoke-http: OK (GET /health" +
+            (process.env.SMOKE_SKIP_READY === "true" ? "" : " + /ready") +
+            ")",
+        );
         intentionalStop = true;
         await terminate(child);
         process.exit(0);
@@ -144,7 +166,7 @@ async function main() {
   }
 
   console.error(
-    "smoke-http: falhou — servidor não respondeu com /health a tempo.",
+    "smoke-http: falhou — /health ou /ready não responderam como esperado a tempo.",
   );
   if (stderr.trim()) {
     console.error("--- stderr (último trecho) ---\n", stderr.slice(-4000));

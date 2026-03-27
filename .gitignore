@@ -6,3 +6,10 @@ dist
 .env.test
 .env.production
 tsconfig.tsbuildinfo
+
+# Terraform (Fase 1 S3 — estado local)
+**/.terraform/
+*.tfstate
+*.tfstate.*
+*.tfplan
+**/terraform.tfvars

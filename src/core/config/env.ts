@@ -40,6 +40,18 @@ const EnvSchema = z.object({
     .transform((v) => (typeof v === "string" ? v === "true" : Boolean(v)))
     .default(false),
 
+  /**
+   * Se true (padrão), GET /ready chama `sequelize.authenticate()`.
+   * Defina false só em cenários especiais (ex.: diagnóstico sem DB).
+   */
+  READINESS_CHECK_DB: z
+    .union([z.string(), z.boolean()])
+    .optional()
+    .transform((v) => {
+      if (v === undefined) return true;
+      return typeof v === "string" ? v === "true" : Boolean(v);
+    }),
+
   SALT: z.coerce.number().int().positive().default(10),
   ADMIN_PASSWORD: z.string().default("admin123"),
 
@@ -62,6 +74,11 @@ const EnvSchema = z.object({
     .union([z.string(), z.boolean()])
     .transform((v) => (typeof v === "string" ? v === "true" : Boolean(v)))
     .default(true),
+  /**
+   * Caminho para o PEM da AWS (ex.: global-bundle.pem). Opcional; com DB_SSL=true
+   * permite manter DB_SSL_REJECT_UNAUTHORIZED=true contra Aurora/RDS.
+   */
+  DB_SSL_CA_PATH: z.string().optional(),
 
   /** Pool Sequelize — ajuste conforme tasks Fargate × max_connections do Aurora. */
   DB_POOL_MAX: z.coerce.number().int().positive().default(5),

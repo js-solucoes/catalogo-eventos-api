@@ -7,15 +7,17 @@ jest.mock("@aws-sdk/client-s3", () => {
   return {
     S3Client: jest.fn().mockImplementation(() => ({ send: sendMock })),
     PutObjectCommand: jest.fn().mockImplementation((input) => ({ input })),
+    HeadObjectCommand: jest.fn().mockImplementation((input) => ({ input })),
   };
 });
 
-import { PutObjectCommand } from "@aws-sdk/client-s3";
+import { HeadObjectCommand, PutObjectCommand } from "@aws-sdk/client-s3";
 
 describe("S3MediaStorageService", () => {
   beforeEach(() => {
     sendMock.mockReset();
     (PutObjectCommand as unknown as jest.Mock).mockClear();
+    (HeadObjectCommand as unknown as jest.Mock).mockClear();
   });
 
   it("deve enviar PutObjectCommand e retornar path s3://... (public)", async () => {
@@ -85,5 +87,68 @@ describe("S3MediaStorageService", () => {
 
     const cmdArg = (PutObjectCommand as unknown as jest.Mock).mock.calls[0][0];
     expect(cmdArg.ACL).toBeUndefined();
+  });
+
+  it("headOwnedPublicUrl envia HeadObject e retorna metadados", async () => {
+    sendMock.mockResolvedValueOnce({
+      ContentType: "image/png",
+      ContentLength: 99,
+    });
+
+    const svc = new S3MediaStorageService({
+      bucket: "my-bucket",
+      region: "us-east-1",
+      publicBaseUrl: "https://my-bucket.s3.amazonaws.com",
+      publicKeyPrefix: "public",
+      defaultStorageClass: "STANDARD",
+    });
+
+    const url =
+      "https://my-bucket.s3.amazonaws.com/public/phase1/uuid.png";
+    const meta = await svc.headOwnedPublicUrl(url);
+
+    expect(HeadObjectCommand).toHaveBeenCalledWith(
+      expect.objectContaining({
+        Bucket: "my-bucket",
+        Key: "public/phase1/uuid.png",
+      }),
+    );
+    expect(meta).toEqual({
+      contentType: "image/png",
+      contentLength: 99,
+    });
+  });
+
+  it("headOwnedPublicUrl retorna null para URL fora do prefixo público", async () => {
+    const svc = new S3MediaStorageService({
+      bucket: "my-bucket",
+      region: "us-east-1",
+      publicBaseUrl: "https://my-bucket.s3.amazonaws.com",
+      publicKeyPrefix: "public",
+      defaultStorageClass: "STANDARD",
+    });
+
+    const meta = await svc.headOwnedPublicUrl(
+      "https://my-bucket.s3.amazonaws.com/private/x.png",
+    );
+    expect(meta).toBeNull();
+    expect(sendMock).not.toHaveBeenCalled();
+  });
+
+  it("headOwnedPublicUrl retorna null em 404 do S3", async () => {
+    sendMock.mockRejectedValueOnce({ $metadata: { httpStatusCode: 404 } });
+
+    const svc = new S3MediaStorageService({
+      bucket: "my-bucket",
+      region: "us-east-1",
+      publicBaseUrl: "https://my-bucket.s3.amazonaws.com/",
+      publicKeyPrefix: "public",
+      defaultStorageClass: "STANDARD",
+    });
+
+    const meta = await svc.headOwnedPublicUrl(
+      "https://my-bucket.s3.amazonaws.com/public/missing.png",
+    );
+    expect(meta).toBeNull();
   });
 });

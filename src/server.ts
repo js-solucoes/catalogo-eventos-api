@@ -23,9 +23,11 @@ async function start() {
 
     await initializeDatabaseAndServer(sequelize);
 
-    const server = app.listen(ENV.PORT, () => {
+    // 0.0.0.0: obrigatório em container/ECS — o ALB health check bate no IP da task, não em 127.0.0.1
+    const server = app.listen(ENV.PORT, "0.0.0.0", () => {
       logger.info("HTTP server started", {
         port: ENV.PORT,
+        host: "0.0.0.0",
         swaggerEnabled: ENV.SWAGGER_ENABLED,
         swaggerUrl: ENV.SWAGGER_ENABLED
           ? `http://localhost:${ENV.PORT}/api-docs`
