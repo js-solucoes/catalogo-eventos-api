@@ -5,7 +5,7 @@ tags:
 paths:
   /public/events:
     get:
-      summary: Lista de eventos do Celeiro do MS
+      summary: Lista de eventos do catálogo de eventos
       tags: 
         - Events PUBLIC
       parameters:

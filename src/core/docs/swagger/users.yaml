@@ -1,6 +1,6 @@
 tags:
   - name: Users ADMIN
-    description: Endpoints relacionados aos usu?rios do Celeiro do MS
+    description: Endpoints relacionados aos usuários do catálogo de eventos
 
 paths:
   /admin/users:

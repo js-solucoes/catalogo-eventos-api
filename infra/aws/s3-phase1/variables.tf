@@ -6,8 +6,8 @@ variable "aws_region" {
 
 variable "project_name" {
   type        = string
-  description = "Prefixo do nome do bucket (minúsculas; usado em celeiro-api-media-xxxx)"
-  default     = "celeiro-api"
+  description = "Prefixo do nome do bucket (minúsculas; usado em catalogo-eventos-api-media-xxxx)"
+  default     = "catalogo-eventos-api"
 }
 
 variable "s3_public_prefix" {

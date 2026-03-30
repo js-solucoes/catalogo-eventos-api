@@ -1,11 +1,11 @@
 tags:
   - name: Cities PUBLIC
-    description: Endpoints relacionados as cidades da região do Celeiro do MS
+    description: Endpoints relacionados as cidades da região do catálogo de eventos
 
 paths:
   /public/cities:
     get:
-      summary: Lista as cidades da região do Celeiro do MS
+      summary: Lista as cidades da região do catálogo de eventos
       tags: 
         - Cities PUBLIC
       responses:

@@ -7,7 +7,7 @@ variable "aws_region" {
 variable "project_name" {
   type        = string
   description = "Prefixo de nomes de recursos"
-  default     = "celeiro-api"
+  default     = "catalogo-eventos-api"
 }
 
 variable "environment" {
@@ -83,7 +83,7 @@ variable "health_check_path" {
 # --- Container (até você publicar a imagem Node no ECR) ---
 variable "container_image" {
   type        = string
-  description = "URI ECR (terraform output ecr_repository_url) + tag, ex.: ...amazonaws.com/celeiro-api-dev-api:latest"
+  description = "URI ECR (terraform output ecr_repository_url) + tag, ex.: ...amazonaws.com/catalogo-eventos-api-dev-api:latest"
   default     = "public.ecr.aws/docker/library/nginx:alpine"
 }
 

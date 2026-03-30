@@ -27,7 +27,7 @@ npm run db:seed:undo        # desfaz todos os seeders registrados
 npm run db:bootstrap        # migrate + seed (ambiente local/staging com .env)
 ```
 
-A migration `20250326120000-phase1-schema-placeholder` é **no-op** (histórico / `SequelizeMeta`). O DDL das tabelas da aplicação está em `20250326120100-create-application-schema.cjs`. Os seeders exigem **`ADMIN_PASSWORD`** no ambiente para criar o usuário `admin@celeirodoms.com.br` (hash bcrypt com 12 rounds, alinhado aos factories de auth).
+A migration `20250326120000-phase1-schema-placeholder` é **no-op** (histórico / `SequelizeMeta`). O DDL das tabelas da aplicação está em `20250326120100-create-application-schema.cjs`. Os seeders exigem **`ADMIN_PASSWORD`** no ambiente para criar o usuário `admin@catalogo-eventos.com.br` (hash bcrypt com 12 rounds, alinhado aos factories de auth).
 
 O workflow **CI** (`.github/workflows/ci.yml`, job `database`) sobe **MySQL 8** em serviço e executa `npm run db:bootstrap` para validar migrations e seeders em cada push/PR.
 

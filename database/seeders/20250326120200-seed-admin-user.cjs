@@ -10,7 +10,7 @@ require("dotenv").config({
   ],
 });
 
-const ADMIN_EMAIL = "admin@celeirodoms.com.br";
+const ADMIN_EMAIL = "admin@catalogo-eventos.com.br";
 /** Mesmo valor usado em make-user-controllers e make-auth-controllers */
 const BCRYPT_ROUNDS = 12;
 

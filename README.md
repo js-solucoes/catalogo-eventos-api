@@ -1,5 +1,7 @@
 # Catálogo de eventos — API (Node.js + Express + Sequelize)
 
+**Repositório:** `catalogo-eventos-api` — ao clonar a partir do GitHub/GitLab com esse nome remoto, a pasta local padrão é `catalogo-eventos-api`.
+
 API modular (`core` + contextos de negócio), pronta para execução local, testes em CI e publicação na **AWS** (S3, ECS Fargate, ALB, RDS MySQL, ECR). Este README concentra o fluxo para **clonar o repositório, criar uma conta AWS nova e subir o ambiente**, além de **manutenção, publicação de alterações** e **orientações para CI/CD no GitHub**.
 
 Documentação complementar: pasta [`docs/deployment/`](docs/deployment/README.md).
@@ -22,8 +24,8 @@ Documentação complementar: pasta [`docs/deployment/`](docs/deployment/README.m
 ## 1. Clonar e rodar localmente
 
 ```bash
-git clone <url-do-repositório>
-cd catalogo-eventos-api
+git clone <url-do-repositório>   # ex.: git@github.com:<org>/catalogo-eventos-api.git
+cd catalogo-eventos-api          # nome da pasta = nome do repositório remoto
 cp .env-exemplo .env   # ajuste variáveis (JWT ≥ 16 caracteres, DB, etc.)
 npm ci
 npm run dev            # ou: npm run build && npm start
@@ -77,7 +79,7 @@ terraform output -raw bucket_name
 terraform output -raw s3_public_base_url
 ```
 
-O nome do bucket inclui um **sufixo aleatório** (ex.: `celeiro-api-media-a1b2c3d4`). **Não** use placeholders como `xxxxxxxx` no próximo passo.
+O nome do bucket inclui um **sufixo aleatório** (ex.: `catalogo-eventos-api-media-a1b2c3d4`). **Não** use placeholders como `xxxxxxxx` no próximo passo.
 
 ### 3.2 Foundation — VPC, RDS, ECR, ALB, ECS Fargate, Secrets
 
@@ -124,7 +126,7 @@ terraform output -raw ecs_service_name
 
 ## 4. Imagem Docker e publicação no ECR
 
-Na **raiz do repositório**:
+Na **raiz do repositório** (`cd catalogo-eventos-api`):
 
 ```bash
 npm ci
@@ -157,7 +159,7 @@ export ECS_SERVICE_NAME="$(cd infra/aws/foundation && terraform output -raw ecs_
 ## 5. Validação pós-deploy (smoke)
 
 ```bash
-cd /caminho/para/catalogo-eventos-api
+cd catalogo-eventos-api            # raiz do repositório clonado
 export SMOKE_BASE_URL="$(cd infra/aws/foundation && terraform output -raw alb_public_base_url)"
 npm run smoke:alb
 ```

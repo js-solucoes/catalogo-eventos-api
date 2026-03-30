@@ -1,11 +1,11 @@
 tags:
   - name: Tourist Point PUBLIC
-    description: Endpoints relacionados aos pontos turísiticos
+    description: Endpoints relacionados aos pontos turísticos
 
 paths:
   /public/tourist-points:
     get:
-      summary: Lista de pontos turísiticos do Celeiro do MS
+      summary: Lista de pontos turísticos do catálogo de eventos
       tags:
         - Tourist Point PUBLIC
       parameters:
@@ -38,7 +38,7 @@ paths:
           schema: { type: string, example: ASC }
       responses:
         200:
-          description: A listagem de pontos turísiticos foi obtida com sucesso!
+          description: A listagem de pontos turísticos foi obtida com sucesso!
           content:
             application/json:
               schema:

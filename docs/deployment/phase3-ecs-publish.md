@@ -39,8 +39,8 @@ Task (mesma VPC) ──► MySQL :3306
 Validação local:
 
 ```bash
-docker build -t celeiro-api:local .
-docker run --rm -p 3000:3000 -e READINESS_CHECK_DB=false celeiro-api:local
+docker build -t catalogo-eventos-api:local .
+docker run --rm -p 3000:3000 -e READINESS_CHECK_DB=false catalogo-eventos-api:local
 # outro terminal: curl -s http://127.0.0.1:3000/health
 ```
 
