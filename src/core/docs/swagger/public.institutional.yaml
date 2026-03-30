@@ -5,7 +5,7 @@ tags:
 paths:
   /admin/institutional-content:
     get:
-      summary: Lista de conteudo institucional do Celeiro do MS
+      summary: Lista de conteudo institucional do catálogo de eventos
       tags: 
         - Institutional Content ADMIN
       responses:

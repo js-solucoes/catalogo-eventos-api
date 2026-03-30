@@ -2,19 +2,19 @@
 # JWT: cada um com pelo menos 16 caracteres (regra do env.ts).
 
 aws_region   = "us-east-1"
-project_name = "celeiro-api"
+project_name = "catalogo-eventos-api"
 environment  = "dev"
 
-# Saídas do módulo infra/aws/s3-phase1
-media_bucket_name    = "celeiro-api-media-a3aa2da3"
-s3_public_base_url   = "https://celeiro-api-media-a3aa2da3.s3.us-east-1.amazonaws.com"
+# Saídas do módulo infra/aws/s3-phase1 (use os valores reais do terraform output)
+media_bucket_name    = "catalogo-eventos-api-media-a1b2c3d4"
+s3_public_base_url   = "https://catalogo-eventos-api-media-a1b2c3d4.s3.us-east-1.amazonaws.com"
 
 jwt_secret          = "troque-por-32-chars-minimo-segredo-jwt"
 jwt_access_secret   = "troque-por-32-chars-minimo-access-xx"
 jwt_refresh_secret  = "troque-por-32-chars-minimo-refresh-x"
 
 # Imagem inicial (valida ALB/ECS). Depois do push para o ECR (Fase 3):
-# container_image     = "123456789012.dkr.ecr.us-east-1.amazonaws.com/celeiro-api-dev-api:v1"
+# container_image     = "123456789012.dkr.ecr.us-east-1.amazonaws.com/catalogo-eventos-api-dev-api:v1"
 # container_port      = 3000
 # health_check_path   = "/health"
 

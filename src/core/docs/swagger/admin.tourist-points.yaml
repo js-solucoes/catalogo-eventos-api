@@ -1,11 +1,11 @@
 tags:
   - name: Tourist Point ADMIN
-    description: Endpoints relacionados aos pontos turísiticos
+    description: Endpoints relacionados aos pontos turísticos
 
 paths:
   /api/admin/tourist-points:
     get:
-      summary: Lista de pontos turísiticos do Celeiro do MS
+      summary: Lista de pontos turísticos do catálogo de eventos
       tags:
         - Tourist Point ADMIN
       security:
@@ -39,7 +39,7 @@ paths:
           schema: { type: string, example: ASC }
       responses:
         200:
-          description: A listagem de pontos turísiticos foi obtida com sucesso!
+          description: A listagem de pontos turísticos foi obtida com sucesso!
           content:
             application/json:
               schema:
@@ -52,7 +52,7 @@ paths:
                 $ref: "#components/schemas/InvalidQueryResponse"
 
     post:
-      summary: Cadastra um ponto turístico do Celeiro do MS
+      summary: Cadastra um ponto turístico do catálogo de eventos
       tags:
         - Tourist Point ADMIN
       security:
@@ -92,7 +92,7 @@ paths:
               schema:
                 $ref: "#components/schemas/AdminSocialLink"
     patch:
-      summary: Atualiza os dados de um link de ponto turístico do Celeiro do MS
+      summary: Atualiza os dados de um link de ponto turístico do catálogo de eventos
       tags:
         - Tourist Point ADMIN
       security:

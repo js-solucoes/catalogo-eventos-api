@@ -5,7 +5,7 @@ tags:
 paths:
   /api/admin/social-links:
     get:
-      summary: Lista de links de redes sociais do Celeiro do MS
+      summary: Lista de links de redes sociais do catálogo de eventos
       tags: 
         - Social Link ADMIN
       security:
@@ -19,7 +19,7 @@ paths:
                 $ref: "#components/schemas/AdminSocialLinkPagedResponse"
 
     post:
-      summary: Cadastra um link de rede social do Celeiro do MS
+      summary: Cadastra um link de rede social do catálogo de eventos
       tags: 
         - Social Link ADMIN
       security:
@@ -59,7 +59,7 @@ paths:
               schema:
                 $ref: "#components/schemas/AdminSocialLink"
     patch:
-      summary: Atualiza os dados de um link de rede social do Celeiro do MS
+      summary: Atualiza os dados de um link de rede social do catálogo de eventos
       tags:
         - Social Link ADMIN
       security:

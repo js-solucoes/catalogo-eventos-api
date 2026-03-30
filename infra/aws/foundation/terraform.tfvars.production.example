@@ -3,17 +3,17 @@
 # 2) Preencha media_bucket_name, s3_public_base_url, jwt_* e demais segredos reais (não commitar).
 
 aws_region   = "us-east-1"
-project_name = "celeiro-api"
+project_name = "catalogo-eventos-api"
 environment  = "prod"
 
-media_bucket_name  = "celeiro-api-media-PROD_REPLACE"
-s3_public_base_url = "https://celeiro-api-media-PROD_REPLACE.s3.us-east-1.amazonaws.com"
+media_bucket_name  = "catalogo-eventos-api-media-PROD_REPLACE"
+s3_public_base_url = "https://catalogo-eventos-api-media-PROD_REPLACE.s3.us-east-1.amazonaws.com"
 
 jwt_secret         = "REPLACE_MIN_16_CHARS"
 jwt_access_secret  = "REPLACE_MIN_16_CHARS"
 jwt_refresh_secret = "REPLACE_MIN_16_CHARS"
 
-container_image     = "123456789012.dkr.ecr.us-east-1.amazonaws.com/celeiro-api-prod-api:v1"
+container_image     = "123456789012.dkr.ecr.us-east-1.amazonaws.com/catalogo-eventos-api-prod-api:v1"
 container_port      = 3000
 health_check_path   = "/health"
 desired_count       = 2
@@ -29,7 +29,7 @@ rds_backup_retention_period = 14
 rds_skip_final_snapshot     = false
 rds_deletion_protection     = true
 rds_multi_az                = true
-# rds_final_snapshot_identifier = "celeiro-api-prod-mysql-final" # opcional se skip_final_snapshot=false
+# rds_final_snapshot_identifier = "catalogo-eventos-api-prod-mysql-final" # opcional se skip_final_snapshot=false
 
 secret_recovery_window_in_days = 7
 

@@ -5,7 +5,7 @@ tags:
 paths:
   /public/social-links:
     get:
-      summary: Lista de links de redes sociais do Celeiro do MS
+      summary: Lista de links de redes sociais do catálogo de eventos
       tags:
         - Social Link PUBLIC
       responses:

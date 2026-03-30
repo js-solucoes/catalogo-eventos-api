@@ -5,7 +5,7 @@ tags:
 paths:
   /api/admin/events:
     get:
-      summary: Lista de eventos do Celeiro do MS
+      summary: Lista de eventos do catálogo de eventos
       tags: 
         - Events ADMIN
       security:
@@ -48,7 +48,7 @@ paths:
                 $ref: "#components/schemas/InvalidQueryResponse"
 
     post:
-      summary: Cadastra um evento da região do Celeiro do MS
+      summary: Cadastra um evento da região do catálogo de eventos
       tags: 
         - Events ADMIN
       security:
@@ -88,7 +88,7 @@ paths:
               schema:
                 $ref: "#components/schemas/AdminEvent"
     patch:
-      summary: Atualiza os dados de um evento do Celeiro do MS
+      summary: Atualiza os dados de um evento do catálogo de eventos
       tags:
         - Events ADMIN
       security:

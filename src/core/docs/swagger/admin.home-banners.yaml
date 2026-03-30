@@ -5,7 +5,7 @@ tags:
 paths:
   /api/admin/home-banner:
     get:
-      summary: Lista de banners da página home do Celeiro do MS
+      summary: Lista de banners da página home do catálogo de eventos
       tags: 
         - Home Banners ADMIN
       security:
@@ -19,7 +19,7 @@ paths:
                 $ref: "#components/schemas/AdminHomeBannerPagedResponse"
 
     post:
-      summary: Cadastra um banner da página home do Celeiro do MS
+      summary: Cadastra um banner da página home do catálogo de eventos
       tags: 
         - Home Banners ADMIN
       security:
@@ -59,7 +59,7 @@ paths:
               schema:
                 $ref: "#components/schemas/AdminHomeBanner"
     patch:
-      summary: Atualiza os dados de um banner da página home do Celeiro do MS
+      summary: Atualiza os dados de um banner da página home do catálogo de eventos
       tags:
         - Home Banners ADMIN
       security:

@@ -1,6 +1,6 @@
 tags:
   - name: Auth
-    description: Endpoints relacionados ao Login do Celeiro do MS
+    description: Endpoints relacionados ao Login do catálogo de eventos
 
 paths:
   /auth/login:
