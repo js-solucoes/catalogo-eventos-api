@@ -47,6 +47,10 @@ locals {
     { name = "UPDATE_MODEL", value = "false" },
     { name = "READINESS_CHECK_DB", value = "true" },
     { name = "ADMIN_EMAIL", value = var.bootstrap_admin_email },
+    {
+      name  = "FORCE_HTTPS_REDIRECT"
+      value = var.acm_certificate_arn != "" ? "true" : "false"
+    },
   ]
 }
 

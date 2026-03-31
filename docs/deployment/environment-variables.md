@@ -9,6 +9,7 @@ Validação em runtime: `src/core/config/env.ts` (Zod). Falha na validação **e
 | `NODE_ENV` | não | `development` — use `production` no Fargate |
 | `PORT` | não | `3000` — alinhar com target group / container |
 | `SWAGGER_ENABLED` | não | `true` — em produção costuma ser `false` |
+| `FORCE_HTTPS_REDIRECT` | não | `false` — `true` atrás do ALB com ACM (ECS define quando há certificado); redireciona se `X-Forwarded-Proto: http` |
 | `JWT_SECRET` | sim (≥16 chars) | Base para fallbacks legados |
 | `JWT_ACCESS_SECRET` | sim (≥16 chars) | Verificação no `auth-middleware` |
 | `JWT_REFRESH_SECRET` | sim (≥16 chars) | Refresh token |

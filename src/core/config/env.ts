@@ -23,6 +23,18 @@ const EnvSchema = z.object({
     .transform((v) => (typeof v === "string" ? v === "true" : Boolean(v)))
     .default(true),
 
+  /**
+   * Atrás do ALB com HTTPS (ACM): redireciona requisições HTTP detectadas via
+   * X-Forwarded-Proto. Na ECS, ligado automaticamente quando há certificado no ALB.
+   */
+  FORCE_HTTPS_REDIRECT: z
+    .union([z.string(), z.boolean()])
+    .optional()
+    .transform((v) => {
+      if (v === undefined) return false;
+      return typeof v === "string" ? v === "true" : Boolean(v);
+    }),
+
   JWT_SECRET: z
     .string()
     .min(16, "JWT_SECRET deve ter pelo menos 16 caracteres"),

@@ -63,6 +63,17 @@ Variáveis críticas para a **imagem real da API**:
 
 Detalhes: [infra/aws/foundation/README.md](../../infra/aws/foundation/README.md).
 
+### HTTPS no ALB (certificado ACM)
+
+Sem `acm_certificate_arn` no `terraform.tfvars`, o ALB **só escuta na porta 80**. Chamadas a `https://<dns-do-alb>` na **443** ficam em **timeout** (nada ouvindo na 443, SG sem ingress 443).
+
+1. No **ACM** (mesma região do ALB, ex.: `us-east-1`), **solicite um certificado** para o hostname que o front e o browser vão usar (ex.: `api.seudominio.com.br`). Validação **DNS** (recomendada) ou email.
+2. No **DNS** (Route 53 ou provedor), crie um registro **CNAME** desse hostname apontando para o **DNS name** do ALB (output `alb_dns_name`).
+3. Defina no `terraform.tfvars`: `acm_certificate_arn = "arn:aws:acm:..."` e rode `terraform apply`.
+4. O Terraform passa a criar: listener **HTTPS 443**, regra de **ingress 443** no SG do ALB, e **redirect 301** de **HTTP 80 → HTTPS 443** (`infra/aws/foundation/alb.tf`). A task ECS recebe `FORCE_HTTPS_REDIRECT=true` para reforço na app (`X-Forwarded-Proto: http` → 301 para `https://`).
+
+**Nota:** você **não** consegue emitir um certificado ACM público válido só para o hostname padrão `*.elb.amazonaws.com` do ALB; use um **domínio seu** (CNAME → ALB).
+
 ---
 
 ## 4. Variáveis, segredos e conectividade
@@ -70,7 +81,7 @@ Detalhes: [infra/aws/foundation/README.md](../../infra/aws/foundation/README.md)
 | Origem | Conteúdo |
 |--------|----------|
 | **Secrets Manager** (`${project}-${env}/app/runtime`) | `JWT_SECRET`, `JWT_ACCESS_SECRET`, `JWT_REFRESH_SECRET`, `DB_PASSWORD`, `ADMIN_PASSWORD` |
-| **Task definition (environment)** | `DB_HOST`, `DB_PORT`, `DB_DATABASE`, `DB_USERNAME`, `DB_DIALECT`, `DB_SSL`, `DB_SSL_REJECT_UNAUTHORIZED`, `MEDIA_STORAGE=s3`, `S3_*`, `AWS_REGION`, `PORT`, `READINESS_CHECK_DB`, `ADMIN_EMAIL`, etc. |
+| **Task definition (environment)** | `DB_*`, `MEDIA_STORAGE=s3`, `S3_*`, `AWS_REGION`, `PORT`, `READINESS_CHECK_DB`, `ADMIN_EMAIL`, `FORCE_HTTPS_REDIRECT` (true quando `acm_certificate_arn` definido), etc. |
 
 Conectividade:
 
