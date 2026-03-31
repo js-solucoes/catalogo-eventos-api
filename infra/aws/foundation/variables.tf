@@ -116,6 +116,19 @@ variable "jwt_refresh_secret" {
   description = "≥16 caracteres"
 }
 
+variable "bootstrap_admin_email" {
+  type        = string
+  default     = "admin@catalogo-eventos.com.br"
+  description = "E-mail do admin criado pelo seed; repassado como ADMIN_EMAIL na task ECS (env.ts exige em produção)."
+}
+
+variable "bootstrap_admin_password" {
+  type        = string
+  sensitive   = true
+  default     = "admin123"
+  description = "Senha inicial do admin (Secrets Manager → ADMIN_PASSWORD). O login HTTP valida 6–8 caracteres — ajuste o schema ou a senha se precisar de mais."
+}
+
 # --- Produção / endurecimento (valores padrão preservam laboratório) ---
 
 variable "nat_gateway_enabled" {
@@ -127,7 +140,7 @@ variable "nat_gateway_enabled" {
 variable "acm_certificate_arn" {
   type        = string
   default     = ""
-  description = "ARN do certificado ACM na mesma região do ALB; vazio = só HTTP. Com ARN: listener HTTPS + redirect 80→443"
+  description = "Obrigatório para HTTPS no ALB (porta 443). ARN do certificado ACM na MESMA região do ALB; validação DNS (recomendado) ou email. Vazio = só HTTP na 80 (https:// no DNS do ALB não conecta). Com ARN: listener 443 + redirect 301 80→443 + ingress 443 no SG + FORCE_HTTPS_REDIRECT na task."
 }
 
 variable "rds_backup_retention_period" {

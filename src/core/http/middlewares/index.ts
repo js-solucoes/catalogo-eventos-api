@@ -7,6 +7,7 @@ import setupErrorHandlers from "./error-handlers";
 import { securityHeaders } from "./security-headers";
 import { validateBody } from "./validate-body";
 import { correlationIdMiddleware } from "./correlation-id";
+import { forceHttpsRedirect } from "./force-https-redirect";
 
 export {
   authMiddleware,
@@ -18,4 +19,5 @@ export {
   setupErrorHandlers,
   securityHeaders,
   correlationIdMiddleware,
+  forceHttpsRedirect,
 };

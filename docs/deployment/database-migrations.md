@@ -14,7 +14,14 @@
 
 ## Comandos
 
-Configuração: `.sequelizerc` + `database/sequelize-cli-config.cjs` (lê `.env` / `.env.<NODE_ENV>` como `env.ts`).
+Configuração: `.sequelizerc` + `database/sequelize-cli-config.cjs` (lê `.env` / `.env.<NODE_ENV>` na raiz do repo). Com **`DB_SSL=true`** e MySQL **sem** **`DB_SSL_CA_PATH`**, o mysql2 usa o perfil embutido **Amazon RDS** (`aws-ssl-profiles`) — recomendado para RDS/Aurora. Com **`DB_SSL_CA_PATH`** definido, só o PEM desse caminho é usado (se estiver errado/desatualizado, aparece *self-signed certificate in certificate chain*).
+
+A imagem Docker **copia** `certs/` para `/app/certs/` (bundle versionado no repo); a task ECS **não** precisa definir `DB_SSL_CA_PATH` para o fluxo padrão com RDS.
+
+### TLS: erro *self-signed certificate in certificate chain*
+
+1. Confira se **`DB_SSL_CA_PATH` está vazio** no shell (`unset DB_SSL_CA_PATH`) e nos `.env*` usados pelo CLI.
+2. Só use PEM em disco se tiver motivo (CA customizada, proxy corporativo, etc.).
 
 ```bash
 # NODE_ENV define qual chave do config é usada (development | test | production)
@@ -27,9 +34,36 @@ npm run db:seed:undo        # desfaz todos os seeders registrados
 npm run db:bootstrap        # migrate + seed (ambiente local/staging com .env)
 ```
 
-A migration `20250326120000-phase1-schema-placeholder` é **no-op** (histórico / `SequelizeMeta`). O DDL das tabelas da aplicação está em `20250326120100-create-application-schema.cjs`. Os seeders exigem **`ADMIN_PASSWORD`** no ambiente para criar o usuário `admin@catalogo-eventos.com.br` (hash bcrypt com 12 rounds, alinhado aos factories de auth).
+A migration `20250326120000-phase1-schema-placeholder` é **no-op** (histórico / `SequelizeMeta`). O DDL das tabelas da aplicação está em `20250326120100-create-application-schema.cjs`. O seeder de admin exige **`ADMIN_EMAIL`** e **`ADMIN_PASSWORD`** no ambiente (hash bcrypt com 12 rounds). Em produção, `env.ts` exige que ambas existam em `process.env` (ECS: `ADMIN_EMAIL` na task + `ADMIN_PASSWORD` via Secrets Manager — ver `infra/aws/foundation/ecs.tf`).
 
 O workflow **CI** (`.github/workflows/ci.yml`, job `database`) sobe **MySQL 8** em serviço e executa `npm run db:bootstrap` para validar migrations e seeders em cada push/PR.
+
+## Rodar migrate **de dentro da VPC** (RDS privado)
+
+O MySQL do `foundation` não tem endpoint público; da sua máquina na internet o `npm run db:migrate` não conecta. Opções:
+
+### 1) ECS **Run Task** (recomendado com este repositório)
+
+A imagem de produção inclui `database/`, `.sequelizerc` e `sequelize-cli`; as variáveis `DB_*` e o segredo vêm da **mesma task definition** do serviço (já apontam para o RDS).
+
+1. Faça **build e push** da imagem para o ECR (Dockerfile atualizado).
+2. Atualize o serviço ECS (ou force new deployment) para usar a nova imagem.
+3. No diretório do projeto:
+
+   ```bash
+   ./scripts/ecs-run-db-migrate.sh
+   ./scripts/ecs-run-db-seed.sh
+   ```
+
+   O migrate **não** roda seed. Após migrar, execute **`ecs-run-db-seed.sh`** uma vez (ou quando precisar recriar dados iniciais). Os scripts leem `ecs_cluster_name` e `ecs_service_name` via Terraform, copiam subnets/SG do serviço e disparam tasks Fargate com `npm run db:migrate` / `npm run db:seed` (sem ALB). A task usa a mesma definição do serviço, incluindo `ADMIN_*`.
+
+4. Acompanhe em **CloudWatch Logs** → grupo `/ecs/<project>-<env>` (stream da task).
+
+### 2) Outras formas
+
+- **AWS CodeBuild** na mesma VPC/subnets com acesso ao RDS (checkout do repo + `npm ci` + `npm run db:migrate` com `DB_*` em variáveis ou Secrets Manager).
+- **Bastion** (EC2 ou SSM) na VPC com Node + clone do repo + `.env` com `DB_HOST` interno.
+- **Runner de CI** (GitHub self-hosted, etc.) com interface de rede na VPC.
 
 MySQL local opcional: `docker compose -f docker-compose.mysql.yml up -d` (credenciais espelham `.env-exemplo`; ajuste o `.env` se mudar usuário ou senha).
 

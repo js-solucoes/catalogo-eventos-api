@@ -25,7 +25,7 @@ Task (mesma VPC) ──► MySQL :3306
 - **Lab (padrão Terraform):** sem NAT — subnets **públicas** + `assign_public_ip` na task.
 - **Produção:** `nat_gateway_enabled = true` — tasks em subnets **privadas** (as mesmas do RDS), egress via **NAT** (1 NAT = custo menor; uma AZ de egress — para HA use um NAT por AZ).
 - **HTTPS:** `acm_certificate_arn` (mesma região do ALB) → listener **443** + **redirect 301** de **80** para **443**. Output `alb_public_base_url` reflete `https://` ou `http://`.
-- **TLS ao banco**: `DB_SSL=true` + bundle RDS na imagem e `DB_SSL_CA_PATH` na task.
+- **TLS ao banco**: `DB_SSL=true` + `DB_SSL_REJECT_UNAUTHORIZED=true`; a imagem inclui `certs/` em `/app/certs/` (referência). **Sem** `DB_SSL_CA_PATH` na task, o mysql2 usa o bundle embutido **Amazon RDS**.
 
 ---
 
@@ -33,7 +33,7 @@ Task (mesma VPC) ──► MySQL :3306
 
 | Arquivo | Função |
 |---------|--------|
-| `Dockerfile` | Multi-stage: build TypeScript, runner `node:22-bookworm-slim`, usuário não-root, certificado RDS, `PORT=3000`, `HEALTHCHECK` em `/health`. |
+| `Dockerfile` | Multi-stage: build TypeScript, runner `node:22-bookworm-slim`, usuário não-root, `certs/`, `database/`, `.sequelizerc`, `scripts/sequelize-with-node-env.cjs` (migrate/seed na VPC), `PORT=3000`, `HEALTHCHECK` em `/health`. |
 | `.dockerignore` | Reduz contexto de build (sem `node_modules`, `dist`, `.env`, etc.). |
 
 Validação local:
@@ -63,14 +63,25 @@ Variáveis críticas para a **imagem real da API**:
 
 Detalhes: [infra/aws/foundation/README.md](../../infra/aws/foundation/README.md).
 
+### HTTPS no ALB (certificado ACM)
+
+Sem `acm_certificate_arn` no `terraform.tfvars`, o ALB **só escuta na porta 80**. Chamadas a `https://<dns-do-alb>` na **443** ficam em **timeout** (nada ouvindo na 443, SG sem ingress 443).
+
+1. No **ACM** (mesma região do ALB, ex.: `us-east-1`), **solicite um certificado** para o hostname que o front e o browser vão usar (ex.: `api.seudominio.com.br`). Validação **DNS** (recomendada) ou email.
+2. No **DNS** (Route 53 ou provedor), crie um registro **CNAME** desse hostname apontando para o **DNS name** do ALB (output `alb_dns_name`).
+3. Defina no `terraform.tfvars`: `acm_certificate_arn = "arn:aws:acm:..."` e rode `terraform apply`.
+4. O Terraform passa a criar: listener **HTTPS 443**, regra de **ingress 443** no SG do ALB, e **redirect 301** de **HTTP 80 → HTTPS 443** (`infra/aws/foundation/alb.tf`). A task ECS recebe `FORCE_HTTPS_REDIRECT=true` para reforço na app (`X-Forwarded-Proto: http` → 301 para `https://`).
+
+**Nota:** você **não** consegue emitir um certificado ACM público válido só para o hostname padrão `*.elb.amazonaws.com` do ALB; use um **domínio seu** (CNAME → ALB).
+
 ---
 
 ## 4. Variáveis, segredos e conectividade
 
 | Origem | Conteúdo |
 |--------|----------|
-| **Secrets Manager** (`${project}-${env}/app/runtime`) | `JWT_SECRET`, `JWT_ACCESS_SECRET`, `JWT_REFRESH_SECRET`, `DB_PASSWORD` |
-| **Task definition (environment)** | `DB_HOST`, `DB_PORT`, `DB_DATABASE`, `DB_USERNAME`, `DB_DIALECT`, `DB_SSL`, `DB_SSL_REJECT_UNAUTHORIZED`, `DB_SSL_CA_PATH`, `MEDIA_STORAGE=s3`, `S3_*`, `AWS_REGION`, `PORT`, `READINESS_CHECK_DB`, etc. |
+| **Secrets Manager** (`${project}-${env}/app/runtime`) | `JWT_SECRET`, `JWT_ACCESS_SECRET`, `JWT_REFRESH_SECRET`, `DB_PASSWORD`, `ADMIN_PASSWORD` |
+| **Task definition (environment)** | `DB_*`, `MEDIA_STORAGE=s3`, `S3_*`, `AWS_REGION`, `PORT`, `READINESS_CHECK_DB`, `ADMIN_EMAIL`, `FORCE_HTTPS_REDIRECT` (true quando `acm_certificate_arn` definido), etc. |
 
 Conectividade:
 

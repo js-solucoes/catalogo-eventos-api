@@ -10,9 +10,18 @@ import { resolveRuntimePath } from "@/core/config/paths";
 import setupRoutes from "@/core/config/routes";
 import { runReadinessCheck } from "@/core/config/readiness";
 import { ensureCorrelationId } from "@/core/http/correlation";
+import { forceHttpsRedirect } from "@/core/http/middlewares";
 
 export const createApp = (): Application => {
   const app = express();
+
+  if (ENV.NODE_ENV === "production") {
+    app.set("trust proxy", 1);
+  }
+
+  if (ENV.FORCE_HTTPS_REDIRECT) {
+    app.use(forceHttpsRedirect);
+  }
 
   // Swagger opcional
   if (ENV.SWAGGER_ENABLED) {

@@ -13,10 +13,20 @@ jwt_secret          = "troque-por-32-chars-minimo-segredo-jwt"
 jwt_access_secret   = "troque-por-32-chars-minimo-access-xx"
 jwt_refresh_secret  = "troque-por-32-chars-minimo-refresh-x"
 
+# Admin inicial (seed em ECS: ./scripts/ecs-run-db-seed.sh). Login atual valida senha 6–8 caracteres.
+# bootstrap_admin_email    = "admin@catalogo-eventos.com.br"
+# bootstrap_admin_password = "admin123"
+
 # Imagem inicial (valida ALB/ECS). Depois do push para o ECR (Fase 3):
 # container_image     = "123456789012.dkr.ecr.us-east-1.amazonaws.com/catalogo-eventos-api-dev-api:v1"
 # container_port      = 3000
 # health_check_path   = "/health"
+
+# HTTPS no ALB (front em https://): certificado ACM na MESMA região (ex.: us-east-1).
+# O nome do certificado deve bater com o host que o browser usa (ex.: api.seudominio.com).
+# Crie um CNAME no DNS apontando esse nome para o DNS do ALB (output alb_dns_name).
+# Sem este ARN, o ALB só escuta na 80 — https://<dns-do-alb> na 443 dá timeout.
+# acm_certificate_arn = "arn:aws:acm:us-east-1:123456789012:certificate/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
 
 # Banco: RDS criado por este stack (padrão) OU Aurora (Fase 2):
 # use_managed_rds        = true   # default
