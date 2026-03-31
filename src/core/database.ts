@@ -8,23 +8,33 @@ import { Dialect, Options, Sequelize } from "sequelize";
 const isTest = ENV.NODE_ENV === "test";
 
 function buildMysqlOptions(): Options {
+  const caPath = ENV.DB_SSL_CA_PATH?.trim();
+  const useMysql2RdsProfile =
+    ENV.DB_SSL &&
+    ENV.DB_DIALECT === "mysql" &&
+    !caPath;
+
   const dialectOptions: Options["dialectOptions"] = ENV.DB_SSL
-    ? {
-        ssl: {
-          require: true,
-          rejectUnauthorized: ENV.DB_SSL_REJECT_UNAUTHORIZED,
-          ...(ENV.DB_SSL_CA_PATH
-            ? {
-                ca: fs.readFileSync(
-                  path.isAbsolute(ENV.DB_SSL_CA_PATH)
-                    ? ENV.DB_SSL_CA_PATH
-                    : path.resolve(process.cwd(), ENV.DB_SSL_CA_PATH),
-                  "utf8",
-                ),
-              }
-            : {}),
-        },
-      }
+    ? useMysql2RdsProfile
+      ? ENV.DB_SSL_REJECT_UNAUTHORIZED
+        ? { ssl: "Amazon RDS" }
+        : { ssl: { rejectUnauthorized: false } }
+      : {
+          ssl: {
+            require: true,
+            rejectUnauthorized: ENV.DB_SSL_REJECT_UNAUTHORIZED,
+            ...(caPath
+              ? {
+                  ca: fs.readFileSync(
+                    path.isAbsolute(caPath)
+                      ? caPath
+                      : path.resolve(process.cwd(), caPath),
+                    "utf8",
+                  ),
+                }
+              : {}),
+          },
+        }
     : undefined;
 
   return {

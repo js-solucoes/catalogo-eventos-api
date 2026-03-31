@@ -75,8 +75,8 @@ const EnvSchema = z.object({
     .transform((v) => (typeof v === "string" ? v === "true" : Boolean(v)))
     .default(true),
   /**
-   * Caminho para o PEM da AWS (ex.: global-bundle.pem). Opcional; com DB_SSL=true
-   * permite manter DB_SSL_REJECT_UNAUTHORIZED=true contra Aurora/RDS.
+   * PEM customizado (opcional). Em MySQL, se vazio, o mysql2 usa o perfil embutido
+   * "Amazon RDS" (aws-ssl-profiles) — prefira assim para RDS/Aurora.
    */
   DB_SSL_CA_PATH: z.string().optional(),
 

@@ -31,6 +31,10 @@ RUN npm ci --omit=dev && npm cache clean --force
 
 COPY --from=builder /app/dist ./dist
 
+# Migrations na VPC (ECS Run Task / one-off): sequelize-cli + pasta versionada
+COPY .sequelizerc ./
+COPY database ./database
+
 USER nodejs
 EXPOSE 3000
 ENV PORT=3000

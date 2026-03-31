@@ -1,6 +1,50 @@
 // src/config/logger.ts
 export type LogLevel = "debug" | "info" | "warn" | "error";
 
+/** Evita `{}` no JSON quando se passa `Error` em `meta` (message/stack não são enumeráveis). */
+function toSerializable(value: unknown): unknown {
+  if (value instanceof Error) {
+    const withSql = value as Error & {
+      parent?: { code?: string; errno?: number; sqlMessage?: string; sql?: string };
+    };
+    return {
+      name: value.name,
+      message: value.message,
+      stack: value.stack,
+      ...(withSql.parent
+        ? {
+            sql: {
+              code: withSql.parent.code,
+              errno: withSql.parent.errno,
+              sqlMessage: withSql.parent.sqlMessage,
+            },
+          }
+        : {}),
+    };
+  }
+  if (Array.isArray(value)) {
+    return value.map((item) => toSerializable(item));
+  }
+  if (value !== null && typeof value === "object") {
+    return Object.fromEntries(
+      Object.entries(value as Record<string, unknown>).map(([k, v]) => [
+        k,
+        toSerializable(v),
+      ]),
+    );
+  }
+  return value;
+}
+
+function normalizeMeta(
+  meta?: Record<string, unknown>,
+): Record<string, unknown> | undefined {
+  if (!meta) return undefined;
+  return Object.fromEntries(
+    Object.entries(meta).map(([k, v]) => [k, toSerializable(v)]),
+  ) as Record<string, unknown>;
+}
+
 export interface Logger {
   debug: (message: string, meta?: Record<string, unknown>) => void;
   info: (message: string, meta?: Record<string, unknown>) => void;
@@ -21,7 +65,7 @@ const formatLog = (
     env: process.env.NODE_ENV,
   };
 
-  return meta ? { ...base, ...meta } : base;
+  return meta ? { ...base, ...normalizeMeta(meta) } : base;
 };
 const addColorConsole = {
   red(message: string) {

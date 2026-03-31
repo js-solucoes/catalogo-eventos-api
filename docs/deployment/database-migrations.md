@@ -14,7 +14,7 @@
 
 ## Comandos
 
-Configuração: `.sequelizerc` + `database/sequelize-cli-config.cjs` (lê `.env` / `.env.<NODE_ENV>` como `env.ts`).
+Configuração: `.sequelizerc` + `database/sequelize-cli-config.cjs` (lê `.env` / `.env.<NODE_ENV>`). Com **`DB_SSL=true`**, defina **`DB_SSL_CA_PATH`** apontando para o PEM da AWS (ex.: `global-bundle.pem` baixado de https://truststore.pki.rds.amazonaws.com/global/global-bundle.pem) — igual à app; sem isso o Node costuma falhar com *self-signed certificate in certificate chain* contra RDS/Aurora.
 
 ```bash
 # NODE_ENV define qual chave do config é usada (development | test | production)
@@ -30,6 +30,32 @@ npm run db:bootstrap        # migrate + seed (ambiente local/staging com .env)
 A migration `20250326120000-phase1-schema-placeholder` é **no-op** (histórico / `SequelizeMeta`). O DDL das tabelas da aplicação está em `20250326120100-create-application-schema.cjs`. Os seeders exigem **`ADMIN_PASSWORD`** no ambiente para criar o usuário `admin@catalogo-eventos.com.br` (hash bcrypt com 12 rounds, alinhado aos factories de auth).
 
 O workflow **CI** (`.github/workflows/ci.yml`, job `database`) sobe **MySQL 8** em serviço e executa `npm run db:bootstrap` para validar migrations e seeders em cada push/PR.
+
+## Rodar migrate **de dentro da VPC** (RDS privado)
+
+O MySQL do `foundation` não tem endpoint público; da sua máquina na internet o `npm run db:migrate` não conecta. Opções:
+
+### 1) ECS **Run Task** (recomendado com este repositório)
+
+A imagem de produção inclui `database/`, `.sequelizerc` e `sequelize-cli`; as variáveis `DB_*` e o segredo vêm da **mesma task definition** do serviço (já apontam para o RDS).
+
+1. Faça **build e push** da imagem para o ECR (Dockerfile atualizado).
+2. Atualize o serviço ECS (ou force new deployment) para usar a nova imagem.
+3. No diretório do projeto:
+
+   ```bash
+   ./scripts/ecs-run-db-migrate.sh
+   ```
+
+   O script lê `ecs_cluster_name` e `ecs_service_name` via Terraform no `infra/aws/foundation`, copia subnets/SG do serviço e dispara uma task Fargate com comando `npm run db:migrate` (sem ALB).
+
+4. Acompanhe em **CloudWatch Logs** → grupo `/ecs/<project>-<env>` (stream da task).
+
+### 2) Outras formas
+
+- **AWS CodeBuild** na mesma VPC/subnets com acesso ao RDS (checkout do repo + `npm ci` + `npm run db:migrate` com `DB_*` em variáveis ou Secrets Manager).
+- **Bastion** (EC2 ou SSM) na VPC com Node + clone do repo + `.env` com `DB_HOST` interno.
+- **Runner de CI** (GitHub self-hosted, etc.) com interface de rede na VPC.
 
 MySQL local opcional: `docker compose -f docker-compose.mysql.yml up -d` (credenciais espelham `.env-exemplo`; ajuste o `.env` se mudar usuário ou senha).
 
