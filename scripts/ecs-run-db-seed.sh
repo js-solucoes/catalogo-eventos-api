@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
-# Roda `db:migrate` em uma task Fargate na mesma VPC/subnets/SG do serviço — alcança o RDS privado.
-# Pré-requisitos: AWS CLI, jq, imagem no ECR com `database/`, `.sequelizerc`,
-# `scripts/sequelize-with-node-env.cjs` (npm run db:migrate) e sequelize-cli em dependencies;
-# build/push após alterar Dockerfile; task definition revisada no ECS.
+# Roda `db:seed` em uma task Fargate (mesma VPC/SG que o serviço).
+# Exige task definition com ADMIN_EMAIL (env) e ADMIN_PASSWORD (secret), como o serviço após terraform apply.
+# Imagem deve incluir scripts/sequelize-with-node-env.cjs (ver Dockerfile).
+# Após o primeiro deploy: rode migrate, depois este script (ou db:bootstrap só em local).
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
@@ -74,14 +74,14 @@ jq -n \
     overrides: {
       containerOverrides: [{
         name: "app",
-        command: ["sh", "-c", "cd /app && NODE_ENV=production npm run db:migrate"]
+        command: ["sh", "-c", "cd /app && NODE_ENV=production npm run db:seed"]
       }]
     }
   }' >"$RUN_JSON"
 
 TASK_ARN="$(aws ecs run-task --cli-input-json "file://$RUN_JSON" --query 'tasks[0].taskArn' --output text)"
 echo "Task: $TASK_ARN"
-echo "Logs: grupo /ecs/$(terraform output -raw ecs_cluster_name | sed 's/-cluster$//') — filtro stream migrate/run-task"
+echo "Logs: CloudWatch /ecs/<projeto> — stream prefix app"
 echo ""
 aws ecs wait tasks-stopped --cluster "$CLUSTER" --tasks "$TASK_ARN"
 EXIT_CODE="$(

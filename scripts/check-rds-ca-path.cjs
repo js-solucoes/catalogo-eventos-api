@@ -37,4 +37,8 @@ if (dialect === "mysql" && !caEnvTrim) {
   console.log(
     "MySQL sem DB_SSL_CA_PATH: migrate/seed usam ssl: \"Amazon RDS\" (aws-ssl-profiles / mysql2).",
   );
+} else if (dialect === "mysql" && caEnvTrim) {
+  console.log(
+    "Aviso: com DB_SSL_CA_PATH definido, só esse PEM é usado. Se aparecer self-signed contra RDS, deixe DB_SSL_CA_PATH vazio.",
+  );
 }

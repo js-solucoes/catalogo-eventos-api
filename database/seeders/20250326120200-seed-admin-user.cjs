@@ -3,23 +3,32 @@
 const bcrypt = require("bcrypt");
 const path = require("path");
 
+/** Raiz do repo (este arquivo está em database/seeders/). */
+const PROJECT_ROOT = path.resolve(__dirname, "../..");
+
 require("dotenv").config({
   path: [
-    path.resolve(process.cwd(), `.env.${process.env.NODE_ENV || "development"}`),
-    path.resolve(process.cwd(), ".env"),
+    path.join(PROJECT_ROOT, `.env.${process.env.NODE_ENV || "development"}`),
+    path.join(PROJECT_ROOT, ".env"),
   ],
 });
 
-const ADMIN_EMAIL = "admin@catalogo-eventos.com.br";
 /** Mesmo valor usado em make-user-controllers e make-auth-controllers */
 const BCRYPT_ROUNDS = 12;
 
 module.exports = {
   async up(queryInterface, Sequelize) {
-    const password = process.env.ADMIN_PASSWORD;
-    if (password === undefined || password === "") {
+    const adminEmail = (process.env.ADMIN_EMAIL || "").trim();
+    if (!adminEmail) {
       throw new Error(
-        "ADMIN_PASSWORD não definida ou vazia. Defina no .env antes de rodar o seed de admin.",
+        "ADMIN_EMAIL não definido ou vazio. Defina no .env ou na task ECS antes do seed de admin.",
+      );
+    }
+
+    const password = (process.env.ADMIN_PASSWORD || "").trim();
+    if (!password) {
+      throw new Error(
+        "ADMIN_PASSWORD não definida ou vazia. Defina no .env ou no Secrets Manager (ECS) antes do seed de admin.",
       );
     }
 
@@ -29,7 +38,7 @@ module.exports = {
     const [existing] = await queryInterface.sequelize.query(
       `SELECT id FROM ${usersTable} WHERE email = :email LIMIT 1`,
       {
-        replacements: { email: ADMIN_EMAIL },
+        replacements: { email: adminEmail },
         type: Sequelize.QueryTypes.SELECT,
       },
     );
@@ -40,7 +49,7 @@ module.exports = {
 
     await queryInterface.bulkInsert("Users", [
       {
-        email: ADMIN_EMAIL,
+        email: adminEmail,
         password: hash,
         name: "Administrador",
         role: "Admin",
@@ -52,7 +61,7 @@ module.exports = {
     const [row] = await queryInterface.sequelize.query(
       `SELECT id FROM ${usersTable} WHERE email = :email LIMIT 1`,
       {
-        replacements: { email: ADMIN_EMAIL },
+        replacements: { email: adminEmail },
         type: Sequelize.QueryTypes.SELECT,
       },
     );
@@ -69,19 +78,26 @@ module.exports = {
   },
 
   async down(queryInterface, Sequelize) {
+    const adminEmail = (process.env.ADMIN_EMAIL || "").trim();
+    if (!adminEmail) {
+      throw new Error(
+        "ADMIN_EMAIL é necessário para desfazer o seed (mesmo e-mail usado no up).",
+      );
+    }
+
     const dialect = queryInterface.sequelize.getDialect();
     const usersTable = dialect === "postgres" ? '"Users"' : "`Users`";
 
     const [row] = await queryInterface.sequelize.query(
       `SELECT id FROM ${usersTable} WHERE email = :email LIMIT 1`,
       {
-        replacements: { email: ADMIN_EMAIL },
+        replacements: { email: adminEmail },
         type: Sequelize.QueryTypes.SELECT,
       },
     );
     if (!row) return;
 
     await queryInterface.bulkDelete("admins", { userId: row.id });
-    await queryInterface.bulkDelete("Users", { email: ADMIN_EMAIL });
+    await queryInterface.bulkDelete("Users", { email: adminEmail });
   },
 };

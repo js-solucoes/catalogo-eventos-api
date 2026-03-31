@@ -13,6 +13,9 @@ jwt_secret         = "REPLACE_MIN_16_CHARS"
 jwt_access_secret  = "REPLACE_MIN_16_CHARS"
 jwt_refresh_secret = "REPLACE_MIN_16_CHARS"
 
+bootstrap_admin_email    = "admin@catalogo-eventos.com.br"
+bootstrap_admin_password = "REPLACE_6_TO_8_CHARS"
+
 container_image     = "123456789012.dkr.ecr.us-east-1.amazonaws.com/catalogo-eventos-api-prod-api:v1"
 container_port      = 3000
 health_check_path   = "/health"

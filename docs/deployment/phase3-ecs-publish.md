@@ -25,7 +25,7 @@ Task (mesma VPC) ──► MySQL :3306
 - **Lab (padrão Terraform):** sem NAT — subnets **públicas** + `assign_public_ip` na task.
 - **Produção:** `nat_gateway_enabled = true` — tasks em subnets **privadas** (as mesmas do RDS), egress via **NAT** (1 NAT = custo menor; uma AZ de egress — para HA use um NAT por AZ).
 - **HTTPS:** `acm_certificate_arn` (mesma região do ALB) → listener **443** + **redirect 301** de **80** para **443**. Output `alb_public_base_url` reflete `https://` ou `http://`.
-- **TLS ao banco**: `DB_SSL=true` + bundle RDS na imagem e `DB_SSL_CA_PATH` na task.
+- **TLS ao banco**: `DB_SSL=true` + `DB_SSL_REJECT_UNAUTHORIZED=true`; a imagem inclui `certs/` em `/app/certs/` (referência). **Sem** `DB_SSL_CA_PATH` na task, o mysql2 usa o bundle embutido **Amazon RDS**.
 
 ---
 
@@ -33,7 +33,7 @@ Task (mesma VPC) ──► MySQL :3306
 
 | Arquivo | Função |
 |---------|--------|
-| `Dockerfile` | Multi-stage: build TypeScript, runner `node:22-bookworm-slim`, usuário não-root, certificado RDS, `PORT=3000`, `HEALTHCHECK` em `/health`. |
+| `Dockerfile` | Multi-stage: build TypeScript, runner `node:22-bookworm-slim`, usuário não-root, `certs/`, `database/`, `.sequelizerc`, `scripts/sequelize-with-node-env.cjs` (migrate/seed na VPC), `PORT=3000`, `HEALTHCHECK` em `/health`. |
 | `.dockerignore` | Reduz contexto de build (sem `node_modules`, `dist`, `.env`, etc.). |
 
 Validação local:
@@ -69,8 +69,8 @@ Detalhes: [infra/aws/foundation/README.md](../../infra/aws/foundation/README.md)
 
 | Origem | Conteúdo |
 |--------|----------|
-| **Secrets Manager** (`${project}-${env}/app/runtime`) | `JWT_SECRET`, `JWT_ACCESS_SECRET`, `JWT_REFRESH_SECRET`, `DB_PASSWORD` |
-| **Task definition (environment)** | `DB_HOST`, `DB_PORT`, `DB_DATABASE`, `DB_USERNAME`, `DB_DIALECT`, `DB_SSL`, `DB_SSL_REJECT_UNAUTHORIZED`, `DB_SSL_CA_PATH`, `MEDIA_STORAGE=s3`, `S3_*`, `AWS_REGION`, `PORT`, `READINESS_CHECK_DB`, etc. |
+| **Secrets Manager** (`${project}-${env}/app/runtime`) | `JWT_SECRET`, `JWT_ACCESS_SECRET`, `JWT_REFRESH_SECRET`, `DB_PASSWORD`, `ADMIN_PASSWORD` |
+| **Task definition (environment)** | `DB_HOST`, `DB_PORT`, `DB_DATABASE`, `DB_USERNAME`, `DB_DIALECT`, `DB_SSL`, `DB_SSL_REJECT_UNAUTHORIZED`, `MEDIA_STORAGE=s3`, `S3_*`, `AWS_REGION`, `PORT`, `READINESS_CHECK_DB`, `ADMIN_EMAIL`, etc. |
 
 Conectividade:
 

@@ -12,5 +12,6 @@ resource "aws_secretsmanager_secret_version" "app" {
     JWT_ACCESS_SECRET  = var.jwt_access_secret
     JWT_REFRESH_SECRET = var.jwt_refresh_secret
     DB_PASSWORD        = local.effective_db_password
+    ADMIN_PASSWORD     = var.bootstrap_admin_password
   })
 }

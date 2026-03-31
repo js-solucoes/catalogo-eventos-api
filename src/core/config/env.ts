@@ -53,7 +53,20 @@ const EnvSchema = z.object({
     }),
 
   SALT: z.coerce.number().int().positive().default(10),
-  ADMIN_PASSWORD: z.string().default("admin123"),
+
+  /**
+   * E-mail do usuário admin (seed). Em produção deve existir em process.env (ex.: ECS).
+   */
+  ADMIN_EMAIL: z
+    .string()
+    .email("ADMIN_EMAIL deve ser um e-mail válido")
+    .default("admin@catalogo-eventos.com.br"),
+
+  /**
+   * Senha inicial do admin (seed). Em produção deve vir do ambiente (ex.: Secrets Manager).
+   * Em dev/test o default evita fricção local.
+   */
+  ADMIN_PASSWORD: z.string().min(1, "ADMIN_PASSWORD não pode ser vazia").default("admin123"),
 
   DB_DIALECT: z
     .enum(["mysql", "mariadb", "postgres", "sqlite"])
@@ -115,7 +128,30 @@ const EnvSchema = z.object({
   WEB_IMAGE_MAX_WIDTH: z.coerce.number().int().positive().default(1920),
   WEB_IMAGE_MAX_HEIGHT: z.coerce.number().int().positive().default(1080),
   WEB_IMAGE_WEBP_QUALITY: z.coerce.number().int().min(1).max(100).default(82),
-});
+})
+  .superRefine((data, ctx) => {
+    if (data.NODE_ENV !== "production") {
+      return;
+    }
+    const pwd = process.env.ADMIN_PASSWORD;
+    if (pwd === undefined || String(pwd).trim() === "") {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message:
+          "Em produção, ADMIN_PASSWORD deve estar definida no ambiente (ex.: AWS Secrets Manager na task ECS).",
+        path: ["ADMIN_PASSWORD"],
+      });
+    }
+    const email = process.env.ADMIN_EMAIL;
+    if (email === undefined || String(email).trim() === "") {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message:
+          "Em produção, ADMIN_EMAIL deve estar definido no ambiente (ex.: variável plain na task ECS).",
+        path: ["ADMIN_EMAIL"],
+      });
+    }
+  });
 
 const parsed = EnvSchema.safeParse(process.env);
 if (!parsed.success) {

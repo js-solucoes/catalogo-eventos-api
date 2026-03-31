@@ -24,6 +24,7 @@ locals {
     { name = "JWT_ACCESS_SECRET", valueFrom = "${local.secret_arn}:JWT_ACCESS_SECRET::" },
     { name = "JWT_REFRESH_SECRET", valueFrom = "${local.secret_arn}:JWT_REFRESH_SECRET::" },
     { name = "DB_PASSWORD", valueFrom = "${local.secret_arn}:DB_PASSWORD::" },
+    { name = "ADMIN_PASSWORD", valueFrom = "${local.secret_arn}:ADMIN_PASSWORD::" },
   ]
 
   container_environment = [
@@ -36,7 +37,6 @@ locals {
     { name = "DB_DIALECT", value = "mysql" },
     { name = "DB_SSL", value = "true" },
     { name = "DB_SSL_REJECT_UNAUTHORIZED", value = "true" },
-    { name = "DB_SSL_CA_PATH", value = "/app/certs/rds-global-bundle.pem" },
     { name = "MEDIA_STORAGE", value = "s3" },
     { name = "S3_BUCKET", value = var.media_bucket_name },
     { name = "S3_PUBLIC_BASE_URL", value = var.s3_public_base_url },
@@ -46,6 +46,7 @@ locals {
     { name = "SWAGGER_ENABLED", value = "false" },
     { name = "UPDATE_MODEL", value = "false" },
     { name = "READINESS_CHECK_DB", value = "true" },
+    { name = "ADMIN_EMAIL", value = var.bootstrap_admin_email },
   ]
 }
 

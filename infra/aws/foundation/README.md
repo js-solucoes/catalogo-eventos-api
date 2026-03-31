@@ -98,7 +98,7 @@ RDS com `skip_final_snapshot = true` (laboratório). Ajuste para produção.
 
 ## SSL MySQL (`DB_SSL=true`)
 
-A imagem Docker da API (Fase 3) inclui o bundle oficial em `/app/certs/rds-global-bundle.pem` e a task define `DB_SSL_CA_PATH`. Ver [phase3-ecs-publish.md](../../../docs/deployment/phase3-ecs-publish.md).
+A imagem Docker copia `certs/` para `/app/certs/`. A task **não** define `DB_SSL_CA_PATH`: o mysql2 usa o perfil **Amazon RDS** (`aws-ssl-profiles`). Ver [phase3-ecs-publish.md](../../../docs/deployment/phase3-ecs-publish.md).
 
 ## Aurora em vez do RDS deste stack
 

@@ -116,6 +116,19 @@ variable "jwt_refresh_secret" {
   description = "≥16 caracteres"
 }
 
+variable "bootstrap_admin_email" {
+  type        = string
+  default     = "admin@catalogo-eventos.com.br"
+  description = "E-mail do admin criado pelo seed; repassado como ADMIN_EMAIL na task ECS (env.ts exige em produção)."
+}
+
+variable "bootstrap_admin_password" {
+  type        = string
+  sensitive   = true
+  default     = "admin123"
+  description = "Senha inicial do admin (Secrets Manager → ADMIN_PASSWORD). O login HTTP valida 6–8 caracteres — ajuste o schema ou a senha se precisar de mais."
+}
+
 # --- Produção / endurecimento (valores padrão preservam laboratório) ---
 
 variable "nat_gateway_enabled" {
