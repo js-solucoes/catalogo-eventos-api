@@ -104,6 +104,10 @@ A imagem Docker copia `certs/` para `/app/certs/`. A task **não** define `DB_SS
 
 `https://` na **443** exige **`acm_certificate_arn`** no `terraform.tfvars` (certificado ACM na mesma região + DNS do host apontando para o ALB). Sem isso, só **HTTP:80** funciona. Detalhes: seção **HTTPS no ALB (certificado ACM)** em [phase3-ecs-publish.md](../../../docs/deployment/phase3-ecs-publish.md).
 
+## HTTPS sem domínio próprio (API Gateway)
+
+Com **`enable_apigatewayv2_alb_proxy = true`**, o Terraform cria um **API Gateway HTTP API** com URL **`https://{api-id}.execute-api.{região}.amazonaws.com`** (TLS gerenciado pela AWS). Ver [api-gateway-https-front.md](../../../docs/deployment/api-gateway-https-front.md) e o output **`api_gateway_https_base_url`**.
+
 ## Aurora em vez do RDS deste stack
 
 1. Aplique **aurora-phase2** (mesma VPC/subnets do foundation ou equivalente).

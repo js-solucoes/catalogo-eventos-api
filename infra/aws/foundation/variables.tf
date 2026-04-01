@@ -143,6 +143,18 @@ variable "acm_certificate_arn" {
   description = "Obrigatório para HTTPS no ALB (porta 443). ARN do certificado ACM na MESMA região do ALB; validação DNS (recomendado) ou email. Vazio = só HTTP na 80 (https:// no DNS do ALB não conecta). Com ARN: listener 443 + redirect 301 80→443 + ingress 443 no SG + FORCE_HTTPS_REDIRECT na task."
 }
 
+variable "enable_apigatewayv2_alb_proxy" {
+  type        = bool
+  default     = false
+  description = "API Gateway HTTP API (HTTPS em *.execute-api.*) na frente do ALB — sem domínio próprio. Com true e ACM, o listener :80 encaminha ao TG (API GW usa HTTP interno até o ALB)."
+}
+
+variable "api_gateway_cors_allow_origins" {
+  type        = list(string)
+  default     = ["*"]
+  description = "CORS no API Gateway (preflight). Restrinja em produção."
+}
+
 variable "rds_backup_retention_period" {
   type        = number
   default     = 1

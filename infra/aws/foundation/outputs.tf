@@ -4,8 +4,18 @@ output "alb_dns_name" {
 }
 
 output "alb_public_base_url" {
-  description = "Base URL pública (https se acm_certificate_arn definido, senão http)"
+  description = "Base URL do ALB (https se acm_certificate_arn definido, senão http). Preferir api_gateway_https_base_url quando API Gateway estiver habilitado."
   value       = var.acm_certificate_arn != "" ? "https://${aws_lb.main.dns_name}" : "http://${aws_lb.main.dns_name}"
+}
+
+output "api_gateway_https_base_url" {
+  description = "HTTPS no domínio execute-api (sem domínio próprio). Null se enable_apigatewayv2_alb_proxy=false."
+  value       = var.enable_apigatewayv2_alb_proxy ? trimsuffix(aws_apigatewayv2_stage.apigw_default[0].invoke_url, "/") : null
+}
+
+output "api_gateway_execution_arn" {
+  description = "ARN da API HTTP (útil para políticas IAM)."
+  value       = var.enable_apigatewayv2_alb_proxy ? aws_apigatewayv2_api.public_https[0].arn : null
 }
 
 output "ecr_repository_url" {

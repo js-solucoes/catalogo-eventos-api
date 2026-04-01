@@ -43,7 +43,7 @@ resource "aws_lb_listener" "http" {
   protocol          = "HTTP"
 
   dynamic "default_action" {
-    for_each = var.acm_certificate_arn != "" ? [1] : []
+    for_each = local.alb_http_redirect_to_https ? [1] : []
     content {
       type = "redirect"
       redirect {
@@ -55,7 +55,7 @@ resource "aws_lb_listener" "http" {
   }
 
   dynamic "default_action" {
-    for_each = var.acm_certificate_arn == "" ? [1] : []
+    for_each = !local.alb_http_redirect_to_https ? [1] : []
     content {
       type             = "forward"
       target_group_arn = aws_lb_target_group.app.arn
