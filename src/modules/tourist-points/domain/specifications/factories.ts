@@ -1,3 +1,4 @@
+import sequelize from "@/core/database";
 import { Op, WhereOptions } from "sequelize";
 import { AbstractQuerySpecification } from "./abstract-query-specification";
 
@@ -10,6 +11,17 @@ class FieldSpecification extends AbstractQuerySpecification {
     return this.where;
   }
 }
+
+export const touristPointCityIdInState = (state: string) => {
+  const safe = sequelize.escape(state.trim());
+  return new FieldSpecification({
+    cityId: {
+      [Op.in]: sequelize.literal(
+        `(SELECT id FROM \`cities\` WHERE state = ${safe})`,
+      ),
+    },
+  });
+};
 
 export const eq = (field: string, value: any) =>
   new FieldSpecification({ [field]: value });

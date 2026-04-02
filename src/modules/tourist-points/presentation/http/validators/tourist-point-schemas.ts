@@ -142,7 +142,15 @@ export const listTouristPointsQuerySchema = z
     name: z.string().trim().min(1).optional(),
     city: z.string().trim().min(1).optional(),
     state: z.string().trim().min(1).optional(),
-    published: z.enum(["true", "false"]).optional(),
+    published: z.preprocess(
+      (v) => {
+        if (v === true || v === "true" || v === 1 || v === "1") return "true";
+        if (v === false || v === "false" || v === 0 || v === "0")
+          return "false";
+        return v;
+      },
+      z.enum(["true", "false"]).optional(),
+    ),
     sortBy: z.enum(TOURIST_POINT_SORT_FIELDS).optional(),
     sortDir: z.string().trim().optional(),
   })

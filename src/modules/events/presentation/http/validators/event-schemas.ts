@@ -10,8 +10,8 @@ export const createEventSchema = z.object({
   category: z.enum(EVENT_CATEGORIES, {
     error: (issue) => `Categoria ${String(issue.input)} é inválida`,
   }),
-  startDate: z.date("Data inicial é obrigatória"),
-  endDate: z.date("Data inicial é obrigatória"),
+  startDate: z.coerce.date("Data inicial é obrigatória"),
+  endDate: z.coerce.date("Data final é obrigatória"),
   formattedDate: z.string().min(10, "Hora é obrigatória"),
   location: z.string().min(3, "Local é obrigatório"),
   image: webImageFileSchema,

@@ -1,5 +1,6 @@
-import z from "zod";
+import { ctaUrlSchema } from "@/core/http/validators/cta-url.schema";
 import { webImageFileSchema } from "@/modules/media/application/validators/web-image.schema";
+import z from "zod";
 import { HOME_HIGHLIGHT_CATEGORIES } from "../../../domain/value-objects/home-highlight-categories";
 
 export const createHomeHighlightSchema = z.object({
@@ -57,7 +58,7 @@ export const createHomeHighlightSchema = z.object({
     })
     .min(3, "cityName deve ter pelo menos 3 caracteres"),
   image: webImageFileSchema,
-  ctaUrl: z.url(),
+  ctaUrl: ctaUrlSchema,
   active: z.boolean().default(true),
   order: z.number().positive(),
 });

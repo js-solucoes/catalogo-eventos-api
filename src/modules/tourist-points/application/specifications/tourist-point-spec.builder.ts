@@ -1,5 +1,10 @@
 import { QuerySpecification } from "../../domain/specifications/query-specification";
-import { eq, like, between } from "../../domain/specifications/factories";
+import {
+  eq,
+  like,
+  between,
+  touristPointCityIdInState,
+} from "../../domain/specifications/factories";
 
 type Params = {
   nome?: string;
@@ -18,13 +23,13 @@ export class TouristPointSpecificationBuilder {
     return this;
   }
 
-  withCity(city?: string) {
-    if (city) this.specs.push(eq("city", city));
+  withCity(citySlug?: string) {
+    if (citySlug) this.specs.push(eq("citySlug", citySlug));
     return this;
   }
 
   withState(state?: string) {
-    if (state) this.specs.push(eq("state", state));
+    if (state) this.specs.push(touristPointCityIdInState(state));
     return this;
   }
 
