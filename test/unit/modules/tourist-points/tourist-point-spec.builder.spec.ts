@@ -20,14 +20,14 @@ describe("TouristPointSpecificationBuilder", () => {
 
   it("withCity aplica igualdade", () => {
     const spec = new TouristPointSpecificationBuilder()
-      .withCity("Campo Grande")
+      .withCity("campo-grande")
       .build();
-    expect(spec!.toWhere()).toEqual({ city: "Campo Grande" });
+    expect(spec!.toWhere()).toEqual({ citySlug: "campo-grande" });
   });
 
-  it("withState aplica igualdade", () => {
+  it("withState aplica filtro de cidade pelo estado", () => {
     const spec = new TouristPointSpecificationBuilder().withState("MS").build();
-    expect(spec!.toWhere()).toEqual({ state: "MS" });
+    expect(spec!.toWhere()).toEqual({"cityId": { [Op.in]: {"val": "(SELECT id FROM `cities` WHERE state = 'MS')"}}});
   });
 
   it("withPublished false inclui filtro published", () => {
