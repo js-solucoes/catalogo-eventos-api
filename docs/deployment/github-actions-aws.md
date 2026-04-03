@@ -97,6 +97,7 @@ Chaves IAM de longa duração no GitHub estão **descontinuadas** neste workflow
 - Variáveis do módulo: **GitHub Variables + Secrets** expostas como **`TF_VAR_*`** no job (padrão Terraform). Nada de blob multiline nem tfvars em S3.  
 - Migração a partir do antigo secret `TERRAFORM_TFVARS`: copie cada campo para o Secret/Variable nomeado na tabela acima (JWT → três secrets; bucket/URL de mídia → variables).  
 - Não altera infra: apenas `terraform plan` (o `apply` continua no seu fluxo local ou outro pipeline, usando os mesmos valores em `terraform.tfvars` ou `export TF_VAR_*`).
+- **Troubleshooting:** se o log mostra um plano válido e em seguida `Terraform exited with code 1` sem diagnóstico claro, o job já usa `terraform_wrapper: false` no `setup-terraform` (o wrapper padrão costuma mascarar exit codes). Se ainda falhar, procure mais acima no log por `Error:` ou `Check block assertion failed` (blocos `check` em `infra/aws/foundation/checks.tf`).
 
 ## Smoke e espera no ECS
 
