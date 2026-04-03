@@ -1,0 +1,16 @@
+aws_region   = "us-east-1"
+github_org   = "ORG_OU_USUARIO_GITHUB"
+github_repo  = "catalogo-eventos-api"
+
+# Opcional: só branch main
+# github_oidc_sub_pattern = "repo:ORG_OU_USUARIO_GITHUB/catalogo-eventos-api:ref:refs/heads/main"
+
+# iam_role_name = "GitHubActionsDeploy"
+
+# Se o provedor OIDC do GitHub já existir na conta:
+# create_oidc_provider = false
+
+# Após foundation + remote-state (opcional):
+# terraform_lock_table_arn = "arn:aws:dynamodb:us-east-1:123456789012:table/seu-projeto-terraform-locks-abc123"
+# ecr_repository_name      = "catalogo-eventos-api-dev-api"
+# ecs_cluster_name         = "catalogo-eventos-api-dev-cluster"

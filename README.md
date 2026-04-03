@@ -4,7 +4,7 @@
 
 API modular (`core` + contextos de negócio), pronta para execução local, testes em CI e publicação na **AWS** (S3, ECS Fargate, ALB, RDS MySQL, ECR). Este README concentra o fluxo para **clonar o repositório, criar uma conta AWS nova e subir o ambiente**, além de **manutenção, publicação de alterações** e **orientações para CI/CD no GitHub**.
 
-Documentação complementar: pasta [`docs/deployment/`](docs/deployment/README.md).
+Documentação complementar: **[índice geral `docs/index.md`](docs/index.md)** — deploy, handover ao cliente, secrets/variables, inventário de infra. Detalhe de deploy: [`docs/deployment/`](docs/deployment/README.md).
 
 ---
 

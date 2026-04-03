@@ -2,6 +2,8 @@
 
 Documentação operacional para publicação em AWS (Fargate, Aurora, S3) **sem** substituir o código de aplicação.
 
+**Entrega / transferência para outro GitHub ou conta AWS:** ver o hub [**`docs/index.md`**](../index.md) e em especial [**`CLIENT_HANDOVER.md`**](../CLIENT_HANDOVER.md), [**`DEPLOY_CHECKLIST.md`**](../DEPLOY_CHECKLIST.md), [**`SECRETS_AND_VARIABLES.md`**](../SECRETS_AND_VARIABLES.md).
+
 | Documento | Conteúdo |
 |-----------|----------|
 | [environment-variables.md](./environment-variables.md) | Matriz de variáveis (app + AWS SDK implícito) |

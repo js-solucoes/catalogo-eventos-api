@@ -9,6 +9,10 @@ Referências oficiais:
 
 ---
 
+**Automação (opcional):** o módulo Terraform [`infra/aws/github-oidc-iam/`](../../infra/aws/github-oidc-iam/README.md) cria o provedor OIDC (se ainda não existir), a role e anexos de política alinhados a esta página — útil em **handover** para reduzir trabalho manual no console.
+
+---
+
 ## 1. Provedor OIDC no IAM (uma vez por conta AWS)
 
 No **IAM** → **Identity providers** → **Add provider**:
@@ -121,7 +125,48 @@ Anexe uma política **custom** (ajuste ARNs):
 
 - `GetAuthorizationToken` em ECR costuma ser `Resource: *` (exigência da API).
 - Restrinja o repositório ECR e o cluster ECS aos recursos reais (veja ARNs no console).
-- Se usar o job **Terraform plan**, inclua leitura do state S3, lock DynamoDB e `iam:PassRole` / leituras que o `terraform plan` exigir no seu módulo.
+- Se usar o job **Terraform plan**, veja a seção **2.3** abaixo (a política mínima de ECR/ECS **não** basta).
+
+### 2.3 Permissões extras para o job **Terraform plan (foundation)**
+
+O `terraform plan` com backend S3 + DynamoDB lock:
+
+1. **Lê** o state no S3 e usa **DynamoDB** para **lock** (`PutItem` / `GetItem` / `DeleteItem` na tabela de lock — isso **não** está em políticas só de leitura).
+2. Durante o **refresh/plan**, o provider AWS chama dezenas de APIs **`Describe*` / `Get*`** (EC2, ELB, RDS, ECS, IAM, Secrets Manager, etc.). Sem isso aparecem erros como:
+   - `UnauthorizedOperation` em `ec2:DescribeAvailabilityZones`
+   - falha em `data "aws_s3_bucket" "media"` (bucket inexistente, região errada **ou** sem permissão de leitura no S3).
+
+**Abordagem recomendada (simples e estável):** anexe à mesma role (ou a uma role dedicada só para o plan) a política gerenciada:
+
+- **`ReadOnlyAccess`** (`arn:aws:iam::aws:policy/ReadOnlyAccess`)
+
+E **adicione** uma política **custom** estreita para o **lock** do Terraform (substitua `REGION`, `ACCOUNT_ID`, `TABLE_NAME`):
+
+```json
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "TerraformStateLockDynamoDb",
+      "Effect": "Allow",
+      "Action": [
+        "dynamodb:GetItem",
+        "dynamodb:PutItem",
+        "dynamodb:DeleteItem"
+      ],
+      "Resource": "arn:aws:dynamodb:REGION:ACCOUNT_ID:table/TABLE_NAME"
+    }
+  ]
+}
+```
+
+O valor de `TABLE_NAME` é o do GitHub **`TF_STATE_DYNAMODB_TABLE`** (output `terraform_state_lock_table_name` do módulo `infra/aws/terraform-remote-state`, se usar).
+
+**Leitura do state no S3:** `ReadOnlyAccess` já cobre `s3:GetObject` / `ListBucket` para ler o objeto de state. Se a organização usar SCP que negue S3, inclua um statement explícito no bucket de state (`arn:aws:s3:::BUCKET` e `arn:aws:s3:::BUCKET/*`).
+
+**Não quer usar `ReadOnlyAccess`?** Terá de ir ampliando permissões à medida que novos erros `403` aparecem (EC2, RDS, Elastic Load Balancing, ECS, IAM `GetRole`/`ListRolePolicies`, etc.). Para o módulo `foundation`, a lista fica longa; por isso o `ReadOnlyAccess` + DynamoDB lock é o padrão sugerido.
+
+**Erro `reading S3 Bucket (...): empty result`:** além de IAM, confira se o bucket existe **na mesma conta** e **na mesma região** configurada em `AWS_REGION` / `TF_VAR_aws_region` e se o nome bate com o output do `s3-phase1` (`TF_MEDIA_BUCKET_NAME`).
 
 ---
 
@@ -155,6 +200,8 @@ O workflow **CI** (`.github/workflows/ci.yml`) **não** chama a AWS; não precis
 |---------|----------------|
 | `Not authorized to perform sts:AssumeRoleWithWebIdentity` | Trust policy: `sub` não bate com `owner/repo` ou branch/tag. |
 | `Access denied` no ECR/ECS | Policy da role sem ARN correto ou sem permissão. |
+| `ec2:DescribeAvailabilityZones` / `UnauthorizedOperation` no **Terraform plan** | Role só com ECR/ECS; falta leitura na conta — ver seção **2.3** (`ReadOnlyAccess` + DynamoDB lock). |
+| `reading S3 Bucket (...): empty result` no **plan** | Bucket errado/inexistente, região diferente da role, ou IAM sem leitura S3 — ver **2.3**. |
 | OIDC provider não encontrado | Provider URL/audience incorretos ou conta errada. |
 
 Para depurar o `sub` real, use temporariamente um workflow que imprima `github.server_url` / contexto (sem expor segredos) ou consulte a [documentação do claim `sub`](https://docs.github.com/en/actions/deployment/security-hardening-your-deployments/about-security-hardening-with-openid-connect#understanding-the-oidc-token).
