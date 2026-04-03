@@ -31,7 +31,10 @@ Passo a passo na AWS e no IAM: **[github-oidc-aws.md](./github-oidc-aws.md)** (p
 | `ECR_REPOSITORY_URL` | `terraform output -raw ecr_repository_url` no `infra/aws/foundation`. |
 | `ECS_CLUSTER_NAME` | `terraform output -raw ecs_cluster_name`. |
 | `ECS_SERVICE_NAME` | `terraform output -raw ecs_service_name`. |
-| `TERRAFORM_TFVARS` | *(Opcional, só para job plan)* Conteúdo **multiline** equivalente ao seu `terraform.tfvars` (o arquivo real está no `.gitignore`). |
+| `TF_JWT_SECRET` | *(Só job plan)* ≥16 caracteres — mapeado para `TF_VAR_jwt_secret`. |
+| `TF_JWT_ACCESS_SECRET` | *(Só job plan)* ≥16 caracteres — `TF_VAR_jwt_access_secret`. |
+| `TF_JWT_REFRESH_SECRET` | *(Só job plan)* ≥16 caracteres — `TF_VAR_jwt_refresh_secret`. |
+| `TF_EXTERNAL_DB_PASSWORD` | *(Opcional)* Senha do MySQL externo se `TF_USE_MANAGED_RDS=false` no variable. |
 | `SMOKE_BASE_URL` | *(Opcional)* Base URL do ALB se preferir secret em vez de variable (ex.: `https://xxx.elb.amazonaws.com`). |
 
 Opcional: `AWS_REGION` como **secret** se não usar variável.
@@ -43,10 +46,24 @@ Opcional: `AWS_REGION` como **secret** se não usar variável.
 | `AWS_REGION` | ex.: `us-east-1` (ou use secret `AWS_REGION`). |
 | `SMOKE_BASE_URL` | Base URL pública da API (ALB). Com isso, após rollout o workflow roda `aws ecs wait services-stable` e `node scripts/smoke-alb.cjs`. |
 | `SMOKE_SKIP_READY` | `true` para pular `GET /ready` no smoke (mesmo comportamento que localmente). |
-| `TF_STATE_BUCKET` | *(Plan)* Bucket S3 do backend de state. |
-| `TF_STATE_KEY` | *(Plan)* Chave do objeto de state (ex.: `foundation/terraform.tfstate`). |
-| `TF_STATE_REGION` | *(Opcional)* Região do bucket; se vazio, usa `AWS_REGION`. |
-| `TF_STATE_DYNAMODB_TABLE` | *(Opcional)* Tabela DynamoDB de lock de state. |
+| `TF_STATE_BUCKET` | *(Plan)* Bucket S3 **somente para o arquivo de state** (não é o bucket de mídia do `s3-phase1`). **Variable** recomendada; **Secret** também é aceito pelo workflow. |
+| `TF_STATE_KEY` | *(Plan)* Chave do objeto de state (ex.: `foundation/terraform.tfstate`). Variable ou Secret. |
+| `TF_STATE_REGION` | *(Opcional)* Região do bucket; se vazio, usa `AWS_REGION`. Variable ou Secret. |
+| `TF_STATE_DYNAMODB_TABLE` | *(Opcional)* Tabela DynamoDB de lock. Variable ou Secret. |
+| `TF_MEDIA_BUCKET_NAME` | *(Plan)* Nome do bucket de mídia (`terraform output -raw bucket_name` em `s3-phase1`). |
+| `TF_S3_PUBLIC_BASE_URL` | *(Plan)* Base URL pública S3 (`terraform output -raw s3_public_base_url` em `s3-phase1`). |
+| `TF_PROJECT_NAME` | *(Opcional, plan)* Default no workflow: `catalogo-eventos-api`. |
+| `TF_ENVIRONMENT` | *(Opcional, plan)* Default: `dev`. |
+| `TF_CONTAINER_IMAGE` | *(Opcional, plan)* Imagem ECS; default nginx do workflow (alinhado a `variables.tf`). |
+| `TF_CONTAINER_PORT` | *(Opcional, plan)* Default `80`. |
+| `TF_HEALTH_CHECK_PATH` | *(Opcional, plan)* Default `/`. |
+| `TF_DESIRED_COUNT` | *(Opcional, plan)* Default `1`. |
+| `TF_USE_MANAGED_RDS` | *(Opcional, plan)* `true` / `false`; default `true`. |
+| `TF_EXTERNAL_DB_HOST` | *(Opcional)* Host MySQL se RDS não for gerenciado neste stack. |
+| `TF_NAT_GATEWAY_ENABLED` | *(Opcional, plan)* Default `false`. |
+| `TF_ACM_CERTIFICATE_ARN` | *(Opcional)* ARN ACM para HTTPS no ALB. |
+| `TF_ENABLE_APIGATEWAYV2_ALB_PROXY` | *(Opcional, plan)* Default `false`. |
+| `TF_BOOTSTRAP_ADMIN_EMAIL` | *(Opcional, plan)* Default `admin@catalogo-eventos.com.br`. |
 
 ### 3. Inputs do *workflow dispatch*
 
@@ -55,7 +72,7 @@ Opcional: `AWS_REGION` como **secret** se não usar variável.
 | **image_tag** | Tag no ECR; vazio = SHA curto do commit. |
 | **skip_ecs_rollout** | Só build/push; não chama `UpdateService`. |
 | **skip_smoke** | Não executa espera ECS nem smoke (mesmo com `SMOKE_BASE_URL`). |
-| **run_terraform_plan** | Dispara o job **Terraform plan (foundation)** em paralelo ao deploy (exige backend + `TERRAFORM_TFVARS`). |
+| **run_terraform_plan** | Dispara o job **Terraform plan (foundation)** em paralelo (exige backend de state + Variables/Secrets `TF_*`; variáveis via `TF_VAR_*` no job). |
 
 ### 4. IAM (resumo)
 
@@ -76,9 +93,10 @@ Chaves IAM de longa duração no GitHub estão **descontinuadas** neste workflow
 - Só roda quando **Run workflow** marca **run_terraform_plan**.  
 - O workflow compara o input tanto como boolean quanto como string `'true'`, porque o GitHub às vezes entrega `type: boolean` como texto nas expressões — sem isso o job pode ser ignorado mesmo com a caixa marcada.  
 - Roda **em paralelo** com o job `deploy` (não bloqueia o push da imagem).  
-- Exige **backend S3** alinhado às variáveis `TF_STATE_BUCKET` / `TF_STATE_KEY` (e lock opcional).  
-- O secret **`TERRAFORM_TFVARS`** é gravado como `infra/aws/foundation/terraform.tfvars` só no runner (efêmero). Revise se não há segredos que devam ficar só no Terraform Cloud / vault.  
-- Não altera infra: apenas `terraform plan`.
+- **Backend S3** só para o **state** (`TF_STATE_*`): não armazena nem lê `terraform.tfvars` no bucket.  
+- Variáveis do módulo: **GitHub Variables + Secrets** expostas como **`TF_VAR_*`** no job (padrão Terraform). Nada de blob multiline nem tfvars em S3.  
+- Migração a partir do antigo secret `TERRAFORM_TFVARS`: copie cada campo para o Secret/Variable nomeado na tabela acima (JWT → três secrets; bucket/URL de mídia → variables).  
+- Não altera infra: apenas `terraform plan` (o `apply` continua no seu fluxo local ou outro pipeline, usando os mesmos valores em `terraform.tfvars` ou `export TF_VAR_*`).
 
 ## Smoke e espera no ECS
 

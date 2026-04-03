@@ -1,0 +1,6 @@
+# Copie para terraform.tfvars (arquivo ignorado pelo git).
+
+aws_region   = "us-east-1"
+project_name = "catalogo-eventos-api"
+
+# create_dynamodb_lock_table = true

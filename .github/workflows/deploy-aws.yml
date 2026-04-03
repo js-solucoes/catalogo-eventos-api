@@ -5,7 +5,7 @@
 #   Secrets: ECR_REPOSITORY_URL, ECS_CLUSTER_NAME, ECS_SERVICE_NAME
 #   Variables: AWS_REGION (ou secret)
 #   Opcional pós-deploy: SMOKE_BASE_URL (variable ou secret), SMOKE_SKIP_READY
-#   Opcional terraform plan: TF_STATE_BUCKET, TF_STATE_KEY, secret TERRAFORM_TFVARS, etc.
+#   Opcional terraform plan: backend state (TF_STATE_*) + Variables/Secrets TF_* / TF_VAR via env (sem tfvars em S3).
 #
 # Documentação: docs/deployment/github-actions-aws.md
 
@@ -27,7 +27,7 @@ on:
         type: boolean
         default: false
       run_terraform_plan:
-        description: "Rodar job paralelo terraform plan (foundation) — exige backend + secret TERRAFORM_TFVARS"
+        description: "Rodar job paralelo terraform plan (foundation) — exige backend state + Variables/Secrets TF_*"
         type: boolean
         default: false
 
@@ -53,6 +53,27 @@ jobs:
       id-token: write
     env:
       AWS_REGION: ${{ vars.AWS_REGION || secrets.AWS_REGION }}
+      # Obrigatórios para o módulo foundation (espelham terraform.tfvars.example).
+      TF_VAR_aws_region: ${{ vars.AWS_REGION || secrets.AWS_REGION }}
+      TF_VAR_project_name: ${{ vars.TF_PROJECT_NAME || 'catalogo-eventos-api' }}
+      TF_VAR_environment: ${{ vars.TF_ENVIRONMENT || 'dev' }}
+      TF_VAR_media_bucket_name: ${{ vars.TF_MEDIA_BUCKET_NAME }}
+      TF_VAR_s3_public_base_url: ${{ vars.TF_S3_PUBLIC_BASE_URL }}
+      TF_VAR_jwt_secret: ${{ secrets.TF_JWT_SECRET }}
+      TF_VAR_jwt_access_secret: ${{ secrets.TF_JWT_ACCESS_SECRET }}
+      TF_VAR_jwt_refresh_secret: ${{ secrets.TF_JWT_REFRESH_SECRET }}
+      # Opcionais com defaults alinhados a variables.tf (override via Variables).
+      TF_VAR_container_image: ${{ vars.TF_CONTAINER_IMAGE || 'public.ecr.aws/docker/library/nginx:alpine' }}
+      TF_VAR_container_port: ${{ vars.TF_CONTAINER_PORT || '80' }}
+      TF_VAR_health_check_path: ${{ vars.TF_HEALTH_CHECK_PATH || '/' }}
+      TF_VAR_desired_count: ${{ vars.TF_DESIRED_COUNT || '1' }}
+      TF_VAR_use_managed_rds: ${{ vars.TF_USE_MANAGED_RDS || 'true' }}
+      TF_VAR_external_db_host: ${{ vars.TF_EXTERNAL_DB_HOST }}
+      TF_VAR_external_db_password: ${{ secrets.TF_EXTERNAL_DB_PASSWORD }}
+      TF_VAR_nat_gateway_enabled: ${{ vars.TF_NAT_GATEWAY_ENABLED || 'false' }}
+      TF_VAR_acm_certificate_arn: ${{ vars.TF_ACM_CERTIFICATE_ARN }}
+      TF_VAR_enable_apigatewayv2_alb_proxy: ${{ vars.TF_ENABLE_APIGATEWAYV2_ALB_PROXY || 'false' }}
+      TF_VAR_bootstrap_admin_email: ${{ vars.TF_BOOTSTRAP_ADMIN_EMAIL || 'admin@catalogo-eventos.com.br' }}
     defaults:
       run:
         working-directory: infra/aws/foundation
@@ -73,28 +94,36 @@ jobs:
           role-session-name: github-actions-terraform-plan
           aws-region: ${{ env.AWS_REGION }}
 
-      - name: Validar backend e tfvars para CI
+      - name: Validar backend de state e variáveis obrigatórias
         env:
-          TF_STATE_BUCKET: ${{ vars.TF_STATE_BUCKET }}
-          TF_STATE_KEY: ${{ vars.TF_STATE_KEY }}
-          TERRAFORM_TFVARS: ${{ secrets.TERRAFORM_TFVARS }}
+          # Bucket/key de state não são credenciais; Variables é o ideal. Secrets também funcionam.
+          TF_STATE_BUCKET: ${{ vars.TF_STATE_BUCKET || secrets.TF_STATE_BUCKET }}
+          TF_STATE_KEY: ${{ vars.TF_STATE_KEY || secrets.TF_STATE_KEY }}
+          MEDIA_BUCKET: ${{ vars.TF_MEDIA_BUCKET_NAME }}
+          S3_PUBLIC_BASE_URL: ${{ vars.TF_S3_PUBLIC_BASE_URL }}
+          JWT_SECRET: ${{ secrets.TF_JWT_SECRET }}
+          JWT_ACCESS: ${{ secrets.TF_JWT_ACCESS_SECRET }}
+          JWT_REFRESH: ${{ secrets.TF_JWT_REFRESH_SECRET }}
         run: |
-          if [ -z "$TF_STATE_BUCKET" ] || [ -z "$TF_STATE_KEY" ]; then
-            echo "::error::Defina as variáveis de repositório TF_STATE_BUCKET e TF_STATE_KEY (backend S3 do state)."
+          set -euo pipefail
+          if [ -z "${TF_STATE_BUCKET:-}" ] || [ -z "${TF_STATE_KEY:-}" ]; then
+            echo "::error::Defina TF_STATE_BUCKET e TF_STATE_KEY (Repository Variable ou Secret; backend S3 so para state)."
             exit 1
           fi
-          if [ -z "$TERRAFORM_TFVARS" ]; then
-            echo "::error::Defina o secret TERRAFORM_TFVARS com o conteúdo completo do terraform.tfvars (multiline). O arquivo local está no .gitignore."
-            exit 1
-          fi
-          printf '%s\n' "$TERRAFORM_TFVARS" > terraform.tfvars
+          missing=0
+          [ -z "${MEDIA_BUCKET:-}" ] && echo "::error::Defina a Variable TF_MEDIA_BUCKET_NAME (output bucket_name do s3-phase1)." && missing=1
+          [ -z "${S3_PUBLIC_BASE_URL:-}" ] && echo "::error::Defina a Variable TF_S3_PUBLIC_BASE_URL (output s3_public_base_url do s3-phase1)." && missing=1
+          [ -z "${JWT_SECRET:-}" ] && echo "::error::Defina o Secret TF_JWT_SECRET (minimo 16 caracteres)." && missing=1
+          [ -z "${JWT_ACCESS:-}" ] && echo "::error::Defina o Secret TF_JWT_ACCESS_SECRET (minimo 16 caracteres)." && missing=1
+          [ -z "${JWT_REFRESH:-}" ] && echo "::error::Defina o Secret TF_JWT_REFRESH_SECRET (minimo 16 caracteres)." && missing=1
+          exit "$missing"
 
       - name: Terraform init (backend remoto)
         env:
-          TF_STATE_BUCKET: ${{ vars.TF_STATE_BUCKET }}
-          TF_STATE_KEY: ${{ vars.TF_STATE_KEY }}
-          TF_STATE_REGION: ${{ vars.TF_STATE_REGION }}
-          TF_STATE_DYNAMODB_TABLE: ${{ vars.TF_STATE_DYNAMODB_TABLE }}
+          TF_STATE_BUCKET: ${{ vars.TF_STATE_BUCKET || secrets.TF_STATE_BUCKET }}
+          TF_STATE_KEY: ${{ vars.TF_STATE_KEY || secrets.TF_STATE_KEY }}
+          TF_STATE_REGION: ${{ vars.TF_STATE_REGION || secrets.TF_STATE_REGION }}
+          TF_STATE_DYNAMODB_TABLE: ${{ vars.TF_STATE_DYNAMODB_TABLE || secrets.TF_STATE_DYNAMODB_TABLE }}
         run: |
           set -euo pipefail
           REGION="${TF_STATE_REGION:-${AWS_REGION}}"

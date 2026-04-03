@@ -4,9 +4,10 @@ Stack alinhado à documentação em `docs/deployment/`. **Padrão (laboratório)
 
 ## Ordem recomendada
 
-1. **Criar S3** (Fase 1): `infra/aws/s3-phase1` → guarde `bucket_name` e `s3_public_base_url`.
-2. **Este stack** (`foundation`): VPC, banco, ALB, cluster ECS, segredos, serviço com imagem placeholder (nginx) ou sua imagem.
-3. **Por último** (na sua máquina): `aws configure` ou perfil IAM com o qual você roda `terraform` **e**, separadamente, credenciais para o dia a dia na AWS Console.
+1. **(Opcional, CI / remote state)** [`../terraform-remote-state/`](../terraform-remote-state/) — cria bucket S3 **só para state** + DynamoDB lock; state **local** neste módulo. Use os outputs em `TF_STATE_*` no GitHub e ao fazer `terraform init -backend-config=...` aqui.
+2. **Criar S3** (Fase 1): `infra/aws/s3-phase1` → guarde `bucket_name` e `s3_public_base_url` (mídia da aplicação — **outro** bucket).
+3. **Este stack** (`foundation`): VPC, banco, ALB, cluster ECS, segredos, serviço com imagem placeholder (nginx) ou sua imagem.
+4. **Por último** (na sua máquina): `aws configure` ou perfil IAM com o qual você roda `terraform` **e**, separadamente, credenciais para o dia a dia na AWS Console.
 
 > O Terraform **não** substitui a criação da **conta AWS**. Quem executa `terraform apply` precisa de um **principal IAM** (usuário ou role) com permissões amplas na conta alvo (ver seção “Permissões do operador Terraform” abaixo).
 
