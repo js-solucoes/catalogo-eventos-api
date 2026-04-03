@@ -1,0 +1,178 @@
+# Deploy da API para ECS (ECR + force new deployment).
+#
+# Pré-requisitos no repositório GitHub:
+#   Secrets: AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY (ou OIDC — ver docs)
+#            ECR_REPOSITORY_URL, ECS_CLUSTER_NAME, ECS_SERVICE_NAME
+#   Variables: AWS_REGION (ou secret)
+#   Opcional pós-deploy: SMOKE_BASE_URL (variable ou secret), SMOKE_SKIP_READY
+#   Opcional terraform plan: TF_STATE_BUCKET, TF_STATE_KEY, secret TERRAFORM_TFVARS, etc.
+#
+# Documentação: docs/deployment/github-actions-aws.md
+
+name: Deploy AWS (ECR + ECS)
+
+on:
+  workflow_dispatch:
+    inputs:
+      image_tag:
+        description: "Tag da imagem no ECR (ex. latest, v1.0.0, ou vazio = SHA curto)"
+        required: false
+        default: ""
+      skip_ecs_rollout:
+        description: "Apenas build e push — não chama ecs-force-new-deployment"
+        type: boolean
+        default: false
+      skip_smoke:
+        description: "Não rodar espera ECS + smoke (mesmo com SMOKE_BASE_URL)"
+        type: boolean
+        default: false
+      run_terraform_plan:
+        description: "Rodar job paralelo terraform plan (foundation) — exige backend + secret TERRAFORM_TFVARS"
+        type: boolean
+        default: false
+
+  # push:
+  #   branches: [main]
+
+concurrency:
+  group: deploy-aws-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  terraform-plan:
+    name: Terraform plan (foundation)
+    if: github.event_name == 'workflow_dispatch' && github.event.inputs.run_terraform_plan == true
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+    env:
+      AWS_REGION: ${{ vars.AWS_REGION || secrets.AWS_REGION }}
+    defaults:
+      run:
+        working-directory: infra/aws/foundation
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "1.9.8"
+
+      - name: Configurar credenciais AWS
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Validar backend e tfvars para CI
+        env:
+          TF_STATE_BUCKET: ${{ vars.TF_STATE_BUCKET }}
+          TF_STATE_KEY: ${{ vars.TF_STATE_KEY }}
+          TERRAFORM_TFVARS: ${{ secrets.TERRAFORM_TFVARS }}
+        run: |
+          if [ -z "$TF_STATE_BUCKET" ] || [ -z "$TF_STATE_KEY" ]; then
+            echo "::error::Defina as variáveis de repositório TF_STATE_BUCKET e TF_STATE_KEY (backend S3 do state)."
+            exit 1
+          fi
+          if [ -z "$TERRAFORM_TFVARS" ]; then
+            echo "::error::Defina o secret TERRAFORM_TFVARS com o conteúdo completo do terraform.tfvars (multiline). O arquivo local está no .gitignore."
+            exit 1
+          fi
+          printf '%s\n' "$TERRAFORM_TFVARS" > terraform.tfvars
+
+      - name: Terraform init (backend remoto)
+        env:
+          TF_STATE_BUCKET: ${{ vars.TF_STATE_BUCKET }}
+          TF_STATE_KEY: ${{ vars.TF_STATE_KEY }}
+          TF_STATE_REGION: ${{ vars.TF_STATE_REGION }}
+          TF_STATE_DYNAMODB_TABLE: ${{ vars.TF_STATE_DYNAMODB_TABLE }}
+        run: |
+          set -euo pipefail
+          REGION="${TF_STATE_REGION:-${AWS_REGION}}"
+          ARGS=(
+            -input=false
+            "-backend-config=bucket=${TF_STATE_BUCKET}"
+            "-backend-config=key=${TF_STATE_KEY}"
+            "-backend-config=region=${REGION}"
+            "-backend-config=encrypt=true"
+          )
+          if [ -n "${TF_STATE_DYNAMODB_TABLE:-}" ]; then
+            ARGS+=("-backend-config=dynamodb_table=${TF_STATE_DYNAMODB_TABLE}")
+          fi
+          terraform init "${ARGS[@]}"
+
+      - name: Terraform plan
+        run: terraform plan -input=false -no-color
+
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+
+    env:
+      AWS_REGION: ${{ vars.AWS_REGION || secrets.AWS_REGION }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Resolver tag da imagem
+        id: meta
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ -n "${{ github.event.inputs.image_tag }}" ]; then
+            echo "tag=${{ github.event.inputs.image_tag }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "tag=${GITHUB_SHA:0:7}" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Configurar credenciais AWS
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Build e push (script do repositório)
+        env:
+          ECR_REPOSITORY_URL: ${{ secrets.ECR_REPOSITORY_URL }}
+          IMAGE_TAG: ${{ steps.meta.outputs.tag }}
+        run: ./scripts/ecr-build-push.sh
+
+      - name: Forçar nova implantação no ECS
+        id: rollout
+        if: github.event_name != 'workflow_dispatch' || github.event.inputs.skip_ecs_rollout != true
+        env:
+          ECS_CLUSTER_NAME: ${{ secrets.ECS_CLUSTER_NAME }}
+          ECS_SERVICE_NAME: ${{ secrets.ECS_SERVICE_NAME }}
+        run: |
+          ./scripts/ecs-force-new-deployment.sh
+          echo "ran=true" >> "$GITHUB_OUTPUT"
+
+      - name: Aguardar serviço ECS estável
+        if: >
+          steps.rollout.outputs.ran == 'true'
+          && (vars.SMOKE_BASE_URL != '' || secrets.SMOKE_BASE_URL)
+          && (github.event_name != 'workflow_dispatch' || github.event.inputs.skip_smoke != true)
+        env:
+          ECS_CLUSTER_NAME: ${{ secrets.ECS_CLUSTER_NAME }}
+          ECS_SERVICE_NAME: ${{ secrets.ECS_SERVICE_NAME }}
+        run: >-
+          aws ecs wait services-stable
+          --cluster "$ECS_CLUSTER_NAME"
+          --services "$ECS_SERVICE_NAME"
+          --region "$AWS_REGION"
+
+      - name: Smoke ALB (/health e /ready)
+        if: >
+          steps.rollout.outputs.ran == 'true'
+          && (vars.SMOKE_BASE_URL != '' || secrets.SMOKE_BASE_URL)
+          && (github.event_name != 'workflow_dispatch' || github.event.inputs.skip_smoke != true)
+        env:
+          SMOKE_BASE_URL: ${{ vars.SMOKE_BASE_URL || secrets.SMOKE_BASE_URL }}
+          SMOKE_SKIP_READY: ${{ vars.SMOKE_SKIP_READY }}
+        run: node scripts/smoke-alb.cjs

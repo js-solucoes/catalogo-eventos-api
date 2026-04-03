@@ -220,7 +220,7 @@ O repositório inclui [`.github/workflows/ci.yml`](.github/workflows/ci.yml):
 | **quality** | `yarn install --frozen-lockfile`, `yarn run check`, `yarn build && yarn verify:dist`, `yarn smoke:http` em branches `main`, `master`, `develop` e em PRs. |
 | **database** | Sobe **MySQL 8** como serviço e roda `yarn db:bootstrap` (migrations + seeds) para validar o pipeline de banco. |
 
-**Não há CD (deploy automático para AWS)** neste repositório. O deploy continua sendo: build da imagem, push ECR, `terraform apply` e/ou `ecs-force-new-deployment` (ou equivalente automatizado por vocês).
+**CD opcional:** existe o workflow [`.github/workflows/deploy-aws.yml`](.github/workflows/deploy-aws.yml) (manual em **Actions**), que roda os scripts de ECR + ECS. Configure secrets/variáveis conforme [`docs/deployment/github-actions-aws.md`](docs/deployment/github-actions-aws.md). **Terraform** e **migrations** continuam fora desse fluxo por padrão (ver doc).
 
 ### 9.1 Habilitar CI no fork/cliente
 
