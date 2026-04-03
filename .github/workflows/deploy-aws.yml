@@ -86,6 +86,9 @@ jobs:
         uses: hashicorp/setup-terraform@v3
         with:
           terraform_version: "1.9.8"
+          # Wrapper padrão altera exit codes do plan e costuma falhar o job com "exited with code 1"
+          # mesmo com plano válido (ex.: diff presente). Não usamos outputs do wrapper neste job.
+          terraform_wrapper: false
 
       - name: Configurar credenciais AWS (OIDC)
         uses: aws-actions/configure-aws-credentials@v4
