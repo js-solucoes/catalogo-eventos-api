@@ -12,7 +12,8 @@ Documentação operacional para publicação em AWS (Fargate, Aurora, S3) **sem*
 | [../infra/aws/foundation/README.md](../../infra/aws/foundation/README.md) | **Foundation AWS** (Terraform): VPC, RDS MySQL, ECR, ALB, ECS Fargate, Secrets — ordem: S3 → foundation → `aws configure` |
 | [aurora-phase2.md](./aurora-phase2.md) | **Fase 2 Aurora MySQL** (sem proxy): Terraform `aurora-phase2`, SSL/Sequelize, `npm run verify:aurora-db` |
 | [phase3-ecs-publish.md](./phase3-ecs-publish.md) | **Fase 3 ECS Fargate**: Docker, ECR, ALB, variáveis/segredos, Aurora ou RDS, smoke `/health` e `/ready`, checklist e rollback |
-| [github-actions-aws.md](./github-actions-aws.md) | **CD no GitHub Actions**: ECR + `force-new-deployment` no ECS (secrets, OIDC, limites vs Terraform/migrations) |
+| [github-actions-aws.md](./github-actions-aws.md) | **CD no GitHub Actions**: ECR + `force-new-deployment` no ECS (secrets, limites vs Terraform/migrations) |
+| [github-oidc-aws.md](./github-oidc-aws.md) | **OIDC GitHub → AWS**: provedor IAM, trust policy, role, `AWS_ROLE_TO_ASSUME` |
 
 **Checks locais / CI**
 

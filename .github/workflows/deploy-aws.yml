@@ -1,8 +1,8 @@
 # Deploy da API para ECS (ECR + force new deployment).
 #
 # Pré-requisitos no repositório GitHub:
-#   Secrets: AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY (ou OIDC — ver docs)
-#            ECR_REPOSITORY_URL, ECS_CLUSTER_NAME, ECS_SERVICE_NAME
+#   Secret: AWS_ROLE_TO_ASSUME (ARN da role IAM com trust OIDC do GitHub)
+#   Secrets: ECR_REPOSITORY_URL, ECS_CLUSTER_NAME, ECS_SERVICE_NAME
 #   Variables: AWS_REGION (ou secret)
 #   Opcional pós-deploy: SMOKE_BASE_URL (variable ou secret), SMOKE_SKIP_READY
 #   Opcional terraform plan: TF_STATE_BUCKET, TF_STATE_KEY, secret TERRAFORM_TFVARS, etc.
@@ -46,6 +46,7 @@ jobs:
     timeout-minutes: 20
     permissions:
       contents: read
+      id-token: write
     env:
       AWS_REGION: ${{ vars.AWS_REGION || secrets.AWS_REGION }}
     defaults:
@@ -61,11 +62,11 @@ jobs:
         with:
           terraform_version: "1.9.8"
 
-      - name: Configurar credenciais AWS
+      - name: Configurar credenciais AWS (OIDC)
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
+          role-session-name: github-actions-terraform-plan
           aws-region: ${{ env.AWS_REGION }}
 
       - name: Validar backend e tfvars para CI
@@ -113,6 +114,7 @@ jobs:
     timeout-minutes: 30
     permissions:
       contents: read
+      id-token: write
 
     env:
       AWS_REGION: ${{ vars.AWS_REGION || secrets.AWS_REGION }}
@@ -130,11 +132,11 @@ jobs:
             echo "tag=${GITHUB_SHA:0:7}" >> "$GITHUB_OUTPUT"
           fi
 
-      - name: Configurar credenciais AWS
+      - name: Configurar credenciais AWS (OIDC)
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
+          role-session-name: github-actions-deploy-ecs
           aws-region: ${{ env.AWS_REGION }}
 
       - name: Build e push (script do repositório)

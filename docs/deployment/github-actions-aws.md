@@ -15,14 +15,19 @@ Além disso (opcional):
 - **`terraform apply`**: mantenha no seu fluxo (local, Terraform Cloud, outro pipeline). O job opcional só executa **`plan`**.  
 - **Migrations**: o RDS costuma ser só na VPC; o runner do GitHub não alcança o banco. Use task one-off no ECS, bastion ou [`scripts/ecs-run-db-migrate.sh`](../../scripts/ecs-run-db-migrate.sh) — ver [database-migrations.md](./database-migrations.md).
 
+## Autenticação na AWS (OIDC)
+
+O deploy usa **OpenID Connect**: o workflow assume uma **role IAM** via `AWS_ROLE_TO_ASSUME` — **sem** access keys de longa duração.
+
+Passo a passo na AWS e no IAM: **[github-oidc-aws.md](./github-oidc-aws.md)** (provedor OIDC, trust policy `repo:OWNER/REPO:*`, política de permissões).
+
 ## Configuração no GitHub
 
 ### 1. Secrets do repositório (Settings → Secrets and variables → Actions)
 
 | Secret | Descrição |
 |--------|-----------|
-| `AWS_ACCESS_KEY_ID` | IAM com ECR (push), ECS (`UpdateService`, `DescribeServices`), e — se usar plan — leitura Terraform/state. |
-| `AWS_SECRET_ACCESS_KEY` | Par da chave acima. |
+| **`AWS_ROLE_TO_ASSUME`** | ARN da role IAM que o GitHub pode assumir via OIDC (obrigatório para o workflow atual). |
 | `ECR_REPOSITORY_URL` | `terraform output -raw ecr_repository_url` no `infra/aws/foundation`. |
 | `ECS_CLUSTER_NAME` | `terraform output -raw ecs_cluster_name`. |
 | `ECS_SERVICE_NAME` | `terraform output -raw ecs_service_name`. |
@@ -54,15 +59,17 @@ Opcional: `AWS_REGION` como **secret** se não usar variável.
 
 ### 4. IAM (resumo)
 
-- **ECR**: push da imagem da API.  
-- **ECS**: `UpdateService`, `DescribeServices`, e **`ecs:DescribeServices` + `ecs:Wait`** implícitos no `wait services-stable`.  
-- **Terraform plan** (se usar): leitura do state no S3 (`s3:GetObject` no objeto de state), opcional DynamoDB lock (`dynamodb:GetItem`, `PutItem`, …), mais APIs de leitura que o `plan` fizer *refresh* (EC2, ELB, etc.). Na prática costuma-se uma policy anexa “TerraformRead” ou estado compartilhado com o mesmo usuário que aplica em outro lugar, com cuidado ao princípio do menor privilégio.
+A role referenciada por `AWS_ROLE_TO_ASSUME` deve permitir:
 
-### 5. OIDC em vez de access keys
+- **ECR**: push da imagem da API (`GetAuthorizationToken` + operações no repositório).  
+- **ECS**: `UpdateService`, `DescribeServices`, etc., e o que o `aws ecs wait services-stable` precisar.  
+- **Terraform plan** (se usar o job opcional): leitura do state no S3, lock DynamoDB opcional, e leituras do `terraform plan` no seu módulo.
 
-Ver seção anterior da documentação: trust no GitHub, `role-to-assume`, `permissions: id-token: write` nos jobs. Estenda a role com as mesmas permissões extras se habilitar **plan** ou **smoke/wait**.
+Exemplos de JSON em **[github-oidc-aws.md](./github-oidc-aws.md)**.
 
-Guia: [Configuring OpenID Connect in Amazon Web Services](https://docs.github.com/en/actions/deployment/security-hardening-your-deployments/configuring-openid-connect-in-amazon-web-services).
+### 5. Legado: access keys (não recomendado)
+
+Chaves IAM de longa duração no GitHub estão **descontinuadas** neste workflow. Use apenas OIDC + `AWS_ROLE_TO_ASSUME`.
 
 ## Job Terraform plan
 

@@ -231,7 +231,7 @@ O repositório inclui [`.github/workflows/ci.yml`](.github/workflows/ci.yml):
 
 Para publicar a cada tag ou push em `main`, uma abordagem comum é:
 
-1. Criar secrets no repositório: `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_REGION` (ou usar **OIDC** com IAM role — recomendado em produção).
+1. Configurar **OIDC** com role IAM e o secret `AWS_ROLE_TO_ASSUME` (recomendado); ver [`docs/deployment/github-oidc-aws.md`](docs/deployment/github-oidc-aws.md). Evite access keys de longa duração no GitHub.
 2. Workflow com passos: `aws ecr get-login-password`, `docker build/push`, `aws ecs update-service --force-new-deployment` ou `terraform apply` com backend remoto (S3 + DynamoDB lock).
 
 Mantenha **Terraform state** fora do git (backend S3) se várias pessoas forem aplicar infra.
